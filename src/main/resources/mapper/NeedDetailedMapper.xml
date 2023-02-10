@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cetc28.needManagement.mapper.NeedDetailedMapper">
+
+    <resultMap id="BaseResultMap" type="com.cetc28.needManagement.domain.NeedDetailed">
+            <result property="needCode" column="NEED_CODE" jdbcType="VARCHAR"/>
+            <result property="needName" column="NEED_NAME" jdbcType="VARCHAR"/>
+            <result property="needNs" column="NEED_NS" jdbcType="OTHER"/>
+            <result property="needDetailed" column="NEED_DETAILED" jdbcType="VARCHAR"/>
+            <result property="planCompleteDate" column="PLAN_COMPLETE_DATE" jdbcType="DATE"/>
+            <result property="version" column="VERSION" jdbcType="VARCHAR"/>
+            <result property="issue" column="ISSUE" jdbcType="VARCHAR"/>
+            <result property="state" column="STATE" jdbcType="OTHER"/>
+            <result property="createPeople" column="CREATE_PEOPLE" jdbcType="VARCHAR"/>
+            <result property="createTime" column="CREATE_TIME" jdbcType="DATE"/>
+            <result property="updatePeople" column="UPDATE_PEOPLE" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="UPDATE_TIME" jdbcType="DATE"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        NEED_CODE,NEED_NAME,NEED_NS,
+        NEED_DETAILED,PLAN_COMPLETE_DATE,VERSION,
+        ISSUE,STATE,CREATE_PEOPLE,
+        CREATE_TIME,UPDATE_PEOPLE,UPDATE_TIME
+    </sql>
+</mapper>
