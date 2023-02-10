@@ -1,7 +1,27 @@
-spring:
-  # 环境 dev|test|prod
-  profiles:
-    active: dev
+server:
+  port: 8099
+  servlet:
+    context-path: /NeedManagement
+#  mvc:
+#    static-path-pattern: /static/**
+
+
+dm1:
+  jpa:
+    database: ORACLE
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.DmDialect
+  datasource:
+    url: jdbc:dm://28.9.125.1:5236/DBHTXDKZ
+    username: DBHTXDKZ
+    password: 123456789
+    driver-class-name: dm.jdbc.driver.DmDriver
+    validationQuery: SELECT 1
 
 
 
