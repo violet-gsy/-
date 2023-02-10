@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="默认变更列表">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/8125bd98-c805-47bc-b7e5-54d2976265f8.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/mybatisx/templates.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/doc/Log.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationCiDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationCiDctMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationSsDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationSsDctMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CompanyDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/CompanyDctMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CutPeopleDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/CutPeopleDctMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedDetailedMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/NeedDetailedMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedSourcesDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/NeedSourcesDctMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationCiDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/RelationCiDctMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationSsDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/RelationSsDctMapper.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/UserNeedMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/UserNeedMapper.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="localRepository" value="F:\tjb\repository" />
+        <option name="mavenHome" value="$PROJECT_DIR$/../apache-maven-3.6.3" />
+        <option name="userSettingsFile" value="F:\tjb\apache-maven-3.6.3\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="2LV6iV0BC0eySff3Z3YWWyQKOfd" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="F:\tjb\NeedManagement\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="NmApplication" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="com.cetc28.needmanagement.MainApplication" />
+      <module name="NeedManagement" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="" />
+      <created>1675944031411</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1675944031411</updated>
+      <workItem from="1675944032759" duration="205000" />
+      <workItem from="1675992460171" duration="224000" />
+      <workItem from="1675992709909" duration="13182000" />
+      <workItem from="1676021541537" duration="261000" />
+    </task>
+    <task id="LOCAL-00001" summary="需求管理项目框架搭建">
+      <created>1675997889850</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1675997889850</updated>
+    </task>
+    <task id="LOCAL-00002" summary="默认变更列表">
+      <created>1675998091183</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1675998091183</updated>
+    </task>
+    <task id="LOCAL-00003" summary="默认变更列表">
+      <created>1675998225548</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1675998225548</updated>
+    </task>
+    <task id="LOCAL-00004" summary="需求管理首次提交">
+      <created>1676000287127</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1676000287127</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <MESSAGE value="需求管理项目框架搭建" />
+    <MESSAGE value="默认变更列表" />
+    <MESSAGE value="需求管理首次提交" />
+    <option name="LAST_COMMIT_MESSAGE" value="需求管理首次提交" />
+  </component>
+</project>
