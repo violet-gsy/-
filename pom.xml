@@ -21,25 +21,47 @@
     </properties>
 
     <dependencies>
+        <!--spring框架依赖-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <!--        通用组件依赖-->
         <dependency>
             <groupId>com.cetc28.tkb</groupId>
-            <artifactId>frame-common</artifactId>
+            <artifactId>common-swagger</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cetc28.tkb</groupId>
+            <artifactId>common-core</artifactId>
             <version>0.0.1</version>
         </dependency>
+
+
+        <!--        数据库驱动与mybatis-->
         <dependency>
             <groupId>dm.jdbc.driver</groupId>
             <artifactId>dm-jdbc</artifactId>
             <version>1.7</version>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate.dialect</groupId>
-            <artifactId>dm-dialect</artifactId>
-            <version>5.0</version>
-        </dependency>
+
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus</artifactId>
-            <version>3.4.1</version>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.4.2</version>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-starter-jdbc</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
+<!--            <version>2.4.2</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

@@ -1,12 +1,12 @@
-package com.cetc28.needManagement;
+package com.cetc28.needmanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NmApplication {
+public class MainApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NmApplication.class);
+        SpringApplication.run(MainApplication.class);
     }
 }
