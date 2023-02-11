@@ -3,7 +3,6 @@ package com.cetc28.needmanagement.controller;
 import com.cetc28.needmanagement.entity.CompanyDct;
 import com.cetc28.needmanagement.service.CompanyDctService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +21,22 @@ public class CompanyDctController {
     @GetMapping("/selCompanyDct")
     public List<CompanyDct> selCompanyDct(){
 
-        return companyDctService.list();
+        List<CompanyDct> list = companyDctService.list();
+        return list;
     }
 
-    @GetMapping("/count")
-    public Long selCompanyDct1(){
-        return 5L;
-//        return companyDctService.count();
+
+    @GetMapping("/selCompanyDct1")
+    public CompanyDct selCompanyDct1(){
+        String COMPANY_CODE = "TEXT1";
+        return companyDctService.getById(COMPANY_CODE);
     }
 
+    @GetMapping("/saveCompanyDct")
+    public boolean saveCompanyDct(){
+        String COMPANY_CODE = "TEXT2";
+        CompanyDct companyDct=new CompanyDct();
+        companyDct.setCOMPANY_CODE(COMPANY_CODE);
+        return companyDctService.saveOrUpdate(companyDct);
+    }
 }

@@ -12,6 +12,15 @@ spring:
     password: 123456789
     driver-class-name: dm.jdbc.driver.DmDriver
 
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      table-prefix: TAB_DMS_
+  type-aliases-package: com.cetc28.needmanagement.entity
+
 
 
 

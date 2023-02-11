@@ -25,5 +25,3 @@ Msrc/main/java/com/cetc28/needmanagement/service/impl/UserNeedServiceImpl.java,
 Rsrc/main/java/com/cetc28/needmanagement/service/impl/RelationSsDctServiceImpl.java,d\7\d787fa90427038447e3064ac6f279e4ce045ed9f
 
 Osrc/main/java/com/cetc28/needmanagement/service/impl/CompanyDctServiceImpl.java,4\3\437381955538bdbd4189a60b536bd6a35267175b
-l
-<src/main/java/com/cetc28/needmanagement/MainApplication.java,b\6\b614551a5af99ed3d34e824db15c9364f1d466e4

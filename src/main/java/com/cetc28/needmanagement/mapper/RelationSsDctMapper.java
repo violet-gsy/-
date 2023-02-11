@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 * @createDate 2023-02-10 13:49:56
 * @Entity com.cetc28.needmanagement.entity.RelationSsDct
 */
-@Mapper
+
 public interface RelationSsDctMapper extends BaseMapper<RelationSsDct> {
 
 }

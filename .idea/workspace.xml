@@ -5,22 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="默认变更列表">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/8125bd98-c805-47bc-b7e5-54d2976265f8.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/mybatisx/templates.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/doc/Log.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/CompanyDct.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/CompanyDct.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" afterDir="false" />
@@ -30,6 +18,8 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" afterDir="false" />
@@ -37,13 +27,6 @@
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CompanyDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/CompanyDctMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CutPeopleDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/CutPeopleDctMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedDetailedMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/NeedDetailedMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedSourcesDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/NeedSourcesDctMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationCiDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/RelationCiDctMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationSsDctMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/RelationSsDctMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/mapper/UserNeedMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/mapper/UserNeedMapper.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +49,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="0.1_database" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -74,7 +57,7 @@
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="localRepository" value="F:\tjb\repository" />
+        <option name="localRepository" value="F:\repository" />
         <option name="mavenHome" value="$PROJECT_DIR$/../apache-maven-3.6.3" />
         <option name="userSettingsFile" value="F:\tjb\apache-maven-3.6.3\conf\settings.xml" />
       </MavenGeneralSettings>
@@ -87,6 +70,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="MyBatisLogPluginindexNum" value="9" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
@@ -104,7 +88,7 @@
       <recent name="F:\tjb\NeedManagement\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.NmApplication">
     <configuration name="NmApplication" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="com.cetc28.needmanagement.MainApplication" />
       <module name="NeedManagement" />
@@ -125,6 +109,26 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="generated-requests#1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests#2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="2" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests#3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="3" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="generated-requests#4" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="4" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP Request.generated-requests#4" />
+        <item itemvalue="HTTP Request.generated-requests#3" />
+        <item itemvalue="HTTP Request.generated-requests#2" />
+        <item itemvalue="HTTP Request.generated-requests#1" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -137,7 +141,7 @@
       <workItem from="1675944032759" duration="205000" />
       <workItem from="1675992460171" duration="224000" />
       <workItem from="1675992709909" duration="13182000" />
-      <workItem from="1676021541537" duration="261000" />
+      <workItem from="1676021541537" duration="8210000" />
     </task>
     <task id="LOCAL-00001" summary="需求管理项目框架搭建">
       <created>1675997889850</created>
@@ -167,7 +171,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676000287127</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="数据库实体创建">
+      <created>1676021933776</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1676021933776</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -178,6 +189,7 @@
     <MESSAGE value="需求管理项目框架搭建" />
     <MESSAGE value="默认变更列表" />
     <MESSAGE value="需求管理首次提交" />
-    <option name="LAST_COMMIT_MESSAGE" value="需求管理首次提交" />
+    <MESSAGE value="数据库实体创建" />
+    <option name="LAST_COMMIT_MESSAGE" value="数据库实体创建" />
   </component>
 </project>
