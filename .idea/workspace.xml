@@ -4,22 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="默认变更列表">
-      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+    <list default="true" id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="打通数据库与后台接口">
+      <change afterPath="$PROJECT_DIR$/doc/界面原型/需求管理.rp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/UserNeedController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/listener/commonListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/CompanyDctController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/CompanyDct.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/CompanyDct.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CompanyDctMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedDetailedMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationCiDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationCiDctMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationSsDctMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/RelationSsDctMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/mapper/UserNeedMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/doc/Log.md" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Log.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/UserNeed.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/UserNeed.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/UserNeed.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/UserNeed.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" afterDir="false" />
@@ -49,7 +45,7 @@
     </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="0.1_database" />
+        <entry key="$PROJECT_DIR$" value="1-v0-3-eazyexcel_" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -70,7 +66,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="MyBatisLogPluginindexNum" value="9" />
+    <property name="MyBatisLogPluginindexNum" value="13" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
@@ -86,6 +82,12 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="F:\tjb\NeedManagement\src\main\resources" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\tjb\NeedManagement\doc\界面原型" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.cetc28.needmanagement.controller.listener" />
     </key>
   </component>
   <component name="RunManager" selected="Application.NmApplication">
@@ -141,7 +143,7 @@
       <workItem from="1675944032759" duration="205000" />
       <workItem from="1675992460171" duration="224000" />
       <workItem from="1675992709909" duration="13182000" />
-      <workItem from="1676021541537" duration="8210000" />
+      <workItem from="1676021541537" duration="15768000" />
     </task>
     <task id="LOCAL-00001" summary="需求管理项目框架搭建">
       <created>1675997889850</created>
@@ -178,7 +180,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676021933776</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="打通数据库与后台接口">
+      <created>1676084003021</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1676084003021</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -190,6 +199,39 @@
     <MESSAGE value="默认变更列表" />
     <MESSAGE value="需求管理首次提交" />
     <MESSAGE value="数据库实体创建" />
-    <option name="LAST_COMMIT_MESSAGE" value="数据库实体创建" />
+    <MESSAGE value="打通数据库与后台接口" />
+    <option name="LAST_COMMIT_MESSAGE" value="打通数据库与后台接口" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../repository/com/alibaba/easyexcel-core/3.1.1/easyexcel-core-3.1.1-sources.jar!/com/alibaba/excel/EasyExcelFactory.java</url>
+          <line>99</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../repository/com/alibaba/easyexcel-core/3.1.1/easyexcel-core-3.1.1-sources.jar!/com/alibaba/excel/EasyExcelFactory.java</url>
+          <line>298</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/UserNeedController.java</url>
+          <line>51</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="dataList.getClass()" />
+        <watch expression="dataList.toString()" />
+        <watch expression="List&lt;Map&gt; list = (List&lt;Map&gt;) dataList;" />
+        <watch expression="dataList.hashCode()" />
+        <watch expression="dataList.notifyAll();" />
+        <watch expression="dataList.toString().getBytes()" />
+        <watch expression="userNeedList.get(i).setNEED_ID(&quot;666&quot;);" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

@@ -1,5 +1,6 @@
 package com.cetc28.needmanagement.entity;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -24,96 +25,112 @@ public class UserNeed implements Serializable {
      * 需求来源
      */
     @TableField(value = "NEED_NAME")
+    @ExcelProperty(value = "需求来源",index = 0)
     private String NEED_NAME;
 
     /**
      * 需求阶段
      */
     @TableField(value = "NEED_SETP")
+    @ExcelProperty(value = "需求阶段",index = 1)
     private String NEED_SETP;
 
     /**
      * 提出单位
      */
     @TableField(value = "CUT_COMPANY_NAME")
+    @ExcelProperty(value = "提出单位",index = 2)
     private String CUT_COMPANY_NAME;
 
     /**
      * 提出人
      */
     @TableField(value = "CUT_PEOPLE_NAME")
+    @ExcelProperty(value = "提出人",index = 3)
     private String CUT_PEOPLE_NAME;
 
     /**
      * 提出意见
      */
     @TableField(value = "CUT_OPINION")
+    @ExcelProperty(value = "提出意见",index = 4)
     private String CUT_OPINION;
 
     /**
      * 提出时间
      */
     @TableField(value = "CUT_TIME")
+    @ExcelProperty(value = "提出时间",index = 5)
     private Date CUT_TIME;
 
     /**
      * 关联子系统
      */
     @TableField(value = "SS_NAME")
+    @ExcelProperty(value = "关联子系统",index = 6)
     private String SS_NAME;
 
     /**
      * 关联配置项
      */
     @TableField(value = "CI_NAME")
+    @ExcelProperty(value = "关联配置项",index = 7)
     private String CI_NAME;
 
     /**
      * 需求标识
      */
     @TableField(value = "NEED_CODE")
+    @ExcelProperty(value = "需求标识",index = 8)
     private String NEED_CODE;
 
     /**
      * 提出类别
      */
     @TableField(value = "CUT_CATEGURY")
+    @ExcelProperty(value = "提出类别",index = 9)
     private String CUT_CATEGURY;
 
     /**
      * 处理措施
      */
     @TableField(value = "CLCS")
+    @ExcelProperty(value = "处理措施",index = 10)
     private String CLCS;
 
     /**
      * 责任单位
      */
     @TableField(value = "RESPONSIBLE_UNIT")
+    @ExcelProperty(value = "责任单位",index = 11)
     private String RESPONSIBLE_UNIT;
 
     /**
      * 完成时间
      */
     @TableField(value = "COMPLETE_DATE")
+    @ExcelProperty(value = "完成时间",index = 12)
     private Date COMPLETE_DATE;
 
     /**
      * 现阶段状态
      */
     @TableField(value = "CURRENT_STATUS")
+    @ExcelProperty(value = "现阶段状态",index = 13)
     private String CURRENT_STATUS;
 
     /**
      * 责任人
      */
     @TableField(value = "RESPONSIBLE_PEOPLE")
+    @ExcelProperty(value = "责任人",index = 14)
     private String RESPONSIBLE_PEOPLE;
 
     /**
      * 联系方式
      */
     @TableField(value = "PHONE")
+    @ExcelProperty(value = "联系方式",index = 15)
     private Long PHONE;
 
     /**
