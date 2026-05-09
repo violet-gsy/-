@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.NodeRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.NodeRecord">
+            <id property="noderecordid" column="NODERECORDID" jdbcType="CHAR"/>
+            <result property="recordid" column="RECORDID" jdbcType="CHAR"/>
+            <result property="actId" column="ACT_ID_" jdbcType="VARCHAR"/>
+            <result property="issuccess" column="ISSUCCESS" jdbcType="INTEGER"/>
+            <result property="starttime" column="STARTTIME" jdbcType="TIMESTAMP"/>
+            <result property="endtime" column="ENDTIME" jdbcType="TIMESTAMP"/>
+            <result property="totaltime" column="TOTALTIME" jdbcType="OTHER"/>
+            <result property="fault" column="FAULT" jdbcType="VARCHAR"/>
+            <result property="isexpect" column="ISEXPECT" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        NODERECORDID,RECORDID,ACT_ID_,
+        ISSUCCESS,STARTTIME,ENDTIME,
+        TOTALTIME,FAULT,ISEXPECT
+    </sql>
+</mapper>

@@ -1,0 +1,27 @@
+package com.jc.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.flowable.spring.boot.EngineConfigurationConfigurer;
+import org.flowable.spring.SpringProcessEngineConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
+@Configuration
+public class JacksonConfig {
+
+    /**
+     * 解决Flowable实体JSON序列化空指针异常
+     */
+    @Bean
+    public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
+        ObjectMapper objectMapper = builder.build();
+
+        // 核心：忽略空指针、忽略无法序列化的字段
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false);
+
+        return objectMapper;
+    }
+}

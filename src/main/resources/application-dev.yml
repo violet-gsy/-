@@ -1,0 +1,55 @@
+server:
+  port: 8001
+# mysql
+spring:
+  # 达梦8数据源
+  datasource:
+    driver-class-name: dm.jdbc.driver.DmDriver
+    url: jdbc:dm://localhost:5236?compatibleMode=oracle&useUnicode=true&characterEncoding=utf8
+    username: SYSDBA
+    password: Jc0258888
+  mvc:
+    pathmatch:
+      # 配置策略 如sping版本高于2.4以上则需要添加，否则会导致swagger文档不适配
+      matching-strategy: ant-path-matcher
+  # Flowable 6.3.0 适配 DM8 核心配置
+# Flowable 达梦适配核心配置
+flowable:
+  # 关闭自带liquibase（用我们自定义适配）
+  liquibase.enabled: false
+  # 强制数据库类型为 oracle（达梦兼容模式）
+  database-type: oracle
+  # 首次启动自动建表，生产改为 false
+  database-schema-update: true
+  # 异步线程激活
+  async-executor-activate: true
+  # 关闭定时任务（可选）
+  async-executor-activate-timer: false
+  process-definition-location-prefix: classpath*:/processes/**.bpmn20.xml
+    #datasource:
+    #url: jdbc:mysql://localhost:3306/flowable?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=true&verifyServerCertificate=false&requireSSL=false
+    #username: root
+    #password: zj5211314
+    #driver-class-name: com.mysql.jdbc.Driver
+
+
+
+
+# mybaentitytis-plus
+mybatis-plus:
+  mapper-location: classpath*:/mapper/*.xml
+  type-aliases-package: com.jc.entity
+
+# Swagger3 配置
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+# 日志
+logging:
+  level:
+    org.flowable: info
+    com.baomidou: info

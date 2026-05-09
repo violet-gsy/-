@@ -4,69 +4,111 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.3</version>
+        <version>2.1.5.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.cetc28.tkb</groupId>
-    <artifactId>NeedMangerment</artifactId>
+    <groupId>com.jv</groupId>
+    <artifactId>flowable</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <swagger.version>2.7.0</swagger.version>
+        <mybatisplus.version>3.5.1</mybatisplus.version>
     </properties>
 
     <dependencies>
-        <!--spring框架依赖-->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!--        引入fastjson、hutool-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.72</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.5.1</version>
         </dependency>
-        <!--        通用组件依赖-->
+        <!--        Swagger依赖-->
         <dependency>
-            <groupId>com.cetc28.tkb</groupId>
-            <artifactId>common-swagger</artifactId>
-            <version>1.0</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.15</version>
         </dependency>
-        <dependency>
-            <groupId>com.cetc28.tkb</groupId>
-            <artifactId>common-core</artifactId>
-            <version>0.0.1</version>
-        </dependency>
-
-
-        <!--        数据库驱动与mybatis-->
-        <dependency>
-            <groupId>dm.jdbc.driver</groupId>
-            <artifactId>dm-jdbc</artifactId>
-            <version>1.7</version>
-        </dependency>
-
+        <!--        mybatisPlus以及mysql依赖-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.2</version>
+            <version>${mybatisplus.version}</version>
+        </dependency>
+        <!-- mybatis plus代码生成 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-generator</artifactId>
+            <version>${mybatisplus.version}</version>
+        </dependency>
+        <!--模板引擎 依赖-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.28</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!--引入Flowable6.3依赖-->
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
+            <version>6.3.0</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.jetbrains.kotlin</groupId>
-                    <artifactId>kotlin-stdlib-jdk8</artifactId>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.45</version>
+        </dependency>-->
 
+        <!-- 达梦8 JDBC 本地包 -->
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver8</artifactId>
+            <version>8.1.5.45</version>
+        </dependency>
 
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

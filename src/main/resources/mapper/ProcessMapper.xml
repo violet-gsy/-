@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.ProcessMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Process">
+            <id property="processid" column="PROCESSID" jdbcType="CHAR"/>
+            <result property="key" column="KEY_" jdbcType="CHAR"/>
+            <result property="templateid" column="TEMPLATEID" jdbcType="CHAR"/>
+            <result property="taskid" column="TASKID" jdbcType="CHAR"/>
+            <result property="processname" column="PROCESSNAME" jdbcType="VARCHAR"/>
+            <result property="processdes" column="PROCESSDES" jdbcType="VARCHAR"/>
+            <result property="areaid" column="AREAID" jdbcType="VARCHAR"/>
+            <result property="modelflieid" column="MODELFLIEID" jdbcType="VARCHAR"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+            <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+            <result property="istemp" column="ISTEMP" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        PROCESSID,KEY_,TEMPLATEID,
+        TASKID,PROCESSNAME,PROCESSDES,
+        AREAID,MODELFLIEID,REMARK,
+        CREATETIME,ISTEMP
+    </sql>
+</mapper>
