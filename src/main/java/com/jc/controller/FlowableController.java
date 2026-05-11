@@ -274,7 +274,7 @@ public class FlowableController {
 
 
     @PostMapping("/startProcess")
-    @Operation(summary="启动流程（admin）")
+    @Operation(summary="二维启动流程（admin）")
     public ApiResponse startProcess(@RequestParam @Schema(description = "流程key") String processKey) {
         Map<String, Object> result = new HashMap<>();
         try {
@@ -285,7 +285,11 @@ public class FlowableController {
             result.put("code", 200);
             result.put("msg", "流程启动成功");
             result.put("流程实例ID", instance.getId());
-            log.info("流程启动成功");
+            log.info("流程启动成功,流程实例ID为"+instance.getId());
+
+            // 2. 启动该流程的自动审批（异步，不阻塞当前接口）
+            flowAbleService.startAutoApproval(instance.getId());
+
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "启动失败：" + e.getMessage());

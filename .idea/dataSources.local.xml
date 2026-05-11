@@ -10,6 +10,21 @@
       <user-name>DBHTXDKZ</user-name>
       <schema-mapping>
         <introspection-scope>
+          <node kind="database" negative="1">
+            <node kind="schema" negative="1" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+    <data-source name="dm.jdbc.driver.DmData Source" uuid="c87b433f-acb8-4a39-8605-15c7bde69752">
+      <database-info product="DM DBMS" version="8.1.4.170" jdbc-version="4.0" driver-name="dm.jdbc.driver.DmDriver" driver-version="8.1.4.170" dbms="UNKNOWN" exact-version="8.1" exact-driver-version="8.1">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="upper" quoted-identifiers="exact" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>SYSDBA</user-name>
+      <schema-mapping>
+        <introspection-scope>
           <node kind="database" qname="@">
             <node kind="schema" qname="@" />
           </node>

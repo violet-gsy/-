@@ -6,9 +6,7 @@ import com.jc.entity.Nodeattr;
 import com.jc.service.FlowAbleService;
 import com.jc.service.NodeattrService;
 import com.jc.service.NodeattrhisService;
-import com.jc.util.ApiResponse;
-import com.jc.util.DmUuidUtil;
-import com.jc.util.StringListUtil;
+import com.jc.util.*;
 import com.jc.vo.FlowChartVO;
 import com.jc.vo.JsonToFlowVO;
 import com.jc.vo.NodeAttrOutputVo;
@@ -26,7 +24,10 @@ import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -34,6 +35,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@EnableAsync
+@Transactional(rollbackFor = Exception.class)
 public class FlowAbleServiceImpl implements FlowAbleService {
 
     @Resource
@@ -50,6 +53,40 @@ public class FlowAbleServiceImpl implements FlowAbleService {
 
     @Resource
     private HistoryService historyService;
+
+    @Async
+    @Transactional
+    public void startAutoApproval(String processInstanceId) {
+        try {
+            while (true) {
+                // 查询【这个流程自己】的待办任务（只查自己，不影响别人）
+                Task task = taskService.createTaskQuery()
+                        .processInstanceId(processInstanceId) // 关键：只查当前流程
+                        .singleResult();
+
+                // 没有任务 = 该流程结束
+                if (task == null) {
+                    log.info("✅ 流程【" + processInstanceId + "】已全部自动审批完成");
+                    break;
+                }
+
+                // 每 3 秒审批一步
+                Thread.sleep(5000);
+
+                // 正常审批逻辑...
+                Map<String, Object> vars = new HashMap<>();
+                vars.put("auditResult", "agree");
+                taskService.complete(task.getId(),vars);
+
+                WebSocketServer.sendMsg(MessageTypeEnum.UPDATENODE,task.getTaskDefinitionKey(),0);
+
+                log.info("⏱ 流程【" + processInstanceId + "】:节点"+task.getTaskDefinitionKey() +"自动审批：" + task.getName());
+            }
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
     /**
      * 校验流程名称是否重复

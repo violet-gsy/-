@@ -8,5 +8,13 @@
       <jdbc-url>jdbc:DM://28.9.125.1/DBHTXDKZ</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="dm.jdbc.driver.DmData Source" uuid="c87b433f-acb8-4a39-8605-15c7bde69752">
+      <synchronize>true</synchronize>
+      <configured-by-url>true</configured-by-url>
+      <remarks>FLOWABLE</remarks>
+      <jdbc-driver>dm.jdbc.driver.DmDriver</jdbc-driver>
+      <jdbc-url>jdbc:dm://localhost:5236</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

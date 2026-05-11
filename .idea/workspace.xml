@@ -4,25 +4,130 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="打通数据库与后台接口">
-      <change afterPath="$PROJECT_DIR$/doc/界面原型/需求管理.rp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/UserNeedController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/listener/commonListener.java" afterDir="false" />
+    <list default="true" id="bb8fb6c5-7557-45bc-9204-6a9d815ff92a" name="Default Changelist" comment="测试提交">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/c87b433f-acb8-4a39-8605-15c7bde69752.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/c87b433f-acb8-4a39-8605-15c7bde69752/storage_v2/_src_/database/.UokAAA.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources/c87b433f-acb8-4a39-8605-15c7bde69752/storage_v2/_src_/database/.UokAAA/schema/SYSDBA.timvkg.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/httpRequests/http-requests-log.http" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/DmJdbcDriver8.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jc/util/MessageTypeEnum.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jc/util/WebSocketServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/jc/vo/WebSocketMsg.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/application-dev.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/MainApplication.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/config/CorsConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/config/DamengDatabaseTypeConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/config/FlowableConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/config/JacksonConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/config/MyBatisPlusConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/controller/FlowableController.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/NodeRecord.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/Nodeattr$NodeattrBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/Nodeattr.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/Nodeattrhis.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/Process.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/ProcessRecord.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/entity/Task.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/liquibase/database/core/DmDatabase.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/NodeRecordMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/NodeattrMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/NodeattrhisMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/ProcessMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/ProcessRecordMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/mapper/TaskMapper.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/FlowAbleService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/NodeRecordService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/NodeattrService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/NodeattrhisService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/ProcessRecordService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/ProcessService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/TaskService.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/FlowAbleServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/NodeRecordServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/NodeattrServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/NodeattrhisServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/ProcessRecordServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/ProcessServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/service/impl/TaskServiceImpl.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/util/ApiResponse.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/util/DmUuidUtil.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/util/FlowChartToBpmnConverter.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/util/StringListUtil.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/EmptyFlowVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/FlowChartVO$FlowEdge.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/FlowChartVO$FlowNode.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/FlowChartVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/JsonToFlowVO$FlowEdge.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/JsonToFlowVO$FlowNode.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/JsonToFlowVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/NodeAttrOutputVo$NodeAttrOutputVoBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/NodeAttrOutputVo.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/PageResult.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/ProcessAuditVo.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/ProcessDefinitionVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/ProcessDiagramVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/ProcessJumpVo.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/StartFlowInputVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/jc/vo/TaskVO.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/NodeRecordMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/NodeattrMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/NodeattrhisMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/ProcessMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/ProcessRecordMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/mapper/TaskMapper.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/processes/flowableTest.bpmn20.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/httpRequests/http-client.cookies" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/mybatisx/templates.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mybatisx/templates.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/Log.md" beforeDir="false" afterPath="$PROJECT_DIR$/doc/Log.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/UserNeed.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/entity/UserNeed.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jc/MainApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jc/MainApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jc/controller/FlowableController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jc/controller/FlowableController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jc/service/FlowAbleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jc/service/FlowAbleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/jc/service/impl/FlowAbleServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/jc/service/impl/FlowAbleServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/UserNeed.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/UserNeed.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/MainApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CompanyDct.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/CutPeopleDct.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/NeedDetailed.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/NeedSourcesDct.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/RelationCiDct.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/RelationSsDct.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/entity/UserNeed.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CompanyDctMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/CutPeopleDctMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedDetailedMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/NeedSourcesDctMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationCiDctMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/RelationSsDctMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/mapper/UserNeedMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/CompanyDctService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/CutPeopleDctService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/NeedDetailedService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/NeedSourcesDctService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/RelationCiDctService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/RelationSsDctService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/UserNeedService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/CompanyDctServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/CutPeopleDctServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/NeedDetailedServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/NeedSourcesDctServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/RelationCiDctServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/RelationSsDctServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/cetc28/needmanagement/service/impl/UserNeedServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CompanyDctMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/CutPeopleDctMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedDetailedMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/NeedSourcesDctMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationCiDctMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/RelationSsDctMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/mapper/UserNeedMapper.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,206 +137,209 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="PUSH_TAGS">
-      <GitPushTagMode>
-        <option name="argument" value="--tags" />
-        <option name="title" value="All" />
-      </GitPushTagMode>
-    </option>
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="1-v0-3-eazyexcel_" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/main/resources/application.yml" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/main/java/com/jc/MainApplication.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/pom.xml" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="localRepository" value="F:\repository" />
-        <option name="mavenHome" value="$PROJECT_DIR$/../apache-maven-3.6.3" />
-        <option name="userSettingsFile" value="F:\tjb\apache-maven-3.6.3\conf\settings.xml" />
+        <option name="localRepository" value="C:\Users\Lenovo\.m2\repository" />
+        <option name="mavenHome" value="$PROJECT_DIR$/../../java/maven/apache-maven-3.8.4" />
+        <option name="userSettingsFile" value="D:\java\maven\apache-maven-3.8.4\conf\settings.xml" />
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectId" id="2LV6iV0BC0eySff3Z3YWWyQKOfd" />
+  <component name="ProjectId" id="3BL6sdQgoOz2L2vcXX2ZmmTeDw6" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="MyBatisLogPluginindexNum" value="13" />
+    <property name="DatabaseDriversLRU" value="dm.jdbc.driver.DmDriver" />
+    <property name="RequestMappingsPanelOrder0" value="0" />
+    <property name="RequestMappingsPanelOrder1" value="1" />
+    <property name="RequestMappingsPanelWidth0" value="75" />
+    <property name="RequestMappingsPanelWidth1" value="75" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="SONARLINT_PRECOMMIT_ANALYSIS" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="project.structure.last.edited" value="Project" />
-    <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="MavenSettings" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="F:\tjb\NeedManagement\src\main\resources" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="F:\tjb\NeedManagement\doc\界面原型" />
+      <recent name="D:\workSpace\Flowable\src\main\resources\processes" />
+      <recent name="D:\workSpace\Flowable\src\main\resources\lib" />
+      <recent name="D:\workSpace\Flowable\src\main\java\com\jc\controller" />
+      <recent name="D:\workSpace\Flowable\src\main\java\com\jc\config" />
+      <recent name="D:\workSpace\Flowable\src\main\resources" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="com.cetc28.needmanagement.controller.listener" />
+      <recent name="com.jc.vo" />
+      <recent name="com.jc" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.NmApplication">
-    <configuration name="NmApplication" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="com.cetc28.needmanagement.MainApplication" />
-      <module name="NeedManagement" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+  <component name="RunManager">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="generated-requests#1" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" runType="Run single request">
-      <method v="2" />
+    <configuration name="MainApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="Flowable" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.jc.MainApplication" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SHORTEN_COMMAND_LINE" value="NONE" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
-    <configuration name="generated-requests#2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="2" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="generated-requests#3" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="3" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <configuration name="generated-requests#4" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" path="$APPLICATION_CONFIG_DIR$/scratches/generated-requests.http" index="4" runType="Run single request">
-      <method v="2" />
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="HTTP Request.generated-requests#4" />
-        <item itemvalue="HTTP Request.generated-requests#3" />
-        <item itemvalue="HTTP Request.generated-requests#2" />
-        <item itemvalue="HTTP Request.generated-requests#1" />
-      </list>
-    </recent_temporary>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task active="true" id="Default" summary="默认任务">
-      <changelist id="240a166a-f047-4066-8367-354bb890f9c5" name="默认变更列表" comment="" />
-      <created>1675944031411</created>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bb8fb6c5-7557-45bc-9204-6a9d815ff92a" name="Default Changelist" comment="" />
+      <created>1774256210794</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1675944031411</updated>
-      <workItem from="1675944032759" duration="205000" />
-      <workItem from="1675992460171" duration="224000" />
-      <workItem from="1675992709909" duration="13182000" />
-      <workItem from="1676021541537" duration="15768000" />
+      <updated>1774256210794</updated>
+      <workItem from="1774256212034" duration="5989000" />
+      <workItem from="1774263550965" duration="6011000" />
+      <workItem from="1774273018778" duration="139000" />
+      <workItem from="1774273172203" duration="642000" />
+      <workItem from="1774273840769" duration="1396000" />
+      <workItem from="1774275267285" duration="407000" />
+      <workItem from="1774275941518" duration="1040000" />
+      <workItem from="1774322332268" duration="19562000" />
+      <workItem from="1774399463395" duration="12826000" />
+      <workItem from="1774486438804" duration="17837000" />
+      <workItem from="1774591907611" duration="6715000" />
+      <workItem from="1774831508331" duration="10305000" />
+      <workItem from="1774938169135" duration="6101000" />
+      <workItem from="1775004080815" duration="3748000" />
+      <workItem from="1775031656998" duration="2125000" />
+      <workItem from="1775090356435" duration="5750000" />
+      <workItem from="1775176434830" duration="8952000" />
+      <workItem from="1775521868061" duration="9842000" />
+      <workItem from="1775608333652" duration="11589000" />
+      <workItem from="1775694960542" duration="16933000" />
+      <workItem from="1775781398453" duration="4233000" />
+      <workItem from="1776040934099" duration="2606000" />
+      <workItem from="1776060670068" duration="5600000" />
+      <workItem from="1776127006811" duration="663000" />
+      <workItem from="1776148130701" duration="10072000" />
+      <workItem from="1776217847260" duration="2821000" />
+      <workItem from="1776308334391" duration="12498000" />
+      <workItem from="1776387089530" duration="9967000" />
+      <workItem from="1776645878433" duration="11101000" />
+      <workItem from="1776732089073" duration="7224000" />
+      <workItem from="1776818755952" duration="1227000" />
+      <workItem from="1776905683516" duration="3256000" />
+      <workItem from="1776994735836" duration="2385000" />
+      <workItem from="1777261146736" duration="9255000" />
+      <workItem from="1777337233907" duration="15783000" />
+      <workItem from="1777423127768" duration="18242000" />
+      <workItem from="1777509321771" duration="7099000" />
+      <workItem from="1778028178789" duration="12694000" />
+      <workItem from="1778140110303" duration="5808000" />
+      <workItem from="1778200480076" duration="13485000" />
+      <workItem from="1778287450854" duration="15805000" />
+      <workItem from="1778460104138" duration="7622000" />
+      <workItem from="1778484691073" duration="244000" />
+      <workItem from="1778485082823" duration="775000" />
     </task>
-    <task id="LOCAL-00001" summary="需求管理项目框架搭建">
-      <created>1675997889850</created>
+    <task id="LOCAL-00001" summary="测试提交">
+      <created>1778318017515</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1675997889850</updated>
+      <updated>1778318017515</updated>
     </task>
-    <task id="LOCAL-00002" summary="默认变更列表">
-      <created>1675998091183</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1675998091183</updated>
-    </task>
-    <task id="LOCAL-00003" summary="默认变更列表">
-      <created>1675998225548</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1675998225548</updated>
-    </task>
-    <task id="LOCAL-00004" summary="需求管理首次提交">
-      <created>1676000287127</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1676000287127</updated>
-    </task>
-    <task id="LOCAL-00005" summary="数据库实体创建">
-      <created>1676021933776</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1676021933776</updated>
-    </task>
-    <task id="LOCAL-00006" summary="打通数据库与后台接口">
-      <created>1676084003021</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1676084003021</updated>
-    </task>
-    <option name="localTasksCounter" value="7" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="593995ee-6b5c-4a19-82e3-37fc0a7c9acb">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="593995ee-6b5c-4a19-82e3-37fc0a7c9acb" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="需求管理项目框架搭建" />
-    <MESSAGE value="默认变更列表" />
-    <MESSAGE value="需求管理首次提交" />
-    <MESSAGE value="数据库实体创建" />
-    <MESSAGE value="打通数据库与后台接口" />
-    <option name="LAST_COMMIT_MESSAGE" value="打通数据库与后台接口" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+    <MESSAGE value="测试提交" />
+    <option name="LAST_COMMIT_MESSAGE" value="测试提交" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$PROJECT_DIR$/../../repository/com/alibaba/easyexcel-core/3.1.1/easyexcel-core-3.1.1-sources.jar!/com/alibaba/excel/EasyExcelFactory.java</url>
-          <line>99</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$PROJECT_DIR$/../../repository/com/alibaba/easyexcel-core/3.1.1/easyexcel-core-3.1.1-sources.jar!/com/alibaba/excel/EasyExcelFactory.java</url>
-          <line>298</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/cetc28/needmanagement/controller/UserNeedController.java</url>
-          <line>51</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
-      <configuration name="Application">
-        <watch expression="dataList.getClass()" />
-        <watch expression="dataList.toString()" />
-        <watch expression="List&lt;Map&gt; list = (List&lt;Map&gt;) dataList;" />
-        <watch expression="dataList.hashCode()" />
-        <watch expression="dataList.notifyAll();" />
-        <watch expression="dataList.toString().getBytes()" />
-        <watch expression="userNeedList.get(i).setNEED_ID(&quot;666&quot;);" />
+      <configuration name="SpringBootApplicationConfigurationType">
+        <watch expression="nodes.get(2).nodetiertype" />
       </configuration>
     </watches-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

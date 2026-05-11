@@ -20,4 +20,6 @@ public interface FlowAbleService {
     ApiResponse<FlowChartVO> getFlowChart(String processInstanceId);
 
     ApiResponse<NodeAttrOutputVo> getNodeAttr(String pnodeid);
+
+    void startAutoApproval(String id);
 }
