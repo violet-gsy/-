@@ -66,12 +66,10 @@ public class FlowAbleServiceImpl implements FlowAbleService {
 
                 // 没有任务 = 该流程结束
                 if (task == null) {
+                    WebSocketServer.sendMsg(MessageTypeEnum.ENDNODE,"endNode",0);
                     log.info("✅ 流程【" + processInstanceId + "】已全部自动审批完成");
                     break;
                 }
-
-                // 每 3 秒审批一步
-                Thread.sleep(5000);
 
                 // 正常审批逻辑...
                 Map<String, Object> vars = new HashMap<>();
@@ -81,6 +79,9 @@ public class FlowAbleServiceImpl implements FlowAbleService {
                 WebSocketServer.sendMsg(MessageTypeEnum.UPDATENODE,task.getTaskDefinitionKey(),0);
 
                 log.info("⏱ 流程【" + processInstanceId + "】:节点"+task.getTaskDefinitionKey() +"自动审批：" + task.getName());
+
+                // 每 3 秒审批一步
+                Thread.sleep(2000);
             }
 
         } catch (InterruptedException e) {
@@ -192,7 +193,7 @@ public class FlowAbleServiceImpl implements FlowAbleService {
         BpmnModel model = new BpmnModel();
         Process process = new Process();
         process.setId(vo.getProcessKey());
-        process.setName(vo.getProcessKey() + "流程");
+        process.setName(vo.getProcessName());
         model.addProcess(process);
 
         List<JsonToFlowVO.FlowNode> nodes = vo.getNodeList();

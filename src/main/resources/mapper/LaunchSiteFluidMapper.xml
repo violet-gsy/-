@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.LaunchSiteFluidMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.LaunchSiteFluid">
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="unitid" column="UNITID" jdbcType="CHAR"/>
+            <result property="fluidcode" column="FLUIDCODE" jdbcType="CHAR"/>
+            <result property="fluidname" column="FLUIDNAME" jdbcType="VARCHAR"/>
+            <result property="fluidtype" column="FLUIDTYPE" jdbcType="VARCHAR"/>
+            <result property="phase" column="PHASE" jdbcType="VARCHAR"/>
+            <result property="density" column="DENSITY" jdbcType="DECIMAL"/>
+            <result property="pressurerating" column="PRESSURERATING" jdbcType="DECIMAL"/>
+            <result property="temperature" column="TEMPERATURE" jdbcType="DECIMAL"/>
+            <result property="hazardlevel" column="HAZARDLEVEL" jdbcType="VARCHAR"/>
+            <result property="issupport" column="ISSUPPORT" jdbcType="INTEGER"/>
+            <result property="istoxic" column="ISTOXIC" jdbcType="INTEGER"/>
+            <result property="storagemode" column="STORAGEMODE" jdbcType="VARCHAR"/>
+            <result property="usescene" column="USESCENE" jdbcType="VARCHAR"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+            <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,UNITID,FLUIDCODE,
+        FLUIDNAME,FLUIDTYPE,PHASE,
+        DENSITY,PRESSURERATING,TEMPERATURE,
+        HAZARDLEVEL,ISSUPPORT,ISTOXIC,
+        STORAGEMODE,USESCENE,REMARK,
+        CREATETIME
+    </sql>
+</mapper>

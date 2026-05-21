@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.DatatypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Datatype">
+            <id property="datetypeid" column="DATETYPEID" jdbcType="CHAR"/>
+            <result property="datetypename" column="DATETYPENAME" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        DATETYPEID,DATETYPENAME
+    </sql>
+</mapper>

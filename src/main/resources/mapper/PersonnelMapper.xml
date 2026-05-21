@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.PersonnelMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Personnel">
+            <id property="userid" column="USERID" jdbcType="CHAR"/>
+            <result property="majorid" column="MAJORID" jdbcType="CHAR"/>
+            <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+            <result property="sex" column="SEX" jdbcType="VARCHAR"/>
+            <result property="post" column="POST" jdbcType="VARCHAR"/>
+            <result property="worklocation" column="WORKLOCATION" jdbcType="VARCHAR"/>
+            <result property="workstatus" column="WORKSTATUS" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        USERID,MAJORID,USERNAME,
+        SEX,POST,WORKLOCATION,
+        WORKSTATUS
+    </sql>
+</mapper>

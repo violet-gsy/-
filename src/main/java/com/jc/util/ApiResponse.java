@@ -1,6 +1,7 @@
 package com.jc.util;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
@@ -8,15 +9,19 @@ import lombok.Data;
  * 前端所有接口都用这个格式返回
  */
 @Data
+@Schema(description = "统一返回结果")
 public class ApiResponse<T> {
 
     // 响应码：200成功 500失败
+    @Schema(description = "状态码 200成功 500失败")
     private int code;
 
     // 响应消息
+    @Schema(description = "返回消息")
     private String msg;
 
     // 响应数据
+    @Schema(description = "返回数据")
     private T data;
 
     // ====================== 成功返回 ======================

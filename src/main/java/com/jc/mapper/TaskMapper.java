@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
 * @createDate 2026-05-07 17:44:04
 * @Entity com.jc.entity.Task
 */
-@Mapper
 public interface TaskMapper extends BaseMapper<Task> {
 
 }

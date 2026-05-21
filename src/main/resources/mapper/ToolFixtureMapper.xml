@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.ToolFixtureMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.ToolFixture">
+            <id property="toolid" column="TOOLID" jdbcType="CHAR"/>
+            <result property="facilityid" column="FACILITYID" jdbcType="CHAR"/>
+            <result property="majorid" column="MAJORID" jdbcType="CHAR"/>
+            <result property="productid" column="PRODUCTID" jdbcType="CHAR"/>
+            <result property="toolname" column="TOOLNAME" jdbcType="VARCHAR"/>
+            <result property="tooltype" column="TOOLTYPE" jdbcType="VARCHAR"/>
+            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
+            <result property="manufacturer" column="MANUFACTURER" jdbcType="VARCHAR"/>
+            <result property="producedate" column="PRODUCEDATE" jdbcType="TIMESTAMP"/>
+            <result property="installdate" column="INSTALLDATE" jdbcType="TIMESTAMP"/>
+            <result property="servicelife" column="SERVICELIFE" jdbcType="DECIMAL"/>
+            <result property="location" column="LOCATION" jdbcType="VARCHAR"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        TOOLID,FACILITYID,MAJORID,
+        PRODUCTID,TOOLNAME,TOOLTYPE,
+        STATUS,MANUFACTURER,PRODUCEDATE,
+        INSTALLDATE,SERVICELIFE,LOCATION,
+        REMARK
+    </sql>
+</mapper>

@@ -1,5 +1,8 @@
 package com.jc.config;
 
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -11,14 +14,16 @@ public class MyBatisPlusConfig {
 
     private final static Logger logger = LoggerFactory.getLogger(MyBatisPlusConfig.class);
 
-    /**
-     * @description: 配置分页插件
-     *
-     * @author: gradual
-     * @date: 2019/1/15 10:17
-     * @param: []
-     * @return: com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor
-     */
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        // 关键：必须加分页插件
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.DM);
+        // 防止全表更新与删除
+        paginationInterceptor.setOverflow(true);
+        interceptor.addInnerInterceptor(paginationInterceptor);
+        return interceptor;
+    }
 
 }
 

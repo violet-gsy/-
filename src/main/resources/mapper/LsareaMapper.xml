@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.LsareaMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Lsarea">
+            <id property="areaid" column="AREAID" jdbcType="CHAR"/>
+            <result property="lsid" column="LSID" jdbcType="CHAR"/>
+            <result property="areaname" column="AREANAME" jdbcType="VARCHAR"/>
+            <result property="acreage" column="ACREAGE" jdbcType="NUMERIC"/>
+            <result property="longitude" column="LONGITUDE" jdbcType="NUMERIC"/>
+            <result property="latitude" column="LATITUDE" jdbcType="NUMERIC"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+            <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        AREAID,LSID,AREANAME,
+        ACREAGE,LONGITUDE,LATITUDE,
+        REMARK,CREATETIME
+    </sql>
+</mapper>

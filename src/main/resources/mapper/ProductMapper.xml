@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Product">
+            <id property="productid" column="PRODUCTID" jdbcType="CHAR"/>
+            <result property="lsid" column="LSID" jdbcType="CHAR"/>
+            <result property="productname" column="PRODUCTNAME" jdbcType="VARCHAR"/>
+            <result property="producttype" column="PRODUCTTYPE" jdbcType="VARCHAR"/>
+            <result property="productstatus" column="PRODUCTSTATUS" jdbcType="VARCHAR"/>
+            <result property="manufacturer" column="MANUFACTURER" jdbcType="VARCHAR"/>
+            <result property="producedate" column="PRODUCEDATE" jdbcType="TIMESTAMP"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        PRODUCTID,LSID,PRODUCTNAME,
+        PRODUCTTYPE,PRODUCTSTATUS,MANUFACTURER,
+        PRODUCEDATE,REMARK
+    </sql>
+</mapper>

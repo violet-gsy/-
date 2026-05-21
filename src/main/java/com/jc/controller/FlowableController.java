@@ -2,10 +2,8 @@ package com.jc.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.jc.service.FlowAbleService;
-import com.jc.util.DmUuidUtil;
-import com.jc.util.FlowChartToBpmnConverter;
+import com.jc.util.*;
 import com.jc.vo.*;
-import com.jc.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -133,7 +131,7 @@ public class FlowableController {
                 isOverride = true;
             }
         }
-
+        vo.setProcessName(processName);
         Deployment deploy = repositoryService.createDeployment()
                 .addBpmnModel(vo.getProcessKey() + ".bpmn20.xml", flowAbleService.convert(vo))
                 .name(processName)
@@ -286,7 +284,7 @@ public class FlowableController {
             result.put("msg", "流程启动成功");
             result.put("流程实例ID", instance.getId());
             log.info("流程启动成功,流程实例ID为"+instance.getId());
-
+            WebSocketServer.sendMsg(MessageTypeEnum.STARTENODE,"startNode",0);
             // 2. 启动该流程的自动审批（异步，不阻塞当前接口）
             flowAbleService.startAutoApproval(instance.getId());
 

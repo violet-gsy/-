@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.AttrMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.Attr">
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="attrid" column="ATTRID" jdbcType="CHAR"/>
+            <result property="attrname" column="ATTRNAME" jdbcType="VARCHAR"/>
+            <result property="attrvalue" column="ATTRVALUE" jdbcType="VARCHAR"/>
+            <result property="datetypeid" column="DATETYPEID" jdbcType="CHAR"/>
+            <result property="unitid" column="UNITID" jdbcType="CHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,ATTRID,ATTRNAME,
+        ATTRVALUE,DATETYPEID,UNITID
+    </sql>
+</mapper>

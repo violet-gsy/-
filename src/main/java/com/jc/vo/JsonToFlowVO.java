@@ -12,6 +12,8 @@ import java.util.Set;
 @Schema(name = "JsonToFlowVO", description = "json转flow，部署流程")
 public class JsonToFlowVO {
 
+    @Schema(description = "流程名称")
+    private String processName;
 
     @Schema(description = "流程定义KEY,新增时传空，修改时传后端给返回的")
     private String processKey;

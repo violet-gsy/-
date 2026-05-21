@@ -4,8 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum MessageTypeEnum {
-
-    UPDATENODE("updateNode", "更新节点");
+    STARTENODE("startNode", "启动节点"),
+    UPDATENODE("updateNode", "更新节点"),
+    ENDNODE("endNode", "结束节点");
 
     /** 消息编码（前后端约定标识） */
     private final String code;

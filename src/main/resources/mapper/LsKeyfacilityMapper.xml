@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.LsKeyfacilityMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.LsKeyfacility">
+            <id property="facilityid" column="FACILITYID" jdbcType="CHAR"/>
+            <result property="areaid" column="AREAID" jdbcType="CHAR"/>
+            <result property="facilityname" column="FACILITYNAME" jdbcType="VARCHAR"/>
+            <result property="facilitytype" column="FACILITYTYPE" jdbcType="VARCHAR"/>
+            <result property="iskey" column="ISKEY" jdbcType="DECIMAL"/>
+            <result property="longitude" column="LONGITUDE" jdbcType="DECIMAL"/>
+            <result property="latitude" column="LATITUDE" jdbcType="DECIMAL"/>
+            <result property="buildarea" column="BUILDAREA" jdbcType="DECIMAL"/>
+            <result property="locationdesc" column="LOCATIONDESC" jdbcType="VARCHAR"/>
+            <result property="facilitydesc" column="FACILITYDESC" jdbcType="VARCHAR"/>
+            <result property="state" column="STATE" jdbcType="VARCHAR"/>
+            <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+            <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        FACILITYID,AREAID,FACILITYNAME,
+        FACILITYTYPE,ISKEY,LONGITUDE,
+        LATITUDE,BUILDAREA,LOCATIONDESC,
+        FACILITYDESC,STATE,REMARK,
+        CREATETIME
+    </sql>
+</mapper>

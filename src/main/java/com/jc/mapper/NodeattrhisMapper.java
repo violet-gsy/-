@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
 * @createDate 2026-05-07 17:44:04
 * @Entity com.jc.entity.Nodeattrhis
 */
-@Mapper
 public interface NodeattrhisMapper extends BaseMapper<Nodeattrhis> {
 
 }

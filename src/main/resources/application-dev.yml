@@ -39,7 +39,8 @@ flowable:
 mybatis-plus:
   mapper-location: classpath*:/mapper/*.xml
   type-aliases-package: com.jc.entity
-
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 # Swagger3 配置
 springdoc:
   api-docs:
