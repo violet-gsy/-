@@ -18,7 +18,7 @@ public class NodeRecord implements Serializable {
     /**
      * 节点记录ID
      */
-    @TableId(value = "NODERECORDID")
+    @TableId(value = "NODERECORDID",type = IdType.ASSIGN_UUID)
     private String noderecordid;
 
     /**

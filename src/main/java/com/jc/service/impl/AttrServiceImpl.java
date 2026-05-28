@@ -5,6 +5,9 @@ import com.jc.service.AttrService;
 import com.jc.mapper.AttrMapper;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import java.util.List;
+
 /**
 * @author Lenovo
 * @description 针对表【T_ATTR】的数据库操作Service实现
@@ -14,6 +17,13 @@ import org.springframework.stereotype.Service;
 public class AttrServiceImpl extends BaseServiceImpl<AttrMapper, Attr>
     implements AttrService{
 
+    @Resource
+    AttrMapper attrMapper;
+
+    @Override
+    public List<Attr> getAttr(String attrid) {
+        return attrMapper.getAttr(attrid);
+    }
 }
 
 

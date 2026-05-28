@@ -22,7 +22,7 @@ public class Launchsite implements Serializable {
     /**
      * 发射场id
      */
-    @TableId(value = "LSID",type = IdType.AUTO)
+    @TableId(value = "LSID",type = IdType.ASSIGN_UUID)
     @Schema(description = "发射场id")
     private String lsid;
 

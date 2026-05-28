@@ -17,14 +17,14 @@ public class Datatype implements Serializable {
     /**
      * 属性数据类型id
      */
-    @TableId(value = "DATETYPEID")
-    private String datetypeid;
+    @TableId(value = "DATATYPEID")
+    private String datatypeid;
 
     /**
      * 属性数据类型名称
      */
-    @TableField(value = "DATETYPENAME")
-    private String datetypename;
+    @TableField(value = "DATATYPENAME")
+    private String datatypename;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

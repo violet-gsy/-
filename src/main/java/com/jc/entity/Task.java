@@ -18,7 +18,7 @@ public class Task implements Serializable {
     /**
      * 任务id
      */
-    @TableId(value = "TASKID")
+    @TableId(value = "TASKID",type = IdType.ASSIGN_UUID)
     private String taskid;
 
     /**

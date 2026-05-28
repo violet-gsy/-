@@ -39,7 +39,7 @@ public class BaseController<S extends BaseService<T>, T> {
     @DeleteMapping("/remove/{id}")
     public ApiResponse<Boolean> remove(
             @Parameter(description = "主键ID", required = true)
-            @PathVariable Long id) {
+            @PathVariable String id) {
         return ApiResponse.success(service.removeById(id));
     }
 
@@ -47,7 +47,7 @@ public class BaseController<S extends BaseService<T>, T> {
     @GetMapping("/get/{id}")
     public ApiResponse<T> getById(
             @Parameter(description = "主键ID", required = true)
-            @PathVariable Long id) {
+            @PathVariable String id) {
         return ApiResponse.success(service.getById(id));
     }
 

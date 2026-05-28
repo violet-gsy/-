@@ -9,12 +9,30 @@
             <result property="attrid" column="ATTRID" jdbcType="CHAR"/>
             <result property="attrname" column="ATTRNAME" jdbcType="VARCHAR"/>
             <result property="attrvalue" column="ATTRVALUE" jdbcType="VARCHAR"/>
-            <result property="datetypeid" column="DATETYPEID" jdbcType="CHAR"/>
+            <result property="datatypeid" column="DATATYPEID" jdbcType="CHAR"/>
             <result property="unitid" column="UNITID" jdbcType="CHAR"/>
+            <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+        <result property="attrkey" column="ATTRKEY" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         ID,ATTRID,ATTRNAME,
-        ATTRVALUE,DATETYPEID,UNITID
+        ATTRVALUE,DATATYPEID,UNITID,CREATETIME,ATTRKEY
     </sql>
+    
+    <select id="getAttr" resultType="com.jc.entity.Attr">
+        select
+               attr.*,
+               attrunit.UNITNAME as unitname,
+               datatype.DATATYPENAME as datatypename
+        from T_ATTR attr
+        left join T_ATTR_UNIT attrunit on attr.UNITID = attrunit.UNITID
+        left join T_DATATYPE datatype on attr.DATATYPEID = datatype.DATATYPEID
+        <where>
+            <if test="attrid != null">
+                AND attr.ATTRID = #{attrid}
+            </if>
+        </where>
+        ORDER BY attr.CREATETIME
+    </select>
 </mapper>

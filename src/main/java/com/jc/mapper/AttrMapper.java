@@ -3,6 +3,8 @@ package com.jc.mapper;
 import com.jc.entity.Attr;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.List;
+
 /**
 * @author Lenovo
 * @description 针对表【T_ATTR】的数据库操作Mapper
@@ -11,6 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface AttrMapper extends BaseMapper<Attr> {
 
+
+    List<Attr> getAttr(String attrid);
 }
 
 

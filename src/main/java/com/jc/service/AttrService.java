@@ -3,6 +3,8 @@ package com.jc.service;
 import com.jc.entity.Attr;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
 * @author Lenovo
 * @description 针对表【T_ATTR】的数据库操作Service
@@ -10,4 +12,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface AttrService extends BaseService<Attr> {
 
+    List<Attr> getAttr(String attrid);
 }

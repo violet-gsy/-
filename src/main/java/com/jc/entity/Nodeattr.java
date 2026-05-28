@@ -20,7 +20,7 @@ public class Nodeattr implements Serializable {
     /**
      * 节点属性ID
      */
-    @TableId(value = "NODEATTRID")
+    @TableId(value = "NODEATTRID",type = IdType.ASSIGN_UUID)
     private String nodeattrid;
 
     /**

@@ -5,11 +5,11 @@
 <mapper namespace="com.jc.mapper.DatatypeMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.Datatype">
-            <id property="datetypeid" column="DATETYPEID" jdbcType="CHAR"/>
-            <result property="datetypename" column="DATETYPENAME" jdbcType="VARCHAR"/>
+            <id property="datatypeid" column="DATATYPEID" jdbcType="CHAR"/>
+            <result property="datatypename" column="DATATYPENAME" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        DATETYPEID,DATETYPENAME
+        DATATYPEID,DATATYPENAME
     </sql>
 </mapper>

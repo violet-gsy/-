@@ -18,7 +18,7 @@ public class ProcessRecord implements Serializable {
     /**
      * 流程记录ID
      */
-    @TableId(value = "RECORDID")
+    @TableId(value = "RECORDID",type = IdType.ASSIGN_UUID)
     private String recordid;
 
     /**

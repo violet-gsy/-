@@ -18,7 +18,7 @@ public class Process implements Serializable {
     /**
      * 业务流程id
      */
-    @TableId(value = "PROCESSID")
+    @TableId(value = "PROCESSID",type = IdType.ASSIGN_UUID)
     private String processid;
 
     /**
