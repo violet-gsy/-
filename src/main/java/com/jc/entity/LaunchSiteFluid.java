@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -26,33 +25,20 @@ public class LaunchSiteFluid implements Serializable {
     @Schema(description = "介质ID")
     private String id;
 
-    /**
-     * 计量单位ID
-     */
-    @TableField(value = "UNITID")
-    @Schema(description = "计量单位ID")
-    private String unitid;
-
-    /**
-     * 介质编码
-     */
-    @TableField(value = "FLUIDCODE")
-    @Schema(description = "介质编码")
-    private String fluidcode;
 
     /**
      * 介质名称
      */
-    @TableField(value = "FLUIDNAME")
+    @TableField(value = "NAME")
     @Schema(description = "介质名称")
-    private String fluidname;
+    private String name;
 
     /**
      * 介质类型
      */
-    @TableField(value = "FLUIDTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "介质类型")
-    private String fluidtype;
+    private String type;
 
     /**
      * 相态
@@ -94,14 +80,14 @@ public class LaunchSiteFluid implements Serializable {
      */
     @TableField(value = "ISSUPPORT")
     @Schema(description = "是否助燃")
-    private Integer issupport;
+    private String issupport;
 
     /**
      * 是否有毒
      */
     @TableField(value = "ISTOXIC")
     @Schema(description = "是否有毒")
-    private Integer istoxic;
+    private String istoxic;
 
     /**
      * 存储方式
@@ -127,8 +113,9 @@ public class LaunchSiteFluid implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "CREATETIME")
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
     @TableField(exist = false)

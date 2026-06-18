@@ -1,11 +1,20 @@
 package com.jc.controller;
 
+import com.jc.allenum.ProductTypeEnum;
 import com.jc.entity.ProductComponent;
 import com.jc.service.ProductComponentService;
+import com.jc.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/productComponent")
@@ -17,4 +26,17 @@ public class ProductComponentController extends BaseController<ProductComponentS
     }
 
     // 自带全部CRUD 继承basecontroller
+
+    @Operation(summary = "查看子组件")
+    @GetMapping("/selChildComponent")
+    public ApiResponse<List<ProductComponent>> selChildComponent() {
+
+
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        return ApiResponse.success("list");
+    }
+
+
+
 }

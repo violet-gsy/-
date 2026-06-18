@@ -1,12 +1,11 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,9 +20,9 @@ public class ProductComponent implements Serializable {
     /**
      * 组件ID
      */
-    @TableId(value = "COMPONENTID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "组件ID")
-    private String componentid;
+    private String id;
 
     /**
      * 产品ID
@@ -35,16 +34,16 @@ public class ProductComponent implements Serializable {
     /**
      * 组件名称
      */
-    @TableField(value = "COMPONENTNAME")
+    @TableField(value = "NAME")
     @Schema(description = "组件名称")
-    private String componentname;
+    private String name;
 
     /**
      * 组件类型
      */
-    @TableField(value = "COMPONENTTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "组件类型")
-    private String componenttype;
+    private String type;
 
     /**
      * 父组件 ID
@@ -57,7 +56,7 @@ public class ProductComponent implements Serializable {
      * 研制 / 生产单位
      */
     @TableField(value = "MANUFACTURER")
-    @Schema(description = "研制 / 生产单位")
+    @Schema(description = "生产单位")
     private String manufacturer;
 
     /**
@@ -65,14 +64,9 @@ public class ProductComponent implements Serializable {
      */
     @TableField(value = "PRODUCEDATE")
     @Schema(description = "出厂日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime producedate;
 
-    /**
-     * 技术状态
-     */
-    @TableField(value = "STATUS")
-    @Schema(description = "技术状态")
-    private String status;
 
     /**
      * 备注
@@ -80,6 +74,14 @@ public class ProductComponent implements Serializable {
     @TableField(value = "REMARK")
     @Schema(description = "备注")
     private String remark;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createtime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

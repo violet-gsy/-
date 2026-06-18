@@ -5,19 +5,18 @@
 <mapper namespace="com.jc.mapper.LaunchsiteMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.Launchsite">
-            <id property="lsid" column="LSID" jdbcType="CHAR"/>
-            <result property="lsname" column="LSNAME" jdbcType="VARCHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
             <result property="acreage" column="ACREAGE" jdbcType="NUMERIC"/>
             <result property="longitude" column="LONGITUDE" jdbcType="NUMERIC"/>
             <result property="latitude" column="LATITUDE" jdbcType="NUMERIC"/>
-            <result property="geolcond" column="GEOLCOND" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
             <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        LSID,LSNAME,ACREAGE,
-        LONGITUDE,LATITUDE,GEOLCOND,
+        ID,NAME,ACREAGE,
+        LONGITUDE,LATITUDE,
         REMARK,CREATETIME
     </sql>
 </mapper>

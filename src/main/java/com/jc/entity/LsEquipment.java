@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,44 +21,23 @@ public class LsEquipment implements Serializable {
     /**
      * 设备id
      */
-    @TableId(value = "EQPID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "设备id")
-    private String eqpid;
-
-    /**
-     * 区域id
-     */
-    @TableField(value = "AREAID")
-    @Schema(description = "区域id")
-    private String areaid;
-
-    /**
-     * 设施id
-     */
-    @TableField(value = "FACILITYID")
-    @Schema(description = "设施id")
-    private String facilityid;
-
-    /**
-     * 专业ID
-     */
-    @TableField(value = "MAJORID")
-    @Schema(description = "专业ID")
-    private String majorid;
+    private String id;
 
     /**
      * 设备名称
      */
-    @TableField(value = "EQPNAME")
+    @TableField(value = "NAME")
     @Schema(description = "设备名称")
-    private String eqpname;
+    private String name;
 
     /**
      * 设备类型
      */
-    @TableField(value = "EQPTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "设备类型")
-    private String eqptype;
+    private String type;
 
     /**
      * 生产厂家
@@ -75,18 +53,13 @@ public class LsEquipment implements Serializable {
     @Schema(description = "设备状态")
     private String status;
 
-    /**
-     * 投用日期
-     */
-    @TableField(value = "INSTALLDATE")
-    @Schema(description = "投用日期")
-    private LocalDateTime installdate;
 
     /**
      * 出厂日期
      */
     @TableField(value = "MANUFACTURERDATE")
     @Schema(description = "出厂日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime manufacturerdate;
 
     /**
@@ -96,12 +69,6 @@ public class LsEquipment implements Serializable {
     @Schema(description = "设计使用年限")
     private BigDecimal servicelife;
 
-    /**
-     * 维保 / 供货单位
-     */
-    @TableField(value = "SUPPLIER")
-    @Schema(description = "维保 / 供货单位")
-    private String supplier;
 
     /**
      * 备注
@@ -109,6 +76,14 @@ public class LsEquipment implements Serializable {
     @TableField(value = "REMARK")
     @Schema(description = "备注")
     private String remark;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createtime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

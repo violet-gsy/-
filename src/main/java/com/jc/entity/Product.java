@@ -1,12 +1,11 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,51 +20,46 @@ public class Product implements Serializable {
     /**
      * 产品ID
      */
-    @TableId(value = "PRODUCTID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "产品ID")
-    private String productid;
+    private String id;
 
-    /**
-     * 发射场id
-     */
-    @TableField(value = "LSID")
-    @Schema(description = "发射场id")
-    private String lsid;
 
     /**
      * 产品名称
      */
-    @TableField(value = "PRODUCTNAME")
+    @TableField(value = "NAME")
     @Schema(description = "产品名称")
-    private String productname;
+    private String name;
 
     /**
      * 产品类型
      */
-    @TableField(value = "PRODUCTTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "产品类型")
-    private String producttype;
+    private String type;
 
     /**
      * 产品状态
      */
-    @TableField(value = "PRODUCTSTATUS")
+    @TableField(value = "STATUS")
     @Schema(description = "产品状态")
-    private String productstatus;
+    private String status;
 
     /**
      * 研制 / 生产单位
      */
     @TableField(value = "MANUFACTURER")
-    @Schema(description = "研制 / 生产单位")
+    @Schema(description = "研制单位")
     private String manufacturer;
 
     /**
      * 出厂日期
      */
-    @TableField(value = "PRODUCEDATE")
+    @TableField(value = "MANUFACTURERDATE")
     @Schema(description = "出厂日期")
-    private LocalDateTime producedate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime manufacturerdate;
 
     /**
      * 备注
@@ -73,6 +67,14 @@ public class Product implements Serializable {
     @TableField(value = "REMARK")
     @Schema(description = "备注")
     private String remark;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createtime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

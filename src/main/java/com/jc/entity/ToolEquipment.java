@@ -1,12 +1,11 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,30 +20,24 @@ public class ToolEquipment implements Serializable {
     /**
      * 工器具id
      */
-    @TableId(value = "TOOLEQPID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "工器具id")
-    private String tooleqpid;
+    private String id;
 
-    /**
-     * 专业ID
-     */
-    @TableField(value = "MAJORID")
-    @Schema(description = "专业ID")
-    private String majorid;
 
     /**
      * 工器具名称
      */
-    @TableField(value = "TOOLNAME")
+    @TableField(value = "NAME")
     @Schema(description = "工器具名称")
-    private String toolname;
+    private String name;
 
     /**
      * 工器具类型
      */
-    @TableField(value = "TOOLTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "工器具类型")
-    private String tooltype;
+    private String type;
 
     /**
      * 状态
@@ -58,14 +51,9 @@ public class ToolEquipment implements Serializable {
      */
     @TableField(value = "PURCHASEDATE")
     @Schema(description = "购置日期")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime purchasedate;
 
-    /**
-     * 存放位置
-     */
-    @TableField(value = "LOCATION")
-    @Schema(description = "存放位置")
-    private String location;
 
     /**
      * 备注
@@ -73,6 +61,14 @@ public class ToolEquipment implements Serializable {
     @TableField(value = "REMARK")
     @Schema(description = "备注")
     private String remark;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createtime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

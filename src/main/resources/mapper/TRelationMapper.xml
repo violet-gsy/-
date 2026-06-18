@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.TRelationMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.TRelation">
+            <result property="relationid" column="RELATIONID" jdbcType="CHAR"/>
+            <result property="ourid" column="OURID" jdbcType="CHAR"/>
+            <result property="businesstype" column="BUSINESSTYPE" jdbcType="VARCHAR"/>
+            <result property="targetid" column="TARGETID" jdbcType="CHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        RELATIONID,OURID,BUSINESSTYPE,
+        TARGETID
+    </sql>
+</mapper>

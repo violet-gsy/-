@@ -21,9 +21,9 @@ public class DocumentHis implements Serializable {
     /**
      * 历史文档id
      */
-    @TableId(value = "HISID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "历史文档id")
-    private String hisid;
+    private String id;
 
     /**
      * 文档ID

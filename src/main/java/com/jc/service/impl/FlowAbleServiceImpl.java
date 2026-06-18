@@ -2,6 +2,7 @@ package com.jc.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jc.allenum.MessageTypeEnum;
 import com.jc.entity.Nodeattr;
 import com.jc.service.FlowAbleService;
 import com.jc.service.NodeattrService;

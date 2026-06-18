@@ -58,7 +58,7 @@ public class ProcessRecord implements Serializable {
     private Object totaltime;
 
     /**
-     * 故障详情
+     * 返回详情
      */
     @TableField(value = "FAULT")
     private String fault;

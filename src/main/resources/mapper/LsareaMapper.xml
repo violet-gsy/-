@@ -5,9 +5,8 @@
 <mapper namespace="com.jc.mapper.LsareaMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.Lsarea">
-            <id property="areaid" column="AREAID" jdbcType="CHAR"/>
-            <result property="lsid" column="LSID" jdbcType="CHAR"/>
-            <result property="areaname" column="AREANAME" jdbcType="VARCHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
             <result property="acreage" column="ACREAGE" jdbcType="NUMERIC"/>
             <result property="longitude" column="LONGITUDE" jdbcType="NUMERIC"/>
             <result property="latitude" column="LATITUDE" jdbcType="NUMERIC"/>
@@ -16,7 +15,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        AREAID,LSID,AREANAME,
+        ID,NAME,
         ACREAGE,LONGITUDE,LATITUDE,
         REMARK,CREATETIME
     </sql>

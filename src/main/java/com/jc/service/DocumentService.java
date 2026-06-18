@@ -2,6 +2,11 @@ package com.jc.service;
 
 import com.jc.entity.Document;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jc.util.ApiResponse;
+import com.jc.vo.SaveDocVo;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
 * @author Lenovo
@@ -10,4 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface DocumentService extends BaseService<Document> {
 
+    ApiResponse savedoc(SaveDocVo entity);
+
+    ApiResponse download(String fileName, HttpServletResponse response);
 }

@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,58 +21,52 @@ public class LsKeyfacility implements Serializable {
     /**
      * 设施id
      */
-    @TableId(value = "FACILITYID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "设施id")
-    private String facilityid;
+    private String id;
 
-    /**
-     * 区域id
-     */
-    @TableField(value = "AREAID")
-    @Schema(description = "区域id")
-    private String areaid;
 
     /**
      * 设施名称
      */
-    @TableField(value = "FACILITYNAME")
+    @TableField(value = "NAME")
     @Schema(description = "设施名称")
-    private String facilityname;
+    private String name;
 
     /**
      * 设施类型
      */
-    @TableField(value = "FACILITYTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "设施类型")
-    private String facilitytype;
+    private String type;
 
     /**
      * 是否关键设施
      */
     @TableField(value = "ISKEY")
     @Schema(description = "是否关键设施")
-    private Integer iskey;
+    private String iskey;
 
     /**
-     * 经度
+     * 长
      */
-    @TableField(value = "LONGITUDE")
-    @Schema(description = "经度")
-    private BigDecimal longitude;
+    @TableField(value = "LENGTH")
+    @Schema(description = "长")
+    private BigDecimal length;
 
     /**
-     * 纬度
+     * 宽
      */
-    @TableField(value = "LATITUDE")
-    @Schema(description = "纬度")
-    private BigDecimal latitude;
+    @TableField(value = "WIDTH")
+    @Schema(description = "宽")
+    private BigDecimal width;
 
     /**
-     * 建筑面积
+     * 高
      */
-    @TableField(value = "BUILDAREA")
-    @Schema(description = "建筑面积")
-    private BigDecimal buildarea;
+    @TableField(value = "HEIGHT")
+    @Schema(description = "高")
+    private BigDecimal height;
 
     /**
      * 位置描述
@@ -92,9 +85,9 @@ public class LsKeyfacility implements Serializable {
     /**
      * 设施状态
      */
-    @TableField(value = "STATE")
+    @TableField(value = "STATUS")
     @Schema(description = "设施状态")
-    private String state;
+    private String status;
 
     /**
      * 备注
@@ -106,8 +99,9 @@ public class LsKeyfacility implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "CREATETIME")
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
     @TableField(exist = false)

@@ -1,6 +1,7 @@
 package com.jc.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jc.allenum.MessageTypeEnum;
 import com.jc.vo.WebSocketMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -81,7 +82,7 @@ public class WebSocketServer {
     }
 
     // 通用推送方法：指定类型 + 内容
-    public static void sendMsg(MessageTypeEnum type, String data,Integer status) {
+    public static void sendMsg(MessageTypeEnum type, String data, Integer status) {
         try {
             WebSocketMsg<Object> msg = new WebSocketMsg<>();
             msg.setType(type.getCode());

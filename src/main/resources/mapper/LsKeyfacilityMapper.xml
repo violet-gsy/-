@@ -5,26 +5,25 @@
 <mapper namespace="com.jc.mapper.LsKeyfacilityMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.LsKeyfacility">
-            <id property="facilityid" column="FACILITYID" jdbcType="CHAR"/>
-            <result property="areaid" column="AREAID" jdbcType="CHAR"/>
-            <result property="facilityname" column="FACILITYNAME" jdbcType="VARCHAR"/>
-            <result property="facilitytype" column="FACILITYTYPE" jdbcType="VARCHAR"/>
-            <result property="iskey" column="ISKEY" jdbcType="DECIMAL"/>
-            <result property="longitude" column="LONGITUDE" jdbcType="DECIMAL"/>
-            <result property="latitude" column="LATITUDE" jdbcType="DECIMAL"/>
-            <result property="buildarea" column="BUILDAREA" jdbcType="DECIMAL"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
+            <result property="type" column="TYPE" jdbcType="VARCHAR"/>
+            <result property="iskey" column="ISKEY" jdbcType="VARCHAR"/>
+            <result property="length" column="LENGTH" jdbcType="DECIMAL"/>
+            <result property="width" column="WIDTH" jdbcType="DECIMAL"/>
+            <result property="height" column="HEIGHT" jdbcType="DECIMAL"/>
             <result property="locationdesc" column="LOCATIONDESC" jdbcType="VARCHAR"/>
             <result property="facilitydesc" column="FACILITYDESC" jdbcType="VARCHAR"/>
-            <result property="state" column="STATE" jdbcType="VARCHAR"/>
+            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
             <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        FACILITYID,AREAID,FACILITYNAME,
-        FACILITYTYPE,ISKEY,LONGITUDE,
-        LATITUDE,BUILDAREA,LOCATIONDESC,
-        FACILITYDESC,STATE,REMARK,
+        ID,NAME,
+        TYPE,ISKEY,LENGTH,
+        WIDTH,HEIGHT,LOCATIONDESC,
+        FACILITYDESC,STATUS,REMARK,
         CREATETIME
     </sql>
 </mapper>

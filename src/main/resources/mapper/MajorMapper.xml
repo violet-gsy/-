@@ -5,17 +5,17 @@
 <mapper namespace="com.jc.mapper.MajorMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.Major">
-            <id property="majorid" column="MAJORID" jdbcType="CHAR"/>
-            <result property="majorname" column="MAJORNAME" jdbcType="VARCHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
             <result property="sortno" column="SORTNO" jdbcType="DECIMAL"/>
-            <result property="status" column="STATUS" jdbcType="DECIMAL"/>
+            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
             <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
             <result property="updatetime" column="UPDATETIME" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        MAJORID,MAJORNAME,SORTNO,
+        ID,NAME,SORTNO,
         STATUS,REMARK,CREATETIME,
         UPDATETIME
     </sql>

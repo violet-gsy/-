@@ -1,12 +1,11 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -21,37 +20,24 @@ public class Document implements Serializable {
     /**
      * 文档ID
      */
-    @TableId(value = "DOCID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "文档ID")
-    private String docid;
+    private String id;
 
     /**
      * 文档名称
      */
-    @TableField(value = "DOCNAME")
+    @TableField(value = "NAME")
     @Schema(description = "文档名称")
-    private String docname;
+    private String name;
 
     /**
      * 文档类型
      */
-    @TableField(value = "DOCTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "文档类型")
-    private String doctype;
+    private String type;
 
-    /**
-     * 关联业务类型
-     */
-    @TableField(value = "BUSINESSTYPE")
-    @Schema(description = "关联业务类型")
-    private String businesstype;
-
-    /**
-     * 关联业务数据ID
-     */
-    @TableField(value = "BUSINESSID")
-    @Schema(description = "关联业务数据ID")
-    private String businessid;
 
     /**
      * 文件存储路径
@@ -75,13 +61,6 @@ public class Document implements Serializable {
     private String version;
 
     /**
-     * 状态
-     */
-    @TableField(value = "STATUS")
-    @Schema(description = "状态")
-    private String status;
-
-    /**
      * 备注
      */
     @TableField(value = "REMARK")
@@ -98,8 +77,9 @@ public class Document implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "CREATETIME")
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
     /**

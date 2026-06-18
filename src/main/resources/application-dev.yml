@@ -32,7 +32,9 @@ flowable:
     #password: zj5211314
     #driver-class-name: com.mysql.jdbc.Driver
 
-
+file:
+    # 本地存储根路径（可配置，Windows 示例：D:/upload_files，Linux示例：/home/uploads）
+  uploadPath: D:/uploads
 
 
 # mybaentitytis-plus

@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,23 +21,17 @@ public class Lsarea implements Serializable {
     /**
      * 区域id
      */
-    @TableId(value = "AREAID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "区域id")
-    private String areaid;
+    private String id;
 
-    /**
-     * 发射场id
-     */
-    @TableField(value = "LSID")
-    @Schema(description = "发射场id")
-    private String lsid;
 
     /**
      * 区域名称
      */
-    @TableField(value = "AREANAME")
+    @TableField(value = "NAME")
     @Schema(description = "区域名称")
-    private String areaname;
+    private String name;
 
     /**
      * 面积
@@ -71,8 +64,9 @@ public class Lsarea implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "CREATETIME")
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
     @TableField(exist = false)

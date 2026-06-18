@@ -5,7 +5,7 @@
 <mapper namespace="com.jc.mapper.DocumentHisMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.DocumentHis">
-            <id property="hisid" column="HISID" jdbcType="CHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
             <result property="docid" column="DOCID" jdbcType="CHAR"/>
             <result property="hisdocname" column="HISDOCNAME" jdbcType="VARCHAR"/>
             <result property="version" column="VERSION" jdbcType="VARCHAR"/>
@@ -18,7 +18,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        HISID,DOCID,HISDOCNAME,
+        ID,DOCID,HISDOCNAME,
         VERSION,HISFILEPATH,HISFILESIZE,
         OPERATOR,OPERATE_TYPE,VERSIONREMARK,
         CREATETIME

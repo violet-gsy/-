@@ -5,18 +5,16 @@
 <mapper namespace="com.jc.mapper.PersonnelMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.Personnel">
-            <id property="userid" column="USERID" jdbcType="CHAR"/>
-            <result property="majorid" column="MAJORID" jdbcType="CHAR"/>
-            <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
             <result property="sex" column="SEX" jdbcType="VARCHAR"/>
-            <result property="post" column="POST" jdbcType="VARCHAR"/>
-            <result property="worklocation" column="WORKLOCATION" jdbcType="VARCHAR"/>
-            <result property="workstatus" column="WORKSTATUS" jdbcType="VARCHAR"/>
+            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
+        <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        USERID,MAJORID,USERNAME,
-        SEX,POST,WORKLOCATION,
-        WORKSTATUS
+        ID,NAME,
+        SEX,
+        STATUS,CREATETIME
     </sql>
 </mapper>

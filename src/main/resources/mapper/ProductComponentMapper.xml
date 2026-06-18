@@ -5,20 +5,20 @@
 <mapper namespace="com.jc.mapper.ProductComponentMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.ProductComponent">
-            <id property="componentid" column="COMPONENTID" jdbcType="CHAR"/>
+            <id property="id" column="ID" jdbcType="CHAR"/>
             <result property="productid" column="PRODUCTID" jdbcType="CHAR"/>
-            <result property="componentname" column="COMPONENTNAME" jdbcType="VARCHAR"/>
-            <result property="componenttype" column="COMPONENTTYPE" jdbcType="VARCHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
+            <result property="type" column="TYPE" jdbcType="VARCHAR"/>
             <result property="parentid" column="PARENTID" jdbcType="VARCHAR"/>
             <result property="manufacturer" column="MANUFACTURER" jdbcType="VARCHAR"/>
             <result property="producedate" column="PRODUCEDATE" jdbcType="TIMESTAMP"/>
-            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
+        <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        COMPONENTID,PRODUCTID,COMPONENTNAME,
+        ID,PRODUCTID,NAME,
         COMPONENTTYPE,PARENTID,MANUFACTURER,
-        PRODUCEDATE,STATUS,REMARK
+        PRODUCEDATE,REMARK,CREATETIME
     </sql>
 </mapper>

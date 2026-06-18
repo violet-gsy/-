@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,16 +21,16 @@ public class Launchsite implements Serializable {
     /**
      * 发射场id
      */
-    @TableId(value = "LSID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "发射场id")
-    private String lsid;
+    private String id;
 
     /**
      * 发射场名称
      */
-    @TableField(value = "LSNAME")
+    @TableField(value = "NAME")
     @Schema(description = "发射场名称")
-    private String lsname;
+    private String name;
 
     /**
      * 面积
@@ -54,12 +53,6 @@ public class Launchsite implements Serializable {
     @Schema(description = "纬度")
     private BigDecimal latitude;
 
-    /**
-     * 地质条件
-     */
-    @TableField(value = "GEOLCOND")
-    @Schema(description = "地质条件")
-    private String geolcond;
 
     /**
      * 备注
@@ -71,8 +64,9 @@ public class Launchsite implements Serializable {
     /**
      * 创建时间
      */
-    @TableField(value = "CREATETIME")
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
     @TableField(exist = false)

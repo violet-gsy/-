@@ -1,13 +1,12 @@
 package com.jc.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -22,44 +21,23 @@ public class ToolFixture implements Serializable {
     /**
      * 工装id
      */
-    @TableId(value = "TOOLID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
     @Schema(description = "工装id")
-    private String toolid;
-
-    /**
-     * 设施id
-     */
-    @TableField(value = "FACILITYID")
-    @Schema(description = "设施id")
-    private String facilityid;
-
-    /**
-     * 专业ID
-     */
-    @TableField(value = "MAJORID")
-    @Schema(description = "专业ID")
-    private String majorid;
-
-    /**
-     * 产品ID
-     */
-    @TableField(value = "PRODUCTID")
-    @Schema(description = "产品ID")
-    private String productid;
+    private String id;
 
     /**
      * 工装名称
      */
-    @TableField(value = "TOOLNAME")
+    @TableField(value = "NAME")
     @Schema(description = "工装名称")
-    private String toolname;
+    private String name;
 
     /**
      * 工装类型
      */
-    @TableField(value = "TOOLTYPE")
+    @TableField(value = "TYPE")
     @Schema(description = "工装类型")
-    private String tooltype;
+    private String type;
 
     /**
      * 状态
@@ -78,16 +56,10 @@ public class ToolFixture implements Serializable {
     /**
      * 出厂日期
      */
-    @TableField(value = "PRODUCEDATE")
+    @TableField(value = "MANUFACTURERDATE")
     @Schema(description = "出厂日期")
-    private LocalDateTime producedate;
-
-    /**
-     * 启用日期
-     */
-    @TableField(value = "INSTALLDATE")
-    @Schema(description = "启用日期")
-    private LocalDateTime installdate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime manufacturerdate;
 
     /**
      * 使用年限
@@ -97,18 +69,19 @@ public class ToolFixture implements Serializable {
     private BigDecimal servicelife;
 
     /**
-     * 存放位置
-     */
-    @TableField(value = "LOCATION")
-    @Schema(description = "存放位置")
-    private String location;
-
-    /**
      * 备注
      */
     @TableField(value = "REMARK")
     @Schema(description = "备注")
     private String remark;
+
+    /**
+     * 创建时间
+     */
+    @TableField(value = "CREATETIME",fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createtime;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jc.mapper.TNodeEvaluationMapper">
+
+    <resultMap id="BaseResultMap" type="com.jc.entity.TNodeEvaluation">
+            <id property="id" column="ID" jdbcType="CHAR"/>
+            <result property="procDefId" column="PROC_DEF_ID_" jdbcType="VARCHAR"/>
+            <result property="actId" column="ACT_ID_" jdbcType="VARCHAR"/>
+            <result property="itemids" column="ITEMIDS" jdbcType="VARCHAR"/>
+            <result property="itemnames" column="ITEMNAMES" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,PROC_DEF_ID_,ACT_ID_,
+        ITEMIDS,ITEMNAMES
+    </sql>
+</mapper>

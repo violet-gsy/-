@@ -1,4 +1,4 @@
-package com.jc.util;
+package com.jc.allenum;
 
 import lombok.Getter;
 

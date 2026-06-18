@@ -6,17 +6,15 @@
 
     <resultMap id="BaseResultMap" type="com.jc.entity.LaunchSiteFluid">
             <id property="id" column="ID" jdbcType="CHAR"/>
-            <result property="unitid" column="UNITID" jdbcType="CHAR"/>
-            <result property="fluidcode" column="FLUIDCODE" jdbcType="CHAR"/>
-            <result property="fluidname" column="FLUIDNAME" jdbcType="VARCHAR"/>
-            <result property="fluidtype" column="FLUIDTYPE" jdbcType="VARCHAR"/>
+            <result property="name" column="NAME" jdbcType="VARCHAR"/>
+            <result property="type" column="TYPE" jdbcType="VARCHAR"/>
             <result property="phase" column="PHASE" jdbcType="VARCHAR"/>
             <result property="density" column="DENSITY" jdbcType="DECIMAL"/>
             <result property="pressurerating" column="PRESSURERATING" jdbcType="DECIMAL"/>
             <result property="temperature" column="TEMPERATURE" jdbcType="DECIMAL"/>
             <result property="hazardlevel" column="HAZARDLEVEL" jdbcType="VARCHAR"/>
-            <result property="issupport" column="ISSUPPORT" jdbcType="INTEGER"/>
-            <result property="istoxic" column="ISTOXIC" jdbcType="INTEGER"/>
+            <result property="issupport" column="ISSUPPORT" jdbcType="VARCHAR"/>
+            <result property="istoxic" column="ISTOXIC" jdbcType="VARCHAR"/>
             <result property="storagemode" column="STORAGEMODE" jdbcType="VARCHAR"/>
             <result property="usescene" column="USESCENE" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
@@ -24,8 +22,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,UNITID,FLUIDCODE,
-        FLUIDNAME,FLUIDTYPE,PHASE,
+        ID,
+        NAME,TYPE,PHASE,
         DENSITY,PRESSURERATING,TEMPERATURE,
         HAZARDLEVEL,ISSUPPORT,ISTOXIC,
         STORAGEMODE,USESCENE,REMARK,

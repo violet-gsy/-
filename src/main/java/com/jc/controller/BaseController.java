@@ -1,15 +1,12 @@
 package com.jc.controller;
-
+import com.jc.util.ApiResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jc.service.BaseService;
-import com.jc.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 public class BaseController<S extends BaseService<T>, T> {
 
