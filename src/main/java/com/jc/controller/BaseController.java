@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jc.service.BaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 public class BaseController<S extends BaseService<T>, T> {
 
@@ -55,13 +58,19 @@ public class BaseController<S extends BaseService<T>, T> {
             @RequestParam(defaultValue = "1") Integer current,
             @Parameter(description = "每页条数", example = "10")
             @RequestParam(defaultValue = "10") Integer size,
-            @Parameter(description = "查询条件")
-            T query) {
+            @Parameter(description = "名称") String name,
+            @Parameter(description = "所属分系统") String subsystem) {
         // 分页对象必须用 Integer 构造！！！
         Page<T> page = new Page<>(current, size);
-        QueryWrapper<T> wrapper = new QueryWrapper<>(query);
+        QueryWrapper<T> wrapper = new QueryWrapper<>();
+        //
+        if (StringUtils.hasText(name)) {
+            wrapper.like("name", name);
+        }
+        if (StringUtils.hasText(subsystem)) {
+            wrapper.eq("subsystem", subsystem);
+        }
         service.page(page, wrapper);
-
         return ApiResponse.success(page);
     }
 

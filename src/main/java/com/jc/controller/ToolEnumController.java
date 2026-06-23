@@ -55,6 +55,8 @@ public class ToolEnumController {
         List<Map<String, Object>> phase = new ArrayList<>();
         //危险等级
         List<Map<String, Object>> hazardlevel = new ArrayList<>();
+        //所属分系统
+        List<Map<String, Object>> subsystem = new ArrayList<>();
         if (tableCode.equals(ToolEnum.LAUNCHSITE.getCode())){
             //发射场表
         }else if (tableCode.equals(ToolEnum.LSAREA.getCode())){
@@ -190,7 +192,7 @@ public class ToolEnumController {
                 map.put("desc", enums.getDesc());
                 hazardlevel.add(map);
             }
-        }/*else if (tableCode.equals(ToolEnum.DOCUMENT.getCode())){
+        }else if (tableCode.equals(AllToolEnum.DOCUMENT.getCode())){
             //文档
             for (DocumentTypeEnum enums : DocumentTypeEnum.values()) {
                 Map<String, Object> map = new HashMap<>();
@@ -198,12 +200,36 @@ public class ToolEnumController {
                 map.put("desc", enums.getDesc());
                 type.add(map);
             }
-        }*/
+        }else if (tableCode.equals(AllToolEnum.INTERFACE.getCode())){
+            //接口关系
+            for (InterFaceStatusEnum enums : InterFaceStatusEnum.values()) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("code", enums.getCode());
+                map.put("desc", enums.getDesc());
+                status.add(map);
+            }
+
+            for (InterFaceTypeEnum enums : InterFaceTypeEnum.values()) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("code", enums.getCode());
+                map.put("desc", enums.getDesc());
+                type.add(map);
+            }
+
+        }
+
+        for (SubSysTypeEnum enums : SubSysTypeEnum.values()) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("code", enums.getCode());
+            map.put("desc", enums.getDesc());
+            subsystem.add(map);
+        }
 
         result.put("status",status);
         result.put("type",type);
         result.put("phase",phase);
         result.put("hazardlevel",hazardlevel);
+        result.put("subsystem",subsystem);
         return ApiResponse.success(result);
     }
 

@@ -8,6 +8,12 @@ spring:
     url: jdbc:dm://localhost:5236?compatibleMode=oracle&useUnicode=true&characterEncoding=utf8
     username: SYSDBA
     password: Jc0258888
+  servlet:
+    multipart:
+      # 单个文件最大 50MB
+      max-file-size: 50MB
+      # 整个请求表单总大小 50MB
+      max-request-size: 50MB
   mvc:
     pathmatch:
       # 配置策略 如sping版本高于2.4以上则需要添加，否则会导致swagger文档不适配

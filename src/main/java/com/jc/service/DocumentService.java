@@ -4,6 +4,7 @@ import com.jc.entity.Document;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jc.util.ApiResponse;
 import com.jc.vo.SaveDocVo;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
 */
 public interface DocumentService extends BaseService<Document> {
 
-    ApiResponse savedoc(SaveDocVo entity);
+    ApiResponse savedoc(SaveDocVo entity, MultipartFile file);
 
-    ApiResponse download(String fileName, HttpServletResponse response);
+    void download(String id, HttpServletResponse response);
 }

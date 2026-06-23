@@ -3,7 +3,6 @@ package com.jc.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -11,48 +10,54 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 发射场表
- * @TableName T_LAUNCHSITE
+ * 接口关系表
+ * @TableName T_INTERFACE
  */
-@TableName(value ="T_LAUNCHSITE")
-@Schema(description = "发射场实体")
+@TableName(value ="T_INTERFACE")
+@Schema(description = "接口关系实体")
 @Data
-public class Launchsite implements Serializable {
+public class TInterface implements Serializable {
     /**
-     * 发射场id
+     * ID
      */
     @TableId(value = "ID",type = IdType.ASSIGN_UUID)
-    @Schema(description = "发射场id")
+    @Schema(description = "接口关系ID")
     private String id;
 
     /**
-     * 发射场名称
+     * 名称
      */
     @TableField(value = "NAME")
-    @Schema(description = "发射场名称")
+    @Schema(description = "名称")
     private String name;
 
     /**
-     * 面积
+     * 类型
      */
-    @TableField(value = "ACREAGE")
-    @Schema(description = "面积")
-    private BigDecimal acreage;
+    @TableField(value = "TYPE")
+    @Schema(description = "类型")
+    private String type;
 
     /**
-     * 经度
+     * 连接对象
      */
-    @TableField(value = "LONGITUDE")
-    @Schema(description = "经度")
-    private BigDecimal longitude;
+    @TableField(value = "CONNECTOR")
+    @Schema(description = "连接对象")
+    private String connector;
 
     /**
-     * 纬度
+     * 被连接对象
      */
-    @TableField(value = "LATITUDE")
-    @Schema(description = "纬度")
-    private BigDecimal latitude;
+    @TableField(value = "CONNECTED")
+    @Schema(description = "被连接对象")
+    private String connected;
 
+    /**
+     * 状态
+     */
+    @TableField(value = "STATUS")
+    @Schema(description = "状态")
+    private String status;
 
     /**
      * 备注
@@ -69,6 +74,9 @@ public class Launchsite implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
+    /**
+     * 所属分系统
+     */
     @TableField(value = "SUBSYSTEM")
     @Schema(description = "所属分系统")
     private String subsystem;

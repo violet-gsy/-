@@ -19,6 +19,7 @@
             <result property="usescene" column="USESCENE" jdbcType="VARCHAR"/>
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
             <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+        <result property="subsystem" column="SUBSYSTEM" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">

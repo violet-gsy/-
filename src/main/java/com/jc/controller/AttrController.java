@@ -116,7 +116,7 @@ public class AttrController {
             }else if (relation.getTargetbstype().equals(ToolEnum.MAJOR.getCode())){
                 //专业
                 Major byId = majorService.getById(relation.getTargetid());
-                relation.setTargetname(byId.getMajorname());
+                relation.setTargetname(byId.getName());
             }else if (relation.getTargetbstype().equals(ToolEnum.PERSONNEL.getCode())){
                 //人员
                 Personnel byId = personnelService.getById(relation.getTargetid());

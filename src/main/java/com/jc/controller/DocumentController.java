@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -34,11 +36,18 @@ public class DocumentController  {
     DocumentService documentService;
 
     @Operation(summary = "新增数据", description = "通用新增接口")
-    @PostMapping("/save")
+    @PostMapping(value="/save",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse save(
-            @Parameter(description = "实体数据", required = true)
-            @RequestBody SaveDocVo entity) {
-        ApiResponse response = documentService.savedoc(entity);
+            @RequestParam String type,
+            @RequestParam String remark,
+            @RequestParam String creator,
+            @RequestParam MultipartFile file) {
+        SaveDocVo entity = SaveDocVo.builder()
+                .type(type)
+                .remark(remark)
+                .creator(creator)
+                .build();
+        ApiResponse response = documentService.savedoc(entity,file);
         return response;
     }
 
@@ -63,9 +72,23 @@ public class DocumentController  {
      * 文件下载接口，跨域可用
      */
     @Operation(summary = "文件下载")
-    @GetMapping("/download")
-    public ApiResponse download(@RequestParam String fileName, HttpServletResponse response) {
-        return documentService.download(fileName,response);
+    @GetMapping(value = "/download")
+    public void  download(@RequestParam String id, HttpServletResponse response) {
+         documentService.download(id,response);
+    }
+
+    @Operation(summary = "删除")
+    @DeleteMapping(value = "/delete")
+    public ApiResponse<Boolean>  download(@RequestParam String id) {
+        return ApiResponse.success(documentService.removeById(id));
+    }
+
+    @Operation(summary = "修改数据", description = "根据ID修改")
+    @PutMapping("/updateInfo")
+    public ApiResponse<Boolean> updateInfo(
+            @Parameter(description = "修改后的实体", required = true)
+            @RequestBody Document entity) {
+        return ApiResponse.success(documentService.updateById(entity));
     }
 
 

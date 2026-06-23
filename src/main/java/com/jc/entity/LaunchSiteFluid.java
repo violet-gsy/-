@@ -118,6 +118,10 @@ public class LaunchSiteFluid implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createtime;
 
+    @TableField(value = "SUBSYSTEM")
+    @Schema(description = "所属分系统")
+    private String subsystem;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

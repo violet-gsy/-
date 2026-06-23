@@ -10,6 +10,7 @@
             <result property="sex" column="SEX" jdbcType="VARCHAR"/>
             <result property="status" column="STATUS" jdbcType="VARCHAR"/>
         <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
+        <result property="subsystem" column="SUBSYSTEM" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">

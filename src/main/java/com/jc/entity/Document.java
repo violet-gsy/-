@@ -20,7 +20,7 @@ public class Document implements Serializable {
     /**
      * 文档ID
      */
-    @TableId(value = "ID",type = IdType.ASSIGN_UUID)
+    @TableId(value = "ID")
     @Schema(description = "文档ID")
     private String id;
 
@@ -88,6 +88,10 @@ public class Document implements Serializable {
     @TableField(value = "UPDATETIME")
     @Schema(description = "更新时间")
     private LocalDateTime updatetime;
+
+    @TableField(value = "SUBSYSTEM")
+    @Schema(description = "所属分系统")
+    private String subsystem;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

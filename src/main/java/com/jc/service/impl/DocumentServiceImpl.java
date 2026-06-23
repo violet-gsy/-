@@ -5,6 +5,7 @@ import com.jc.entity.Document;
 import com.jc.service.DocumentService;
 import com.jc.mapper.DocumentMapper;
 import com.jc.util.ApiResponse;
+import com.jc.util.DmUuidUtil;
 import com.jc.vo.SaveDocVo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -37,34 +39,34 @@ public class DocumentServiceImpl extends BaseServiceImpl<DocumentMapper, Documen
     private String uploadPath;
 
     @Override
-    public ApiResponse savedoc(SaveDocVo input) {
-        MultipartFile file = input.getFile();
+    public ApiResponse savedoc(SaveDocVo input,MultipartFile file) {
         String filename = file.getOriginalFilename();
-
-
+        String uuid = DmUuidUtil.get32Uuid();
+        String path = uploadPath + File.separator + uuid;
         try {
             // 1. 判断文件是否为空
             if (file.isEmpty()) {
                 return ApiResponse.error("上传文件不能为空");
             }
             // 2. 创建存储目录，不存在则创建
-            File dir = new File(uploadPath);
+            File dir = new File(path);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
             // 完整保存路径
-            File saveFile = new File(uploadPath + File.separator + filename);
+            File saveFile = new File(path + File.separator + filename);
             // 写入磁盘
             file.transferTo(saveFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
         Document doc = new Document();
+        doc.setId(uuid);
         doc.setName(filename);
         doc.setType(input.getType());
         doc.setFilesize(file.getSize());
-        doc.setFilepath(uploadPath + File.separator + filename);
-        doc.setVersion(input.getVersion());
+        doc.setFilepath(path + File.separator + filename);
+        doc.setVersion("v" + 1);
         doc.setCreator(input.getCreator());
         doc.setRemark(input.getRemark());
         documentMapper.insert(doc);
@@ -72,17 +74,37 @@ public class DocumentServiceImpl extends BaseServiceImpl<DocumentMapper, Documen
     }
 
     @Override
-    public ApiResponse download(String fileName, HttpServletResponse response) {
-        try {
-            File targetFile = new File(uploadPath + File.separator + fileName);
-            if (!targetFile.exists()) {
+    public void download(String id, HttpServletResponse response) {
+        Document doc = documentMapper.selectById(id);
+        if (doc == null) {
+            try {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.setContentType("text/plain;charset=utf-8");
+                response.getWriter().write("文档记录不存在");
+                response.getWriter().flush();
+            } catch (IOException e) {
+                // 忽略
+            }
+            return;
+        }
+
+        File targetFile = new File(doc.getFilepath());
+        if (!targetFile.exists()) {
+            try {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.setContentType("text/plain;charset=utf-8");
                 response.getWriter().write("文件不存在");
-                return ApiResponse.error("文件不存在");
+                response.getWriter().flush();
+            } catch (IOException e) {
+                // 忽略
             }
+            return;
+        }
+
+        try {
             // 下载响应头
             response.setContentType("application/octet-stream");
-            String encodeName = URLEncoder.encode(fileName, "UTF-8");
+            String encodeName = URLEncoder.encode(doc.getName(), "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + encodeName);
 
             // 流输出下载
@@ -97,8 +119,16 @@ public class DocumentServiceImpl extends BaseServiceImpl<DocumentMapper, Documen
             }
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                response.reset(); // 尝试重置响应，但可能已经提交
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.setContentType("text/plain;charset=utf-8");
+                response.getWriter().write("文件下载失败：" + e.getMessage());
+                response.getWriter().flush();
+            } catch (IOException ex) {
+                // 忽略
+            }
         }
-        return ApiResponse.success("下载成功");
     }
 }
 

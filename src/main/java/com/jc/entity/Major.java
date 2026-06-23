@@ -27,9 +27,9 @@ public class Major implements Serializable {
     /**
      * 专业名称
      */
-    @TableField(value = "MAJORNAME")
+    @TableField(value = "NAME")
     @Schema(description = "专业名称")
-    private String majorname;
+    private String name;
 
     /**
      * 排序号
@@ -66,6 +66,10 @@ public class Major implements Serializable {
     @TableField(value = "UPDATETIME")
     @Schema(description = "更新时间")
     private LocalDateTime updatetime;
+
+    @TableField(value = "SUBSYSTEM")
+    @Schema(description = "所属分系统")
+    private String subsystem;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
