@@ -69,6 +69,7 @@ public class DocumentServiceImpl extends BaseServiceImpl<DocumentMapper, Documen
         doc.setVersion("v" + 1);
         doc.setCreator(input.getCreator());
         doc.setRemark(input.getRemark());
+        doc.setSubsystem(input.getSubsystem());
         documentMapper.insert(doc);
         return ApiResponse.success("文件信息保存成功");
     }

@@ -22,6 +22,7 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.jc.util.ApiResponse;
@@ -427,7 +428,7 @@ public class FlowableController {
     }
 
 
-    @PostMapping("/uploadBpmn")
+    @PostMapping(value = "/uploadBpmn",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传bpmn20.xml并部署")
     public ApiResponse uploadBpmn(@RequestParam("file") MultipartFile file) {
         String fileName = file.getOriginalFilename();
@@ -440,23 +441,7 @@ public class FlowableController {
                     .addInputStream(fileName, inputStream)
                     .name("流程部署:" + fileName)
                     .deploy();
-            // 2. 获取刚部署的流程定义
-            ProcessDefinition processDefinition = repositoryService
-                    .createProcessDefinitionQuery()
-                    .deploymentId(deployment.getId())
-                    .singleResult();
-
-            if (processDefinition == null) {
-                return ApiResponse.error("部署成功，但未找到流程定义");
-            }
-
-            // 3. 自动启动流程
-            String processInstanceId = runtimeService
-                    .startProcessInstanceById(processDefinition.getId())
-                    .getId();
-
-            return ApiResponse.success("部署成功！部署ID：" + deployment.getId() +
-                    "\n流程已自动启动！实例ID：" + processInstanceId);
+            return ApiResponse.success("部署成功！部署ID：" + deployment.getId());
         } catch (IOException e) {
             return ApiResponse.error("部署失败：" + e.getMessage());
         }

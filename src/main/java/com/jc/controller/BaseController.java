@@ -59,6 +59,7 @@ public class BaseController<S extends BaseService<T>, T> {
             @Parameter(description = "每页条数", example = "10")
             @RequestParam(defaultValue = "10") Integer size,
             @Parameter(description = "名称") String name,
+            @Parameter(description = "类型") String type,
             @Parameter(description = "所属分系统") String subsystem) {
         // 分页对象必须用 Integer 构造！！！
         Page<T> page = new Page<>(current, size);
@@ -69,6 +70,9 @@ public class BaseController<S extends BaseService<T>, T> {
         }
         if (StringUtils.hasText(subsystem)) {
             wrapper.eq("subsystem", subsystem);
+        }
+        if (StringUtils.hasText(type)) {
+            wrapper.eq("type", type);
         }
         service.page(page, wrapper);
         return ApiResponse.success(page);

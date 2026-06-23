@@ -25,6 +25,9 @@ public class SaveDocVo implements Serializable {
     @Schema(description = "创建人")
     private String creator;
 
+    @Schema(description = "所属分系统")
+    private String subsystem;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

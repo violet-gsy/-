@@ -41,11 +41,13 @@ public class DocumentController  {
             @RequestParam String type,
             @RequestParam String remark,
             @RequestParam String creator,
+            @RequestParam String subsystem,
             @RequestParam MultipartFile file) {
         SaveDocVo entity = SaveDocVo.builder()
                 .type(type)
                 .remark(remark)
                 .creator(creator)
+                .subsystem(subsystem)
                 .build();
         ApiResponse response = documentService.savedoc(entity,file);
         return response;
