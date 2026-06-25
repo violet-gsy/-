@@ -27,16 +27,5 @@ public class ProductComponentController extends BaseController<ProductComponentS
 
     // 自带全部CRUD 继承basecontroller
 
-    @Operation(summary = "查看子组件")
-    @GetMapping("/selChildComponent")
-    public ApiResponse<List<ProductComponent>> selChildComponent() {
-
-
-        List<Map<String, Object>> list = new ArrayList<>();
-
-        return ApiResponse.success("list");
-    }
-
-
 
 }

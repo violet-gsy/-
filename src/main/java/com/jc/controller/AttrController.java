@@ -1,10 +1,13 @@
 package com.jc.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jc.allenum.AllToolEnum;
 import com.jc.allenum.ToolEnum;
 import com.jc.entity.*;
 import com.jc.service.*;
 import com.jc.util.ApiResponse;
+import com.jc.util.DmUuidUtil;
+import com.jc.vo.RelationInputVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,13 +75,29 @@ public class AttrController {
     @Resource
     DocumentService documentService;
 
+    @Resource
+    TInterfaceService interfaceService;
+
     @PostMapping("/saveRelationList")
     @Operation(summary = "批量保存关联关系")
-    public ApiResponse saveRelationList(@RequestBody List<TRelation> relations) {
+    public ApiResponse saveRelationList(@RequestBody RelationInputVO input) {
+        Set<String> allKeys = input.getTargetInfo().keySet();
+        List<TRelation> relations = new ArrayList<>();
+        for (String key : allKeys) {
+            List<String> values = input.getTargetInfo().get(key);
+            for (String value : values) {
+                TRelation tRelation = new TRelation();
+                tRelation.setOurid(input.getOurId());
+                tRelation.setOurbstype(input.getOurType());
+                tRelation.setTargetid(value);
+                tRelation.setTargetbstype(key);
+                relations.add(tRelation);
+            }
+        }
         return ApiResponse.success("成功",tRelationService.saveBatch(relations));
     }
 
-    @PostMapping("/selRelationList")
+    @GetMapping("/selRelationList")
     @Operation(summary = "查询关联表数据")
     public ApiResponse selRelationList(@RequestParam String ourid) {
         List<TRelation> relations = tRelationService.list(new QueryWrapper<TRelation>().eq("OURID",ourid));
@@ -97,7 +118,7 @@ public class AttrController {
                 //产品
                 Product byId = productService.getById(relation.getTargetid());
                 relation.setTargetname(byId.getName());
-            }else if (relation.getTargetbstype().equals(ToolEnum.PRODUCTCOMPONENT.getCode())){
+            }else if (relation.getTargetbstype().equals("/productComponent")){
                 //产品组件
                 ProductComponent byId = productComponentService.getById(relation.getTargetid());
                 relation.setTargetname(byId.getName());
@@ -125,11 +146,15 @@ public class AttrController {
                 //发射场流体介质
                 LaunchSiteFluid byId = launchSiteFluidService.getById(relation.getTargetid());
                 relation.setTargetname(byId.getName());
-            }/*else if (relation.getTargetbstype().equals(ToolEnum.DOCUMENT.getCode())){
+            }else if (relation.getTargetbstype().equals(AllToolEnum.DOCUMENT.getCode())){
                 //文档
                 Document byId = documentService.getById(relation.getTargetid());
-                relation.setTargetname(byId.getDocname());
-            }*/else {
+                relation.setTargetname(byId.getName());
+            }else if (relation.getTargetbstype().equals(AllToolEnum.INTERFACE.getCode())){
+                //接口关系
+                TInterface byId = interfaceService.getById(relation.getTargetid());
+                relation.setTargetname(byId.getName());
+            }else {
                 log.info("------------后端人员注意："+relation.getTargetbstype()+"暂无该目标表类型-------------");
             }
         }

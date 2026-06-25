@@ -37,6 +37,19 @@ public class ToolEnumController {
         return ApiResponse.success(list);
     }
 
+    @Operation(summary = "/获取所有后端接口路由(关联关系)")
+    @GetMapping("/getAllRouteRelation")
+    public ApiResponse<List<Map<String, Object>>> getAllRouteRelation() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (AllToolEnum enums : AllToolEnum.values()) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("code", enums.getCode());
+            map.put("desc", enums.getDesc());
+            list.add(map);
+        }
+        return ApiResponse.success(list);
+    }
+
     @Operation(summary = "/获取表头")
     @GetMapping("/getTableHead")
     public ApiResponse<List<TableColumn>> getTableHead(@RequestParam String code) {
@@ -89,7 +102,7 @@ public class ToolEnumController {
                 map.put("desc", enums.getDesc());
                 status.add(map);
             }
-        }else if (tableCode.equals(ToolEnum.PRODUCTCOMPONENT.getCode())){
+        }else if (tableCode.equals("/productComponent")){
             //产品组件
             for (ProductCptTypeEnum enums : ProductCptTypeEnum.values()) {
                 Map<String, Object> map = new HashMap<>();

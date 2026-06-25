@@ -9,7 +9,6 @@ public enum ToolEnum {
     LSAREA("/lsarea", "发射场区域"),
     LSKEYFACILITY("/lsKeyfacility", "发射场设施"),
     PRODUCT("/product", "产品"),
-    PRODUCTCOMPONENT("/productComponent", "产品组件"),
     LSEQUIPMENT("/lsEquipment", "设备"),
     TOOLFIXTRUE("/toolFixture", "工装"),
     TOOLEQUIPMENT("/toolEquipment", "工器具"),

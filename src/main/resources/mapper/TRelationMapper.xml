@@ -5,14 +5,12 @@
 <mapper namespace="com.jc.mapper.TRelationMapper">
 
     <resultMap id="BaseResultMap" type="com.jc.entity.TRelation">
-            <result property="relationid" column="RELATIONID" jdbcType="CHAR"/>
+            <id property="relationid" column="RELATIONID" jdbcType="CHAR"/>
             <result property="ourid" column="OURID" jdbcType="CHAR"/>
-            <result property="businesstype" column="BUSINESSTYPE" jdbcType="VARCHAR"/>
+            <result property="ourbstype" column="OURBSTYPE" jdbcType="VARCHAR"/>
             <result property="targetid" column="TARGETID" jdbcType="CHAR"/>
+            <result property="targetbstype" column="TARGETBSTYPE" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        RELATIONID,OURID,BUSINESSTYPE,
-        TARGETID
-    </sql>
+
 </mapper>

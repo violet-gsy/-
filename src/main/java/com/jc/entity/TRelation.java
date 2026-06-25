@@ -20,7 +20,7 @@ public class TRelation implements Serializable {
     /**
      * 关联ID
      */
-    @TableField(value = "RELATIONID")
+    @TableId(value = "RELATIONID",type = IdType.ASSIGN_UUID)
     @Schema(description = "关联ID")
     private String relationid;
 

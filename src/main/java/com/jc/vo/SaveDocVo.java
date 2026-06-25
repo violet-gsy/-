@@ -19,6 +19,9 @@ public class SaveDocVo implements Serializable {
     @Schema(description = "文档类型")
     private String type;
 
+    @Schema(description = "名称")
+    private String name;
+
     @Schema(description = "备注")
     private String remark;
 

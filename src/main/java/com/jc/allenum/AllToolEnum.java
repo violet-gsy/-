@@ -9,14 +9,13 @@ public enum AllToolEnum {
     LSAREA("/lsarea", "发射场区域"),
     LSKEYFACILITY("/lsKeyfacility", "发射场设施"),
     PRODUCT("/product", "产品"),
-    PRODUCTCOMPONENT("/productComponent", "产品组件"),
     LSEQUIPMENT("/lsEquipment", "设备"),
     TOOLFIXTRUE("/toolFixture", "工装"),
     TOOLEQUIPMENT("/toolEquipment", "工器具"),
     MAJOR("/major", "专业"),
     PERSONNEL("/personnel", "人员"),
     LAUNCHSITEFLUID("/launchSiteFluid", "发射场流体介质"),
-    DOCUMENT("/document", "文档"),
+    DOCUMENT("/document", "多模态资源管理"),
     INTERFACE("/interface", "接口关系"),
     ;
 
