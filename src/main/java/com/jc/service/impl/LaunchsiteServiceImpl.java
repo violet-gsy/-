@@ -1,10 +1,13 @@
 package com.jc.service.impl;
 
+
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jc.entity.Launchsite;
 import com.jc.service.LaunchsiteService;
 import com.jc.mapper.LaunchsiteMapper;
 import org.springframework.stereotype.Service;
+
 
 /**
 * @author Lenovo
@@ -12,8 +15,8 @@ import org.springframework.stereotype.Service;
 * @createDate 2026-05-12 17:34:15
 */
 @Service
-public class LaunchsiteServiceImpl extends BaseServiceImpl<LaunchsiteMapper, Launchsite>
-    implements LaunchsiteService{
+public class LaunchsiteServiceImpl extends ServiceImpl<LaunchsiteMapper, Launchsite>
+        implements LaunchsiteService, IService<Launchsite> {
 
 }
 

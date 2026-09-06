@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="DmJdbcDriver8">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/src/main/resources/lib/DmJdbcDriver8.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

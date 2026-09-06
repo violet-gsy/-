@@ -11,10 +11,12 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         this.strictInsertFill(metaObject, "createtime", LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, "updatetime", LocalDateTime.class, LocalDateTime.now());
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
         // 创建时间一般不更新
+        this.strictUpdateFill(metaObject, "updatetime", LocalDateTime.class, LocalDateTime.now());
     }
 }

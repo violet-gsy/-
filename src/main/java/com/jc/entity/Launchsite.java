@@ -73,6 +73,14 @@ public class Launchsite implements Serializable {
     @Schema(description = "所属分系统")
     private String subsystem;
 
+    @TableField(value = "CODE")
+    @Schema(description = "编目编码")
+    private String code;
+
+    @TableField(value = "MAJORID")
+    @Schema(description = "专业id")
+    private String majorid;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

@@ -2,6 +2,10 @@ package com.jc.mapper;
 
 import com.jc.entity.Launchsite;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
 * @author Lenovo
@@ -10,6 +14,14 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.jc.entity.Launchsite
 */
 public interface LaunchsiteMapper extends BaseMapper<Launchsite> {
+
+    // 查询所有发射场【本级编码】01、02
+    @Select("SELECT code FROM T_LAUNCHSITE WHERE code IS NOT NULL AND code != ''")
+    List<String> selectAllCode();
+
+    // 根据ID查本级编码
+    @Select("SELECT code FROM T_LAUNCHSITE WHERE id = #{treeId}")
+    String selectCodeByTreeId(@Param("treeId") String treeId);
 
 }
 

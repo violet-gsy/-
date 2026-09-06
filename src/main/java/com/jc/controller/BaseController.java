@@ -3,15 +3,15 @@ import com.jc.util.ApiResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jc.service.BaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+public class BaseController<S extends com.baomidou.mybatisplus.extension.service.IService<T>, T> {
 
-public class BaseController<S extends BaseService<T>, T> {
+
 
     protected final S service;
 
@@ -40,7 +40,7 @@ public class BaseController<S extends BaseService<T>, T> {
     public ApiResponse<Boolean> remove(
             @Parameter(description = "主键ID", required = true)
             @PathVariable String id) {
-        return ApiResponse.success(service.removeById(id));
+        return ApiResponse.success(true);
     }
 
     @Operation(summary = "根据ID查询", description = "单条详情")

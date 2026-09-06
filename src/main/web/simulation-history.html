@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仿真记录与多方案对比</title>
+    <script src="lib/axios.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary: #2563eb;
+            --primary-soft: #eff6ff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --surface: #ffffff;
+            --page: #f1f5f9;
+            --success: #15803d;
+            --warning: #b45309;
+            --danger: #dc2626;
+            --series1: #2563eb;
+            --series2: #16a34a;
+            --series3: #d97706;
+            --series4: #7c3aed;
+            --series5: #0891b2;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: var(--page);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 18px;
+        }
+        button, input { font: inherit; }
+        .app { max-width: 1680px; margin: 0 auto; }
+        .header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .header h1 { font-size: 20px; font-weight: 700; }
+        .header p { color: var(--muted); font-size: 12px; margin-top: 4px; }
+        .header-actions, .tab-bar, .compare-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #334155;
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover { background: #f8fafc; border-color: #94a3b8; }
+        .btn.primary { color: #fff; background: var(--primary); border-color: var(--primary); }
+        .btn.primary:hover { background: #1d4ed8; }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+        .tab-bar {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 14px;
+        }
+        .tab-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 18px;
+            border-radius: 6px;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .tab-btn.active { background: var(--primary-soft); color: var(--primary); }
+        .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; }
+        .sidebar, .content-card, .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .sidebar { overflow: hidden; align-self: start; position: sticky; top: 12px; }
+        .sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); }
+        .sidebar-head-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+        .sidebar-head strong { font-size: 13px; }
+        .count { color: var(--muted); font-size: 11px; }
+        .search {
+            width: 100%; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 8px 10px; font-size: 12px; outline: none;
+        }
+        .search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+        .run-list { max-height: calc(100vh - 245px); overflow-y: auto; padding: 8px; }
+        .run-item {
+            display: grid; grid-template-columns: 24px 1fr; gap: 7px;
+            border: 1px solid #edf2f7; border-radius: 8px; padding: 9px;
+            margin-bottom: 7px; background: #fbfdff; cursor: pointer;
+        }
+        .run-item:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .run-item.active { border-color: var(--primary); background: var(--primary-soft); }
+        .run-check { width: 15px; height: 15px; margin-top: 3px; accent-color: var(--primary); }
+        .run-title { display: flex; justify-content: space-between; gap: 7px; align-items: baseline; }
+        .run-title strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .run-order { font-size: 10px; color: #94a3b8; white-space: nowrap; }
+        .run-meta { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+        .run-result { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .mini-badge { font-size: 10px; padding: 1px 7px; border-radius: 10px; background: #f1f5f9; color: #475569; }
+        .mini-badge.duration { background: #dbeafe; color: #1d4ed8; }
+        .mini-badge.warn { background: #fff7ed; color: var(--warning); }
+        .main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+        .content-card { overflow: hidden; }
+        .section-head {
+            padding: 13px 16px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+            background: #fbfdff;
+        }
+        .section-head h2 { font-size: 15px; }
+        .section-head .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+        .section-body { padding: 16px; }
+        .metrics { display: grid; grid-template-columns: repeat(6, minmax(110px,1fr)); gap: 10px; }
+        .metric { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: #fff; }
+        .metric .label { color: var(--muted); font-size: 11px; }
+        .metric .value { font-size: 20px; font-weight: 750; margin-top: 6px; letter-spacing: -.3px; }
+        .metric .unit { font-size: 11px; color: var(--muted); margin-left: 3px; font-weight: 500; }
+        .notice { border: 1px solid #fde68a; background: #fffbeb; color: #92400e; border-radius: 7px; padding: 9px 11px; font-size: 11px; line-height: 1.6; margin-top: 10px; }
+        .chart-card { border: 1px solid var(--border); border-radius: 8px; margin-top: 12px; overflow: hidden; }
+        .chart-title { padding: 10px 12px; font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        .chart-body { padding: 12px; overflow-x: auto; }
+        .hist-wrap { min-width: 520px; }
+        .hist-plot { height: 245px; display: flex; align-items: flex-end; gap: 8px; border-left: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; padding: 8px 12px 0; position: relative; }
+        .day-group { min-width: 40px; flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 5px; }
+        .bars { height: 205px; width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; }
+        .bar { width: 16px; min-height: 1px; border-radius: 3px 3px 0 0; position: relative; cursor: default; }
+        .bar.s0 { background: var(--series1); } .bar.s1 { background: var(--series2); }
+        .bar.s2 { background: var(--series3); } .bar.s3 { background: var(--series4); }
+        .bar.s4 { background: var(--series5); }
+        .bar:hover::after {
+            content: attr(data-tip); position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%);
+            white-space: nowrap; padding: 4px 7px; border-radius: 4px; background: #0f172a; color: #fff; font-size: 10px; z-index: 5;
+        }
+        .day-label { color: var(--muted); font-size: 9px; white-space: nowrap; }
+        .legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 7px 2px 0; color: #475569; font-size: 10px; }
+        .legend i { width: 9px; height: 9px; display: inline-block; border-radius: 2px; margin-right: 4px; }
+        .legend i.s0 { background: var(--series1); } .legend i.s1 { background: var(--series2); }
+        .legend i.s2 { background: var(--series3); } .legend i.s3 { background: var(--series4); }
+        .legend i.s4 { background: var(--series5); }
+        .hbars { display: flex; flex-direction: column; gap: 9px; }
+        .hbar-row { display: grid; grid-template-columns: minmax(95px, 180px) 1fr 74px; gap: 8px; align-items: center; font-size: 11px; }
+        .hbar-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hbar-track { height: 18px; border-radius: 4px; background: #f1f5f9; overflow: hidden; }
+        .hbar-fill { height: 100%; background: var(--series1); border-radius: 4px; min-width: 1px; }
+        .hbar-value { text-align: right; font-weight: 700; }
+        .table-scroll { overflow: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 900px; }
+        th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #475569; padding: 8px 10px; text-align: left; border-bottom: 1px solid #cbd5e1; white-space: nowrap; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
+        tbody tr:hover td { background: #fbfdff; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .status { display: inline-block; border-radius: 10px; padding: 1px 8px; font-size: 10px; background: #f1f5f9; color: #475569; }
+        .status.done { background: #dcfce7; color: var(--success); }
+        .compare-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--border); background: #fbfdff; }
+        .compare-hint { color: var(--muted); font-size: 11px; margin-right: auto; }
+        .scheme-chip { display: inline-flex; align-items: center; padding: 4px 9px; border: 1px solid #cbd5e1; border-radius: 14px; font-size: 10px; background: #fff; }
+        .compare-table {
+            table-layout: fixed;
+            width: 100%;
+            min-width: 900px;
+        }
+        .compare-table th,
+        .compare-table td {
+            vertical-align: middle;
+        }
+        .compare-table th:first-child,
+        .compare-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 1;
+            text-align: left;
+        }
+        .compare-table th:first-child {
+            background: #f8fafc;
+            z-index: 3;
+        }
+        /* 方案列：表头、指标值、参数值统一居中，避免表头左对齐而数字右对齐造成视觉错位 */
+        .compare-table th:not(:first-child),
+        .compare-table td:not(:first-child),
+        .compare-table td.num:not(:first-child) {
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .param-cell {
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.55;
+        }
+        .empty { text-align: center; padding: 70px 20px; color: #94a3b8; }
+        .empty strong { display: block; color: #475569; font-size: 14px; margin-bottom: 5px; }
+        #toast { position: fixed; right: 24px; bottom: 24px; z-index: 999; display: flex; flex-direction: column; gap: 7px; }
+        .toast { color: #fff; background: #0f172a; border-radius: 6px; padding: 9px 14px; font-size: 11px; box-shadow: 0 5px 18px rgba(0,0,0,.16); }
+        .toast.error { background: var(--danger); }
+        @media (max-width: 1200px) { .metrics { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 860px) {
+            body { padding: 10px; }
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .run-list { max-height: 330px; }
+            .metrics { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 480px) { .metrics { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <div>
+            <h1>仿真记录与多方案对比</h1>
+            <p id="headerSub">读取每次仿真的输入快照、总工期与每日平均资源使用量</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn primary" id="refreshBtn" type="button">刷新</button>
+            <button class="btn" id="exportBtn" type="button" disabled>导出当前 CSV</button>
+            <button class="btn" id="backBtn" type="button">返回流程管理</button>
+        </div>
+    </header>
+
+    <nav class="tab-bar">
+        <button class="tab-btn active" id="detailTab" type="button">单次仿真记录</button>
+        <button class="tab-btn" id="compareTab" type="button">多方案对比</button>
+    </nav>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-head">
+                <div class="sidebar-head-row">
+                    <strong>仿真方案</strong>
+                    <span class="count" id="runCount">0 个</span>
+                </div>
+                <input id="searchInput" class="search" type="search" placeholder="搜索方案名称或运行次数">
+            </div>
+            <div id="runList" class="run-list">
+                <div class="empty">正在读取...</div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <section id="detailView" class="content-card">
+                <div id="detailContent" class="empty">
+                    <strong>请选择左侧仿真记录</strong>
+                    查看本次方案参数、工期和资源使用情况
+                </div>
+            </section>
+
+            <section id="compareView" class="content-card" style="display:none;">
+                <div class="compare-toolbar">
+                    <div class="compare-actions">
+                        <span class="compare-hint">勾选左侧 2～5 个方案进行比较</span>
+                        <button class="btn" id="latest3Btn" type="button">选择最近3个</button>
+                        <button class="btn" id="clearCompareBtn" type="button">清空勾选</button>
+                    </div>
+                </div>
+                <div id="compareContent" class="empty">
+                    <strong>尚未选择对比方案</strong>
+                    请在左侧勾选至少两个仿真方案
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<div id="toast"></div>
+
+<script>
+    (function () {
+        'use strict';
+
+        const API_BASE = 'http://localhost:8001';
+        const SUMMARY_ID = '__SIM_SUMMARY__';
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterDiagramId = urlParams.get('diagramId') || '';
+        const filterDiagramName = urlParams.get('name') || '';
+        const initialMode = urlParams.get('mode') === 'compare' ? 'compare' : 'detail';
+
+        let allRuns = [];
+        let selectedRunId = null;
+        let compareIds = new Set();
+        let activeMode = 'detail';
+
+        const els = {
+            runList: document.getElementById('runList'),
+            runCount: document.getElementById('runCount'),
+            searchInput: document.getElementById('searchInput'),
+            detailTab: document.getElementById('detailTab'),
+            compareTab: document.getElementById('compareTab'),
+            detailView: document.getElementById('detailView'),
+            compareView: document.getElementById('compareView'),
+            detailContent: document.getElementById('detailContent'),
+            compareContent: document.getElementById('compareContent'),
+            refreshBtn: document.getElementById('refreshBtn'),
+            exportBtn: document.getElementById('exportBtn'),
+            latest3Btn: document.getElementById('latest3Btn'),
+            clearCompareBtn: document.getElementById('clearCompareBtn'),
+            backBtn: document.getElementById('backBtn'),
+            headerSub: document.getElementById('headerSub')
+        };
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[ch]);
+        }
+
+        function toast(message, type) {
+            const node = document.createElement('div');
+            node.className = 'toast' + (type === 'error' ? ' error' : '');
+            node.textContent = message;
+            document.getElementById('toast').appendChild(node);
+            setTimeout(() => node.remove(), 3000);
+        }
+
+        function finite(value, fallback = null) {
+            if (value === null || value === undefined || value === '') return fallback;
+            const n = Number(value);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function round2(value) {
+            const n = finite(value, 0);
+            return Math.round(n * 100) / 100;
+        }
+
+        function formatNumber(value, digits = 2) {
+            const n = finite(value, null);
+            if (n === null) return '—';
+            return n.toFixed(digits).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+        }
+
+        function formatDate(value) {
+            if (!value) return '—';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return String(value);
+            return d.toLocaleString('zh-CN', { hour12: false });
+        }
+
+        function parseMaybeJson(value) {
+            if (typeof value !== 'string') return value;
+            const text = value.trim();
+            if (!text || !((text[0] === '{' && text[text.length - 1] === '}') ||
+                (text[0] === '[' && text[text.length - 1] === ']'))) return value;
+            try { return JSON.parse(text); } catch (e) { return value; }
+        }
+
+        function collectBags(value, out = [], depth = 0, seen = new Set()) {
+            if (depth > 5 || value === null || value === undefined) return out;
+            const parsed = parseMaybeJson(value);
+            if (parsed !== value) return collectBags(parsed, out, depth + 1, seen);
+            if (typeof value !== 'object') return out;
+            if (seen.has(value)) return out;
+            seen.add(value);
+
+            if (!Array.isArray(value)) out.push(value);
+            const values = Array.isArray(value) ? value : Object.values(value);
+            values.forEach(v => {
+                if (v && (typeof v === 'object' || typeof v === 'string')) {
+                    collectBags(v, out, depth + 1, seen);
+                }
+            });
+            return out;
+        }
+
+        function pick(bags, keys) {
+            for (const key of keys) {
+                for (const bag of bags) {
+                    if (Object.prototype.hasOwnProperty.call(bag, key)) {
+                        const value = bag[key];
+                        if (value !== undefined && value !== null && value !== '') return value;
+                    }
+                }
+            }
+            return undefined;
+        }
+
+        function pickNumber(bags, keys, fallback = null) {
+            return finite(pick(bags, keys), fallback);
+        }
+
+        function pickArray(bags, keys) {
+            const value = pick(bags, keys);
+            const parsed = parseMaybeJson(value);
+            return Array.isArray(parsed) ? parsed : [];
+        }
+
+        function getNodeName(node) {
+            return node?.nodeName || node?.name || node?.nodeId || '';
+        }
+
+        function isSummaryNode(node) {
+            if (!node) return false;
+            if (node.nodeId === SUMMARY_ID || node.nodeName === SUMMARY_ID || node.name === SUMMARY_ID) return true;
+            const bags = collectBags(node);
+            return String(pick(bags, ['recordType', 'type']) || '').toUpperCase() === 'SIMULATION_SUMMARY';
+        }
+
+        function extractSchemeFromRemark(remark) {
+            const text = String(remark || '');
+            const m = text.match(/仿真方案[：:]\s*(.+)$/);
+            return m ? m[1].trim() : '';
+        }
+
+
+        function parseSummaryDescription(description) {
+            const result = {};
+            String(description || '').split(';').forEach(part => {
+                const pos = part.indexOf('=');
+                if (pos <= 0) return;
+                const key = part.slice(0, pos).trim();
+                const value = part.slice(pos + 1).trim();
+                result[key] = value;
+            });
+            if (result.scheme) {
+                try { result.scheme = decodeURIComponent(result.scheme); } catch (ignored) {}
+            }
+            if (result.daily) {
+                result.dailyResources = result.daily.split('|').map(item => {
+                    const [dayText, valueText] = item.split(':');
+                    return {
+                        day: finite(dayText, 0),
+                        averageResources: finite(valueText, 0),
+                        resourcePersonDays: finite(valueText, 0)
+                    };
+                }).filter(item => item.day > 0);
+            }
+            return result;
+        }
+
+        function extractTaskFromNode(node) {
+            if (!node || isSummaryNode(node)) return null;
+            const bags = collectBags(node);
+            const taskName = getNodeName(node) || String(pick(bags, ['taskName']) || '未命名');
+            const requiredPeople = pickNumber(bags, ['_requiredPeople', 'requiredPeople'], 0);
+            const duration = pickNumber(bags, ['_durationDays', 'durationDays', 'duration'], 0);
+            const readyTime = pickNumber(bags, ['_simReadyDay', 'simReadyDay', 'readyDay'], null);
+            const startTime = pickNumber(bags, ['_simStartDay', 'simStartDay', 'startDay'], null);
+            const finishTime = pickNumber(bags, ['_simFinishDay', 'simFinishDay', 'finishDay'], null);
+            let waitTime = pickNumber(bags, ['_simWaitDays', 'simWaitDays', 'waitDays'], null);
+            let totalTime = pickNumber(bags, ['_simTotalDays', 'simTotalDays', 'totalDays'], null);
+            if (waitTime === null && readyTime !== null && startTime !== null) waitTime = Math.max(0, startTime - readyTime);
+            if (totalTime === null && readyTime !== null && finishTime !== null) totalTime = Math.max(0, finishTime - readyTime);
+            return {
+                nodeId: node.nodeId || '',
+                taskName,
+                requiredPeople: requiredPeople || 0,
+                duration: duration || 0,
+                readyTime,
+                startTime,
+                finishTime,
+                waitTime,
+                totalTime,
+                status: node.executionStatus || String(pick(bags, ['status', 'executionStatus']) || ''),
+                actualReadyTime: node.readyTime || '',
+                actualStartTime: node.startTime || '',
+                actualFinishTime: node.finishTime || ''
+            };
+        }
+
+        function buildDailyResources(tasks, totalDuration) {
+            const duration = finite(totalDuration, 0);
+            if (duration <= 0) return [];
+            const dayCount = Math.max(1, Math.ceil(duration - 1e-9));
+            const result = [];
+            for (let day = 1; day <= dayCount; day++) {
+                const ds = day - 1;
+                const de = day;
+                let personDays = 0;
+                tasks.forEach(task => {
+                    const start = finite(task.startTime, null);
+                    const finish = finite(task.finishTime, null);
+                    const people = finite(task.requiredPeople, 0);
+                    if (start === null || finish === null || finish <= start || people <= 0) return;
+                    const overlap = Math.max(0, Math.min(finish, de) - Math.max(start, ds));
+                    personDays += people * overlap;
+                });
+                result.push({
+                    day,
+                    dayStart: ds,
+                    dayEnd: Math.min(de, duration),
+                    averageResources: round2(personDays),
+                    resourcePersonDays: round2(personDays)
+                });
+            }
+            return result;
+        }
+
+        function deriveSummary(run, nodes) {
+            const summaryNode = nodes.find(isSummaryNode);
+            const summaryBags = summaryNode ? collectBags(summaryNode) : [];
+            const runBags = collectBags(run);
+            const summaryDescription = summaryNode
+                ? parseSummaryDescription(summaryNode.description || pick(summaryBags, ['description']) || '')
+                : {};
+
+            let tasks = pickArray(summaryBags, ['tasksJson', 'tasks']);
+            let planSnapshot = pickArray(summaryBags, ['planSnapshotJson', 'planSnapshot']);
+            if (!tasks.length) tasks = nodes.map(extractTaskFromNode).filter(Boolean);
+            if (!planSnapshot.length) {
+                planSnapshot = tasks.map(t => ({
+                    nodeId: t.nodeId || '', taskName: t.taskName,
+                    requiredPeople: finite(t.requiredPeople, 0), duration: finite(t.duration, 0)
+                }));
+            }
+
+            let totalDuration = pickNumber(summaryBags, ['totalDuration', 'simulationDuration'], null);
+            if (totalDuration === null) totalDuration = finite(summaryDescription.totalDuration, null);
+            if (totalDuration === null && summaryNode) {
+                const pseudoMs = finite(summaryNode.execDurationMs, null);
+                if (pseudoMs !== null) totalDuration = pseudoMs / 1000;
+            }
+            if (totalDuration === null) {
+                const finishes = tasks.map(t => finite(t.finishTime, null)).filter(v => v !== null);
+                totalDuration = finishes.length ? Math.max(...finishes) : null;
+            }
+
+            let dailyResources = pickArray(summaryBags, ['dailyResourcesJson', 'dailyResources']);
+            if (!dailyResources.length && Array.isArray(summaryDescription.dailyResources)) {
+                dailyResources = summaryDescription.dailyResources;
+            }
+            if (!dailyResources.length && totalDuration !== null) dailyResources = buildDailyResources(tasks, totalDuration);
+
+            let totalPersonDays = pickNumber(summaryBags, ['totalPersonDays'], null);
+            if (totalPersonDays === null) totalPersonDays = finite(summaryDescription.totalPersonDays, null);
+            if (totalPersonDays === null && tasks.length) {
+                totalPersonDays = tasks.reduce((sum, t) => {
+                    const start = finite(t.startTime, null);
+                    const finish = finite(t.finishTime, null);
+                    const duration = start !== null && finish !== null ? Math.max(0, finish - start) : finite(t.duration, 0);
+                    return sum + duration * finite(t.requiredPeople, 0);
+                }, 0);
+            }
+
+            let averageResourceUsage = pickNumber(summaryBags, ['averageResourceUsage'], null);
+            if (averageResourceUsage === null) averageResourceUsage = finite(summaryDescription.averageResourceUsage, null);
+            if (averageResourceUsage === null && totalDuration > 0 && totalPersonDays !== null) {
+                averageResourceUsage = totalPersonDays / totalDuration;
+            }
+            let peakDailyResourceUsage = pickNumber(summaryBags, ['peakDailyResourceUsage'], null);
+            if (peakDailyResourceUsage === null) peakDailyResourceUsage = finite(summaryDescription.peakDailyResourceUsage, null);
+            if (peakDailyResourceUsage === null && dailyResources.length) {
+                peakDailyResourceUsage = Math.max(...dailyResources.map(d => finite(d.averageResources, 0)));
+            }
+            let totalWaitTime = pickNumber(summaryBags, ['totalWaitTime'], null);
+            if (totalWaitTime === null) totalWaitTime = finite(summaryDescription.totalWaitTime, null);
+            if (totalWaitTime === null && tasks.length) {
+                totalWaitTime = tasks.reduce((sum, t) => sum + finite(t.waitTime, 0), 0);
+            }
+
+            let totalOperators = pickNumber(summaryBags, ['totalOperators'], null);
+            if (totalOperators === null && summaryNode) totalOperators = finite(summaryNode.requiredPeople, null);
+            if (totalOperators === null) totalOperators = pickNumber(runBags, ['totalOperators', 'GV_TOTAL_OPERATORS'], null);
+
+            const schemeName = String(
+                pick(summaryBags, ['schemeName']) ||
+                summaryDescription.scheme ||
+                pick(runBags, ['_schemeName', 'schemeName']) ||
+                extractSchemeFromRemark(run.remark) || ''
+            ).trim();
+
+            const hasTimeline = tasks.some(t => finite(t.startTime, null) !== null && finite(t.finishTime, null) !== null);
+            const isNewSummary = !!summaryNode;
+
+            return {
+                schemeName,
+                timeUnit: String(pick(summaryBags, ['timeUnit']) || 'day'),
+                totalOperators,
+                totalDuration,
+                completedNodes: pickNumber(summaryBags, ['completedNodes'], tasks.filter(t => t.finishTime !== null).length),
+                totalPersonDays,
+                averageResourceUsage,
+                peakDailyResourceUsage,
+                totalWaitTime,
+                waitingNodeCount: pickNumber(
+                    summaryBags,
+                    ['waitingNodeCount'],
+                    finite(summaryDescription.waitingNodeCount, tasks.filter(t => finite(t.waitTime, 0) > 1e-9).length)
+                ),
+                dayCount: dailyResources.length,
+                dailyResources,
+                tasks,
+                planSnapshot,
+                isNewSummary,
+                hasTimeline,
+                completeForCompare: totalDuration !== null && dailyResources.length > 0
+            };
+        }
+
+        async function fetchRuns() {
+            let url = `${API_BASE}/simulationRun/page?current=1&size=500`;
+            if (filterDiagramName) url += `&diagramName=${encodeURIComponent(filterDiagramName)}`;
+            const resp = await axios.get(url);
+            if (resp.data.code !== 200) throw new Error(resp.data.msg || '获取仿真列表失败');
+            return resp.data.data?.records || [];
+        }
+
+        async function fetchNodes(runId) {
+            const resp = await axios.get(`${API_BASE}/simulationNode/records/${encodeURIComponent(runId)}`);
+            if (resp.data.code !== 200) throw new Error(resp.data.msg || '获取节点数据失败');
+            return resp.data.data || [];
+        }
+
+        async function loadAll() {
+            els.refreshBtn.disabled = true;
+            els.runList.innerHTML = '<div class="empty">正在加载仿真记录...</div>';
+            try {
+                let runs = await fetchRuns();
+                if (filterDiagramId) runs = runs.filter(r => !r.diagramId || r.diagramId === filterDiagramId);
+                const enriched = [];
+                for (const run of runs) {
+                    const nodes = await fetchNodes(run.id);
+                    enriched.push({ ...run, nodes, summary: deriveSummary(run, nodes) });
+                }
+                enriched.sort((a, b) => new Date(a.createtime || a.startTime || 0) - new Date(b.createtime || b.startTime || 0));
+                allRuns = enriched;
+
+                if (filterDiagramName) {
+                    els.headerSub.textContent = `${filterDiagramName} · ${allRuns.length} 次仿真 · duration 单位为天`;
+                }
+                if (!selectedRunId || !allRuns.some(r => r.id === selectedRunId)) {
+                    selectedRunId = allRuns.length ? allRuns[allRuns.length - 1].id : null;
+                }
+
+                if (activeMode === 'compare' && compareIds.size === 0 && allRuns.length) {
+                    allRuns.slice(-Math.min(3, allRuns.length)).forEach(r => compareIds.add(r.id));
+                } else {
+                    compareIds = new Set([...compareIds].filter(id => allRuns.some(r => r.id === id)));
+                }
+
+                renderAll();
+                toast(`已加载 ${allRuns.length} 次仿真记录`);
+            } catch (error) {
+                console.error(error);
+                els.runList.innerHTML = `<div class="empty"><strong>加载失败</strong>${escapeHtml(error.message)}</div>`;
+                toast(error.message, 'error');
+            } finally {
+                els.refreshBtn.disabled = false;
+            }
+        }
+
+        function getRunOrder(run) {
+            const index = allRuns.findIndex(r => r.id === run.id);
+            return index >= 0 ? index + 1 : '?';
+        }
+
+        function displaySchemeName(run) {
+            return run.summary.schemeName || `第 ${getRunOrder(run)} 次运行`;
+        }
+
+        function filteredRuns() {
+            const keyword = els.searchInput.value.trim().toLowerCase();
+            if (!keyword) return allRuns;
+            return allRuns.filter(run => {
+                const text = `${displaySchemeName(run)} 第${getRunOrder(run)}次 ${run.diagramName || ''}`.toLowerCase();
+                return text.includes(keyword);
+            });
+        }
+
+        function renderRunList() {
+            const runs = filteredRuns();
+            els.runCount.textContent = `${runs.length} 个`;
+            if (!runs.length) {
+                els.runList.innerHTML = '<div class="empty"><strong>暂无记录</strong>请先运行一次仿真</div>';
+                return;
+            }
+            els.runList.innerHTML = runs.map(run => {
+                const s = run.summary;
+                const checked = compareIds.has(run.id) ? 'checked' : '';
+                const active = run.id === selectedRunId ? ' active' : '';
+                const duration = s.totalDuration === null ? '无工期' : `${formatNumber(s.totalDuration)}天`;
+                const warning = !s.completeForCompare ? '<span class="mini-badge warn">旧记录数据不足</span>' : '';
+                return `
+                <div class="run-item${active}" data-run-id="${escapeHtml(run.id)}">
+                    <input class="run-check" type="checkbox" data-check-id="${escapeHtml(run.id)}" ${checked} aria-label="选择 ${escapeHtml(displaySchemeName(run))} 进行对比">
+                    <div class="run-click" data-select-id="${escapeHtml(run.id)}">
+                        <div class="run-title">
+                            <strong title="${escapeHtml(displaySchemeName(run))}">${escapeHtml(displaySchemeName(run))}</strong>
+                            <span class="run-order">#${getRunOrder(run)}</span>
+                        </div>
+                        <div class="run-meta">${escapeHtml(formatDate(run.createtime || run.startTime))}</div>
+                        <div class="run-result"><span class="mini-badge duration">${duration}</span>${warning}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            els.runList.querySelectorAll('[data-select-id]').forEach(node => {
+                node.addEventListener('click', () => {
+                    selectedRunId = node.getAttribute('data-select-id');
+                    if (activeMode !== 'detail') setMode('detail');
+                    renderAll();
+                });
+            });
+            els.runList.querySelectorAll('[data-check-id]').forEach(box => {
+                box.addEventListener('click', event => event.stopPropagation());
+                box.addEventListener('change', () => toggleCompare(box.getAttribute('data-check-id'), box.checked));
+            });
+        }
+
+        function metric(label, value, unit) {
+            return `<div class="metric"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}<span class="unit">${escapeHtml(unit || '')}</span></div></div>`;
+        }
+
+        function renderHistogram(seriesList) {
+            const maxDay = Math.max(0, ...seriesList.map(s => s.data.length));
+            if (!maxDay) return '<div class="empty" style="padding:30px"><strong>暂无每日资源数据</strong></div>';
+            const maxValue = Math.max(1, ...seriesList.flatMap(s => s.data.map(d => finite(d.averageResources, 0))));
+            const minWidth = Math.max(520, maxDay * Math.max(46, seriesList.length * 22 + 18));
+            let groups = '';
+            for (let day = 1; day <= maxDay; day++) {
+                let bars = '';
+                seriesList.forEach((series, si) => {
+                    const item = series.data.find(d => Number(d.day) === day) || { averageResources: 0 };
+                    const value = finite(item.averageResources, 0);
+                    const height = Math.max(value > 0 ? 2 : 0, value / maxValue * 195);
+                    bars += `<div class="bar s${si % 5}" style="height:${height}px" data-tip="${escapeHtml(series.name)} · 第${day}天 · ${formatNumber(value)} 人"></div>`;
+                });
+                groups += `<div class="day-group"><div class="bars">${bars}</div><div class="day-label">第${day}天</div></div>`;
+            }
+            const legend = seriesList.map((s, i) => `<span><i class="s${i % 5}"></i>${escapeHtml(s.name)}</span>`).join('');
+            return `<div class="hist-wrap" style="min-width:${minWidth}px"><div class="hist-plot">${groups}</div><div class="legend">${legend}</div></div>`;
+        }
+
+        function renderDurationBars(runs) {
+            const max = Math.max(1, ...runs.map(r => finite(r.summary.totalDuration, 0)));
+            return `<div class="hbars">${runs.map(run => {
+                const value = finite(run.summary.totalDuration, 0);
+                return `<div class="hbar-row">
+                <div class="hbar-name" title="${escapeHtml(displaySchemeName(run))}">${escapeHtml(displaySchemeName(run))}</div>
+                <div class="hbar-track"><div class="hbar-fill" style="width:${Math.max(value > 0 ? 1 : 0, value / max * 100)}%"></div></div>
+                <div class="hbar-value">${formatNumber(value)} 天</div>
+            </div>`;
+            }).join('')}</div>`;
+        }
+
+        function renderNodeTable(run) {
+            const tasksByName = new Map((run.summary.tasks || []).map(t => [String(t.taskName || ''), t]));
+            const nodes = run.nodes.filter(n => !isSummaryNode(n));
+            if (!nodes.length) return '<div class="empty" style="padding:30px"><strong>暂无节点数据</strong></div>';
+            const rows = nodes.map((node, index) => {
+                const extracted = extractTaskFromNode(node) || {};
+                const task = tasksByName.get(getNodeName(node)) || extracted;
+                return `<tr>
+                <td>${index + 1}</td>
+                <td><strong>${escapeHtml(getNodeName(node) || '未命名')}</strong></td>
+                <td><span class="status ${node.executionStatus === 'done' ? 'done' : ''}">${escapeHtml(node.executionStatus || task.status || '—')}</span></td>
+                <td class="num">${formatNumber(task.requiredPeople, 0)}</td>
+                <td class="num">${formatNumber(task.duration)}</td>
+                <td class="num">${formatNumber(task.readyTime)}</td>
+                <td class="num">${formatNumber(task.startTime)}</td>
+                <td class="num">${formatNumber(task.finishTime)}</td>
+                <td class="num">${formatNumber(task.waitTime)}</td>
+                <td>${escapeHtml(formatDate(node.startTime || task.actualStartTime))}</td>
+                <td>${escapeHtml(formatDate(node.finishTime || task.actualFinishTime))}</td>
+            </tr>`;
+            }).join('');
+            return `<div class="table-scroll"><table>
+            <thead><tr>
+                <th>#</th><th>节点名称</th><th>状态</th><th class="num">资源</th><th class="num">duration(天)</th>
+                <th class="num">ready(天)</th><th class="num">start(天)</th><th class="num">finish(天)</th><th class="num">等待(天)</th>
+                <th>实际开始时间</th><th>实际完成时间</th>
+            </tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+
+        function renderDetail() {
+            const run = allRuns.find(r => r.id === selectedRunId);
+            if (!run) {
+                els.detailContent.className = 'empty';
+                els.detailContent.innerHTML = '<strong>请选择左侧仿真记录</strong>';
+                els.exportBtn.disabled = true;
+                return;
+            }
+            els.exportBtn.disabled = false;
+            const s = run.summary;
+            const notice = s.isNewSummary ? '' : `<div class="notice">这是旧仿真记录，没有新的 <code>${SUMMARY_ID}</code> 汇总记录。页面已尽量从节点历史数据重建；缺少仿真天数时间线的指标不会猜测。</div>`;
+            els.detailContent.className = '';
+            els.detailContent.innerHTML = `
+            <div class="section-head">
+                <div><h2>${escapeHtml(displaySchemeName(run))}</h2><div class="sub">第 ${getRunOrder(run)} 次运行 · ${escapeHtml(formatDate(run.createtime || run.startTime))} · ${escapeHtml(run.diagramName || '')}</div></div>
+            </div>
+            <div class="section-body">
+                <div class="metrics">
+                    ${metric('总工期', formatNumber(s.totalDuration), '天')}
+                    ${metric('资源池总量', formatNumber(s.totalOperators, 0), '人')}
+                    ${metric('平均资源使用', formatNumber(s.averageResourceUsage), '人')}
+                    ${metric('单日峰值资源', formatNumber(s.peakDailyResourceUsage), '人')}
+                    ${metric('总资源工作量', formatNumber(s.totalPersonDays), '人·天')}
+                    ${metric('总等待时间', formatNumber(s.totalWaitTime), '天')}
+                </div>
+                ${notice}
+                <div class="chart-card">
+                    <div class="chart-title">每日平均资源使用数量（资源直方图）</div>
+                    <div class="chart-body">${renderHistogram([{ name: displaySchemeName(run), data: s.dailyResources || [] }])}</div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">节点输入参数与仿真时间线</div>
+                    ${renderNodeTable(run)}
+                </div>
+            </div>`;
+        }
+
+        function selectedCompareRuns() {
+            return allRuns.filter(r => compareIds.has(r.id)).slice(-5);
+        }
+
+        function buildCompareColGroup(runCount) {
+            /*
+             * 第一列固定占 32%，其余 68% 在所有方案之间平均分配。
+             * 核心指标表、参数差异表共用同一套比例，因此纵向看起来完全对齐。
+             */
+            const firstWidth = 32;
+            const schemeWidth = runCount > 0 ? (100 - firstWidth) / runCount : 68;
+
+            return `<colgroup>
+            <col style="width:${firstWidth}%">
+            ${Array.from({ length: runCount }, () =>
+                `<col style="width:${schemeWidth}%">`
+            ).join('')}
+        </colgroup>`;
+        }
+
+        function renderCompareMetricsTable(runs) {
+            const metrics = [
+                ['总工期(天)', r => r.summary.totalDuration],
+                ['资源池总量(人)', r => r.summary.totalOperators],
+                ['平均资源使用(人)', r => r.summary.averageResourceUsage],
+                ['单日峰值资源(人)', r => r.summary.peakDailyResourceUsage],
+                ['总资源工作量(人·天)', r => r.summary.totalPersonDays],
+                ['总等待时间(天)', r => r.summary.totalWaitTime],
+                ['等待节点数', r => r.summary.waitingNodeCount]
+            ];
+            return `<div class="table-scroll"><table class="compare-table">
+            ${buildCompareColGroup(runs.length)}
+            <thead>
+                <tr>
+                    <th>指标</th>
+                    ${runs.map(r => `<th>${escapeHtml(displaySchemeName(r))}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${metrics.map(([name, getter]) => `
+                    <tr>
+                        <td><strong>${name}</strong></td>
+                        ${runs.map(r => `<td>${formatNumber(getter(r))}</td>`).join('')}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table></div>`;
+        }
+
+        function renderParamCompare(runs) {
+            const names = new Set();
+            runs.forEach(run => (run.summary.planSnapshot || run.summary.tasks || []).forEach(t => names.add(String(t.taskName || ''))));
+            const taskNames = [...names].filter(Boolean);
+            if (!taskNames.length) return '<div class="empty" style="padding:30px"><strong>没有可对比的 ResourceTask 参数</strong></div>';
+            const maps = runs.map(run => new Map((run.summary.planSnapshot || run.summary.tasks || []).map(t => [String(t.taskName || ''), t])));
+            return `<div class="table-scroll"><table class="compare-table">
+            ${buildCompareColGroup(runs.length)}
+            <thead>
+                <tr>
+                    <th>任务</th>
+                    ${runs.map(r => `<th>${escapeHtml(displaySchemeName(r))}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${taskNames.map(name => `
+                    <tr>
+                        <td><strong>${escapeHtml(name)}</strong></td>
+                        ${maps.map(map => {
+                const t = map.get(name);
+                return `<td class="param-cell">${
+                    t
+                        ? `duration=${formatNumber(t.duration)} 天<br>资源=${formatNumber(t.requiredPeople, 0)}`
+                        : '—'
+                }</td>`;
+            }).join('')}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table></div>`;
+        }
+
+        function renderCompare() {
+            const runs = selectedCompareRuns();
+            if (runs.length < 2) {
+                els.compareContent.className = 'empty';
+                els.compareContent.innerHTML = '<strong>请至少勾选两个方案</strong>左侧复选框用于多方案对比，最多显示 5 个方案';
+                return;
+            }
+            const complete = runs.filter(r => r.summary.completeForCompare);
+            const incomplete = runs.filter(r => !r.summary.completeForCompare);
+            const warning = incomplete.length ? `<div class="notice">${escapeHtml(incomplete.map(displaySchemeName).join('、'))} 缺少完整仿真天数时间线，因此部分资源直方图/工期指标可能为空。新运行的方案会自动保存完整汇总。</div>` : '';
+            els.compareContent.className = '';
+            els.compareContent.innerHTML = `
+            <div class="section-head">
+                <div><h2>已选择 ${runs.length} 个方案</h2><div class="sub">对比 duration（天）、requiredPeople（资源）及仿真结果</div></div>
+                <div>${runs.map(r => `<span class="scheme-chip">${escapeHtml(displaySchemeName(r))}</span>`).join(' ')}</div>
+            </div>
+            <div class="section-body">
+                ${warning}
+                <div class="chart-card"><div class="chart-title">核心指标对比</div>${renderCompareMetricsTable(runs)}</div>
+                <div class="chart-card"><div class="chart-title">总工期对比</div><div class="chart-body">${renderDurationBars(runs)}</div></div>
+                <div class="chart-card"><div class="chart-title">每日平均资源使用量对比</div><div class="chart-body">${renderHistogram(complete.map(r => ({ name: displaySchemeName(r), data: r.summary.dailyResources || [] })))}</div></div>
+                <div class="chart-card"><div class="chart-title">各节点输入参数差异</div>${renderParamCompare(runs)}</div>
+            </div>`;
+        }
+
+        function toggleCompare(runId, checked) {
+            if (checked) {
+                if (compareIds.size >= 5 && !compareIds.has(runId)) {
+                    toast('最多同时对比 5 个方案', 'error');
+                    renderRunList();
+                    return;
+                }
+                compareIds.add(runId);
+            } else {
+                compareIds.delete(runId);
+            }
+            if (activeMode === 'compare') renderCompare();
+            renderRunList();
+        }
+
+        function setMode(mode) {
+            activeMode = mode;
+            const compare = mode === 'compare';
+            els.detailTab.classList.toggle('active', !compare);
+            els.compareTab.classList.toggle('active', compare);
+            els.detailView.style.display = compare ? 'none' : '';
+            els.compareView.style.display = compare ? '' : 'none';
+            if (compare) renderCompare(); else renderDetail();
+        }
+
+        function renderAll() {
+            renderRunList();
+            if (activeMode === 'compare') renderCompare(); else renderDetail();
+        }
+
+        function chooseLatest3() {
+            compareIds.clear();
+            allRuns.slice(-Math.min(3, allRuns.length)).forEach(r => compareIds.add(r.id));
+            setMode('compare');
+            renderRunList();
+        }
+
+        function clearCompare() {
+            compareIds.clear();
+            renderAll();
+        }
+
+        function exportCurrentCsv() {
+            const run = allRuns.find(r => r.id === selectedRunId);
+            if (!run) return;
+            const taskMap = new Map((run.summary.tasks || []).map(t => [String(t.taskName || ''), t]));
+            const nodes = run.nodes.filter(n => !isSummaryNode(n));
+            const headers = ['序号','方案','节点名称','状态','资源数量','duration(天)','ready(天)','start(天)','finish(天)','等待(天)','实际开始时间','实际完成时间'];
+            const rows = nodes.map((node, i) => {
+                const task = taskMap.get(getNodeName(node)) || extractTaskFromNode(node) || {};
+                return [i + 1, displaySchemeName(run), getNodeName(node), node.executionStatus || task.status || '', finite(task.requiredPeople,0), finite(task.duration,0), task.readyTime ?? '', task.startTime ?? '', task.finishTime ?? '', task.waitTime ?? '', node.startTime || '', node.finishTime || ''];
+            });
+            const csv = '\uFEFF' + [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${displaySchemeName(run).replace(/[\\/:*?"<>|]/g, '_')}_仿真记录.csv`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        els.refreshBtn.addEventListener('click', loadAll);
+        els.searchInput.addEventListener('input', renderRunList);
+        els.detailTab.addEventListener('click', () => setMode('detail'));
+        els.compareTab.addEventListener('click', () => setMode('compare'));
+        els.latest3Btn.addEventListener('click', chooseLatest3);
+        els.clearCompareBtn.addEventListener('click', clearCompare);
+        els.exportBtn.addEventListener('click', exportCurrentCsv);
+        els.backBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+        activeMode = initialMode;
+        setMode(activeMode);
+        loadAll();
+    })();
+</script>
+</body>
+</html>

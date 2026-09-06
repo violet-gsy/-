@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流程仿真管理</title>
+    <script src="lib/axios.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <!-- 头部 -->
+    <div class="page-header">
+        <div>
+            <h1>📋 流程仿真管理</h1>
+            <p>管理当前 MagicDraw 项目中的所有 Activity Diagram</p>
+        </div>
+        <div class="header-actions">
+            <button class="sync-btn" id="syncAllBtn" onclick="window.syncAllToDatabase()">
+                💾 同步所有到数据库
+            </button>
+            <button class="refresh-btn" onclick="window.refreshFromMagicDraw()">
+                🔄 从 MagicDraw 刷新
+            </button>
+        </div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索图名称" onkeyup="window.onSearchKeyup(event)">
+        <button class="search-btn" onclick="window.searchFlows()">🔍 搜索</button>
+        <button class="reset-btn" onclick="window.resetSearch()">重置</button>
+        <button class="debug-toggle" onclick="window.toggleDebug()">🐛 调试</button>
+    </div>
+
+    <!-- 统计信息 -->
+    <div class="stats" id="statsInfo">
+        共 <span id="totalCount">0</span> 条 Activity Diagram
+        <span class="sync-status" id="syncStatus">未同步</span>
+    </div>
+
+    <!-- 表格 -->
+    <div class="flow-table">
+        <table>
+            <thead>
+            <tr>
+                <th style="width:60px;text-align:center;">编号</th>
+                <th class="col-diagram">图名称 / 图类型</th>
+                <th class="col-launch-mode">测发模式</th>
+                <th class="col-status">同步状态</th>
+                <th class="col-actions">操作</th>
+            </tr>
+            </thead>
+            <tbody id="flowTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination" id="pagination"></div>
+
+    <!-- 调试信息 -->
+    <div class="debug-info" id="debugInfo">
+        <div id="debugContent">等待调试信息...</div>
+    </div>
+</div>
+
+<!-- 加载遮罩 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <span id="loadingText">正在同步数据...</span>
+    </div>
+</div>
+
+<!-- 列表页专用 JS -->
+<script type="module" src="js/index.js"></script>
+</body>
+</html>

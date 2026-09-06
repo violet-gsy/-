@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流程仿真管理</title>
+  <script src="lib/axios.min.js">
+  </script>
+  <style>
+    /* ===== 全局基础色 ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef0f2;
+      min-height: 100vh;
+      padding: 24px;
+      color: #2d3748;
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    /* ===== 头部 ===== */
+    .page-header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .page-header p {
+      color: #718096;
+      font-size: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions button {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      background: #edf2f7;
+      color: #2d3748;
+    }
+
+    .header-actions button:hover {
+      background: #e2e8f0;
+    }
+
+    .header-actions .sync-btn {
+      background: #48bb78;
+      color: #fff;
+    }
+    .header-actions .sync-btn:hover {
+      background: #38a169;
+    }
+
+    .header-actions .refresh-btn {
+      background: #5a6b9c;
+      color: #fff;
+    }
+    .header-actions .refresh-btn:hover {
+      background: #4a5a8a;
+    }
+
+    .header-actions .mode-manage-btn {
+      background: #8b7a9e;
+      color: #fff;
+    }
+    .header-actions .mode-manage-btn:hover {
+      background: #7a6a8c;
+    }
+
+    .header-actions .sync-btn:disabled,
+    .header-actions .refresh-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ===== 搜索栏 ===== */
+    .search-bar {
+      background: #fff;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      border: 1px solid #e2e8f0;
+    }
+
+    .search-input,
+    .mode-filter-select {
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #f7fafc;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      color: #2d3748;
+    }
+
+    .search-input:focus,
+    .mode-filter-select:focus {
+      border-color: #8b9bb5;
+      background: #fff;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .mode-filter-select {
+      min-width: 150px;
+      cursor: pointer;
+    }
+
+    .search-btn,
+    .reset-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .search-btn {
+      background: #8b9bb5;
+      color: #fff;
+    }
+    .search-btn:hover {
+      background: #7a8aa4;
+    }
+
+    .reset-btn {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+    .reset-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .debug-toggle {
+      background: none;
+      border: 1px solid #e2e8f0;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #718096;
+      background: #f7fafc;
+    }
+    .debug-toggle:hover {
+      background: #edf2f7;
+    }
+
+    /* ===== 统计 ===== */
+    .stats {
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #718096;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .stats .sync-status {
+      color: #5a6b9c;
+      font-weight: 500;
+    }
+
+    .stats .sync-status.success {
+      color: #48bb78;
+    }
+
+    .stats .sync-status.error {
+      color: #e53e3e;
+    }
+
+    .stats .filter-hint {
+      background: #edf2f7;
+      color: #4a5568;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    /* ===== 表格 ===== */
+    .flow-table {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      overflow-x: auto;
+      border: 1px solid #e2e8f0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      background: #f7fafc;
+      color: #4a5568;
+      font-weight: 600;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #edf2f7;
+      color: #2d3748;
+      vertical-align: middle;
+    }
+
+    tr:hover {
+      background: #f7fafc;
+    }
+
+    .serial-number {
+      color: #5a6b9c;
+      font-weight: 600;
+      width: 60px;
+      text-align: center;
+    }
+
+    /* ===== 徽章 ===== */
+    .badge-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-synced {
+      background: #e6fffa;
+      color: #2b6cb0;
+    }
+
+    .badge-unsynced {
+      background: #fefcbf;
+      color: #975a16;
+    }
+
+    .badge-type {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .diagram-name-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .diagram-name-row .name {
+      font-weight: 600;
+      color: #2d3748;
+      font-size: 14px;
+    }
+
+    .diagram-name-row .tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .diagram-name-row .tags .tag {
+      font-size: 10px;
+      color: #4a5568;
+      background: #edf2f7;
+      padding: 1px 8px;
+      border-radius: 10px;
+    }
+
+    .diagram-name-row .tags .tag.executable {
+      background: #e6fffa;
+      color: #2b6cb0;
+    }
+
+    .diagram-name-row .tags .tag.context {
+      background: #ebf8ff;
+      color: #2b6cb0;
+    }
+
+    /* ===== 测发模式列 ===== */
+    .launch-mode-cell {
+      min-width: 200px;
+    }
+
+    .launch-mode-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .launch-mode-select {
+      padding: 3px 8px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 12px;
+      background: #f7fafc;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      min-width: 80px;
+      height: 28px;
+      color: #2d3748;
+    }
+
+    .launch-mode-select:focus {
+      border-color: #8b9bb5;
+      outline: none;
+      background: #fff;
+    }
+
+    .launch-mode-select.saved {
+      border-color: #8b9bb5;
+      background: #f7fafc;
+    }
+
+    .launch-mode-select.changed {
+      border-color: #d69e2e;
+      background: #fffff0;
+    }
+
+    .save-mode-btn {
+      background: #edf2f7;
+      color: #2d3748;
+      border: none;
+      padding: 3px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: background 0.2s;
+      height: 28px;
+      white-space: nowrap;
+    }
+
+    .save-mode-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .save-mode-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .save-mode-btn.saved {
+      background: #e6fffa;
+      color: #2b6cb0;
+    }
+
+    .save-mode-btn.saved:hover {
+      background: #b2f5ea;
+    }
+
+    .mode-badge {
+      display: inline-block;
+      padding: 1px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .mode-badge-saved {
+      background: #e6fffa;
+      color: #2b6cb0;
+    }
+
+    .mode-badge-unsaved {
+      background: #fefcbf;
+      color: #975a16;
+    }
+
+    /* ===== 操作按钮 ===== */
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .view-btn,
+    .sync-btn-small,
+    .context-btn,
+    .history-btn {
+      background: #edf2f7;
+      color: #2d3748;
+      border: none;
+      padding: 4px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .view-btn:hover,
+    .sync-btn-small:hover,
+    .context-btn:hover,
+    .history-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .sync-btn-small {
+      background: #48bb78;
+      color: #fff;
+    }
+    .sync-btn-small:hover {
+      background: #38a169;
+    }
+    .sync-btn-small:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .context-btn {
+      background: #8b9bb5;
+      color: #fff;
+    }
+    .context-btn:hover {
+      background: #7a8aa4;
+    }
+
+    .history-btn {
+      background: #8b7a9e;
+      color: #fff;
+    }
+    .history-btn:hover {
+      background: #7a6a8c;
+    }
+
+    .col-diagram {
+      min-width: 280px;
+    }
+
+    .col-launch-mode {
+      min-width: 200px;
+    }
+
+    .col-status {
+      width: 100px;
+      text-align: center;
+    }
+
+    .col-actions {
+      min-width: 340px;
+    }
+
+    /* ===== 分页 ===== */
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      flex-wrap: wrap;
+      border: 1px solid #e2e8f0;
+    }
+
+    .pagination button {
+      padding: 5px 12px;
+      border: 1px solid #e2e8f0;
+      background: #f7fafc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      color: #2d3748;
+    }
+
+    .pagination button:hover {
+      background: #edf2f7;
+    }
+
+    .pagination button.active {
+      background: #8b9bb5;
+      color: #fff;
+      border-color: #8b9bb5;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 13px;
+      color: #718096;
+      margin-left: 16px;
+    }
+
+    /* ===== 空状态 ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0aec0;
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 22px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      max-width: 400px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .toast-success {
+      background: #48bb78;
+    }
+
+    .toast-error {
+      background: #e53e3e;
+    }
+
+    .toast-info {
+      background: #5a6b9c;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ===== Loading ===== */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-spinner {
+      background: #fff;
+      padding: 20px 36px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #5a6b9c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ===== 调试 ===== */
+    .debug-info {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .debug-info.show {
+      display: block;
+    }
+
+    /* ===== 模态框 ===== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      max-width: 850px;
+      width: 92%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .modal-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-content::-webkit-scrollbar-track {
+      background: #f7fafc;
+      border-radius: 3px;
+    }
+    .modal-content::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 3px;
+    }
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: #a0aec0;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: #a0aec0;
+      transition: color 0.2s;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #2d3748;
+    }
+
+    /* ===== 测发模式管理 ===== */
+    .mode-add-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      background: #f7fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .mode-add-section input {
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      color: #2d3748;
+    }
+
+    .mode-add-section input:focus {
+      border-color: #8b9bb5;
+    }
+
+    .mode-add-section input::placeholder {
+      color: #a0aec0;
+    }
+
+    .mode-add-section button {
+      padding: 8px 20px;
+      background: #8b9bb5;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .mode-add-section button:hover {
+      background: #7a8aa4;
+    }
+
+    .mode-count {
+      font-size: 13px;
+      color: #718096;
+      margin-bottom: 14px;
+      padding: 6px 12px;
+      background: #f7fafc;
+      border-radius: 6px;
+    }
+
+    .mode-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid #edf2f7;
+      transition: background 0.2s;
+      border-radius: 6px;
+    }
+
+    .mode-item:hover {
+      background: #f7fafc;
+    }
+
+    .mode-item:last-child {
+      border-bottom: none;
+    }
+
+    .mode-item .mode-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .mode-item .mode-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .mode-item .mode-code {
+      font-size: 12px;
+      color: #718096;
+      background: #edf2f7;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .mode-item .mode-desc {
+      font-size: 12px;
+      color: #718096;
+      background: #edf2f7;
+      padding: 2px 10px;
+      border-radius: 4px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mode-item .mode-status {
+      font-size: 11px;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .mode-item .mode-status.enabled {
+      background: #e6fffa;
+      color: #2b6cb0;
+    }
+
+    .mode-item .mode-status.disabled {
+      background: #fed7d7;
+      color: #9b2c2c;
+    }
+
+    .mode-item .mode-diagram-count {
+      font-size: 12px;
+      color: #718096;
+      background: #edf2f7;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+
+    .mode-item .mode-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .mode-item .mode-actions button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+      font-weight: 500;
+      white-space: nowrap;
+      background: #edf2f7;
+      color: #2d3748;
+    }
+
+    .mode-item .mode-actions button:hover {
+      background: #e2e8f0;
+    }
+
+    .mode-item .mode-actions .edit-btn {
+      background: #ebf8ff;
+      color: #2b6cb0;
+    }
+    .mode-item .mode-actions .edit-btn:hover {
+      background: #bee3f8;
+    }
+
+    .mode-item .mode-actions .delete-btn {
+      background: #fed7d7;
+      color: #9b2c2c;
+    }
+    .mode-item .mode-actions .delete-btn:hover {
+      background: #feb2b2;
+    }
+
+    .mode-item .mode-actions .delete-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .mode-item .mode-actions .toggle-btn {
+      background: #ebf8ff;
+      color: #2b6cb0;
+    }
+    .mode-item .mode-actions .toggle-btn:hover {
+      background: #bee3f8;
+    }
+
+    .mode-item .mode-actions .toggle-btn.disabled-action {
+      background: #fed7d7;
+      color: #9b2c2c;
+    }
+    .mode-item .mode-actions .toggle-btn.disabled-action:hover {
+      background: #feb2b2;
+    }
+
+    .mode-edit-input {
+      padding: 5px 10px;
+      border: 1.5px solid #8b9bb5;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+      transition: box-shadow 0.2s;
+      background: #fff;
+      color: #2d3748;
+    }
+
+    .mode-edit-input:focus {
+      box-shadow: 0 0 0 2px rgba(139, 155, 181, 0.2);
+    }
+
+    .mode-edit-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mode-edit-actions button {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+      font-weight: 500;
+    }
+
+    .mode-edit-actions .confirm-btn {
+      background: #48bb78;
+      color: #fff;
+    }
+    .mode-edit-actions .confirm-btn:hover {
+      background: #38a169;
+    }
+
+    .mode-edit-actions .cancel-btn {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+    .mode-edit-actions .cancel-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .mode-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0aec0;
+      font-size: 14px;
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: stretch;
+      }
+
+      .header-actions button {
+        flex: 1;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+
+      .diagram-name-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .launch-mode-inline {
+        flex-wrap: wrap;
+      }
+
+      .action-buttons {
+        flex-wrap: wrap;
+      }
+
+      .view-btn,
+      .sync-btn-small,
+      .context-btn,
+      .save-mode-btn,
+      .history-btn {
+        padding: 4px 10px;
+        font-size: 11px;
+      }
+
+      .launch-mode-select {
+        font-size: 11px;
+        min-width: 60px;
+        padding: 2px 6px;
+        height: 26px;
+      }
+
+      .mode-badge {
+        font-size: 10px;
+        padding: 1px 8px;
+      }
+
+      .col-launch-mode {
+        min-width: 160px;
+      }
+
+      .col-actions {
+        min-width: 280px;
+      }
+
+      .mode-filter-select {
+        min-width: 100px;
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      .modal-content {
+        padding: 18px 16px;
+        max-width: 100%;
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .mode-add-section {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .mode-add-section button {
+        grid-column: span 1;
+      }
+
+      .mode-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .mode-item .mode-info {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .mode-item .mode-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .mode-item .mode-actions button {
+        padding: 4px 10px;
+        font-size: 11px;
+      }
+
+      .mode-item .mode-desc {
+        max-width: 120px;
+      }
+
+      .mode-edit-input {
+        width: 100% !important;
+      }
+
+      .mode-item .mode-info .mode-edit-input {
+        width: 100% !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .modal-content {
+        padding: 14px 12px;
+      }
+
+      .modal-header h2 {
+        font-size: 17px;
+      }
+
+      .mode-item .mode-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .mode-item .mode-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .mode-item .mode-desc {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 头部 -->
+  <div class="page-header">
+    <div>
+      <h1>流程仿真管理</h1>
+      <p>管理当前 MagicDraw 项目中的所有 Activity Diagram</p>
+    </div>
+    <div class="header-actions">
+      <button class="mode-manage-btn" onclick="openModeManage()">测发模式管理</button>
+      <button class="sync-btn" id="syncAllBtn" onclick="syncAllToDatabase()">同步所有到数据库</button>
+      <button class="refresh-btn" onclick="refreshFromMagicDraw()">从 MagicDraw 刷新</button>
+    </div>
+  </div>
+
+  <!-- 搜索栏 -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" class="search-input" placeholder="搜索图名称" onkeyup="onSearchKeyup(event)">
+    <select id="modeFilterSelect" class="mode-filter-select" onchange="searchFlows()">
+      <option value="">全部测发模式</option>
+    </select>
+    <button class="search-btn" onclick="searchFlows()">搜索</button>
+    <button class="reset-btn" onclick="resetSearch()">重置</button>
+    <button class="debug-toggle" onclick="toggleDebug()">调试</button>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats" id="statsInfo">
+    共 <span id="totalCount">0</span> 条 Activity Diagram
+    <span class="sync-status" id="syncStatus">未同步</span>
+    <span class="filter-hint" id="filterHint" style="display:none;"></span>
+  </div>
+
+  <!-- 表格 -->
+  <div class="flow-table">
+    <table>
+      <thead>
+      <tr>
+        <th style="width:60px;text-align:center;">编号</th>
+        <th class="col-diagram">图名称 / 图类型</th>
+        <th class="col-launch-mode">测发模式</th>
+        <th class="col-status">同步状态</th>
+        <th class="col-actions">操作</th>
+      </tr>
+      </thead>
+      <tbody id="flowTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination" id="pagination"></div>
+
+  <!-- 调试 -->
+  <div class="debug-info" id="debugInfo">
+    <div id="debugContent">等待调试信息...</div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <span id="loadingText">正在处理...</span>
+  </div>
+</div>
+
+<!-- 测发模式管理弹窗 -->
+<div class="modal-overlay" id="modeManageModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>测发模式管理</h2>
+      <button class="modal-close" onclick="closeModeManage()">&times;</button>
+    </div>
+
+    <div class="mode-add-section">
+      <input id="newModeName" placeholder="模式名称 *" />
+      <input id="newModeCode" placeholder="模式编码（可选）" />
+      <input id="newModeDesc" placeholder="描述（可选）" />
+      <button onclick="addNewMode()">添加模式</button>
+    </div>
+
+    <div class="mode-count" id="modeCount">共 0 个测发模式</div>
+    <div id="modeList"></div>
+  </div>
+</div>
+
+<script>
+  // =====================================================================
+  // 配置
+  // =====================================================================
+  const API_BASE_URL = 'http://localhost:8001';
+
+  // =====================================================================
+  // 状态
+  // =====================================================================
+  let allFlowsData = [];
+  let filteredData = [];
+  let indexWs = null;
+  let currentPage = 1;
+  const pageSize = 10;
+  let syncedIds = new Set();
+  let syncedNames = new Set();
+  let debugLogs = [];
+  let searchKeyword = '';
+  let selectedMode = '';
+
+  let launchModeMap = new Map();
+  let pendingModeChanges = new Map();
+  let launchModeList = [];
+  let editingModeId = null;
+
+  // =====================================================================
+  // 工具
+  // =====================================================================
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function isActivityDiagram(diagram) {
+    if (!diagram) return false;
+    const type = (diagram.diagramType || '').toLowerCase();
+    const typeKey = (diagram.diagramTypeKey || '').toLowerCase();
+    if (type.includes('activity') || typeKey === 'activity' || type === '活动图' || type.includes('活动图')) {
+      return true;
+    }
+    return false;
+  }
+
+  function getDiagramTypeBadge() {
+    return '<span class="badge-type">Activity</span>';
+  }
+
+  function getSyncBadge(diagramId, diagramName) {
+    if (syncedIds.has(diagramId) || syncedNames.has(diagramName)) {
+      return '<span class="badge-status badge-synced">已同步</span>';
+    }
+    return '<span class="badge-status badge-unsynced">未同步</span>';
+  }
+
+  // =====================================================================
+  // Toast & Loading
+  // =====================================================================
+  function showToast(message, type = 'success') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  function showLoading(text = '正在处理...') {
+    document.getElementById('loadingText').textContent = text;
+    document.getElementById('loadingOverlay').classList.add('show');
+  }
+
+  function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+  }
+
+  // =====================================================================
+  // API
+  // =====================================================================
+  function getAxios() {
+    const instance = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 30000,
+      headers: { 'Content-Type': 'application/json' },
+    });
+    instance.interceptors.response.use(
+            response => {
+              const res = response.data;
+              addDebugLog('API 响应', { status: response.status, data: res });
+              if (res.code !== undefined && res.code !== 200) {
+                throw new Error(res.msg || res.message || '请求失败');
+              }
+              return res.data !== undefined ? res.data : res;
+            },
+            error => {
+              const msg = error.response?.data?.msg || error.response?.data?.message || error.message || '网络错误';
+              addDebugLog('API 错误', { message: msg, status: error.response?.status });
+              throw new Error(msg);
+            }
+    );
+    return instance;
+  }
+
+  // =====================================================================
+  // 加载测发模式
+  // =====================================================================
+  async function loadLaunchModes() {
+    try {
+      const api = getAxios();
+      const data = await api.get('/launchMode/enabled');
+      launchModeList = data || [];
+      addDebugLog('加载测发模式', { count: launchModeList.length });
+      updateLaunchModeOptions();
+      updateModeFilter();
+      return launchModeList;
+    } catch (error) {
+      addDebugLog('加载测发模式失败', { error: error.message });
+      launchModeList = [];
+      return [];
+    }
+  }
+
+  async function loadAllLaunchModes() {
+    try {
+      const api = getAxios();
+      const data = await api.get('/launchMode/list');
+      launchModeList = data || [];
+      addDebugLog('加载所有测发模式', { count: launchModeList.length });
+      return launchModeList;
+    } catch (error) {
+      addDebugLog('加载所有测发模式失败', { error: error.message });
+      launchModeList = [];
+      return [];
+    }
+  }
+
+  function updateLaunchModeOptions() {
+    const enabledModes = launchModeList.filter(m => m.status === '1');
+    const selectors = document.querySelectorAll('.launch-mode-select');
+    selectors.forEach(select => {
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">未选择</option>';
+      enabledModes.forEach(m => {
+        select.innerHTML += `<option value="${escapeHtml(m.launchModeName)}">${escapeHtml(m.launchModeName)}</option>`;
+      });
+      if (currentValue) {
+        select.value = currentValue;
+      }
+    });
+  }
+
+  function updateModeFilter() {
+    const select = document.getElementById('modeFilterSelect');
+    if (!select) return;
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">全部测发模式</option>';
+    const enabledModes = launchModeList.filter(m => m.status === '1');
+    enabledModes.forEach(m => {
+      select.innerHTML += `<option value="${escapeHtml(m.launchModeName)}">${escapeHtml(m.launchModeName)}</option>`;
+    });
+    if (currentValue) {
+      select.value = currentValue;
+    }
+  }
+
+  // =====================================================================
+  // 加载已同步数据
+  // =====================================================================
+  async function loadSyncedData() {
+    try {
+      const api = getAxios();
+      let allRecords = [];
+      let current = 1;
+      const size = 100;
+      let hasMore = true;
+
+      while (hasMore) {
+        const res = await api.get('/api/activity-diagram/page', { params: { current, size } });
+        if (res && res.records) {
+          allRecords = allRecords.concat(res.records);
+          hasMore = res.records.length === size;
+          current++;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      syncedIds.clear();
+      syncedNames.clear();
+      launchModeMap.clear();
+
+      allRecords.forEach(item => {
+        if (item.activityDiagramId) {
+          syncedIds.add(item.activityDiagramId);
+          if (item.launchModeName) {
+            launchModeMap.set(item.activityDiagramId, item.launchModeName);
+          }
+        }
+        if (item.activityDiagramName) {
+          syncedNames.add(item.activityDiagramName);
+        }
+      });
+
+      await loadLaunchModes();
+      addDebugLog(`加载 ${syncedIds.size} 个已同步，${launchModeMap.size} 个测发模式`);
+      updateSyncStatus();
+    } catch (error) {
+      addDebugLog('加载已同步数据失败', { error: error.message });
+    }
+  }
+
+  // =====================================================================
+  // 保存图到数据库
+  // =====================================================================
+  async function saveDiagramToDatabase(diagram, launchModeName = null) {
+    try {
+      const api = getAxios();
+      if (launchModeName === null) {
+        launchModeName = launchModeMap.get(diagram.id) || '';
+      }
+
+      addDebugLog(`保存: ${diagram.name} 模式=${launchModeName}`);
+
+      let existing = null;
+      try {
+        existing = await api.get(`/api/activity-diagram/get/${diagram.id}`);
+      } catch (e) {
+        addDebugLog(`按ID查询失败: ${diagram.id}`, { error: e.message });
+      }
+
+      if (!existing) {
+        try {
+          const pageRes = await api.get('/api/activity-diagram/page', {
+            params: { current: 1, size: 100, name: diagram.name }
+          });
+          if (pageRes && pageRes.records && pageRes.records.length > 0) {
+            existing = pageRes.records[0];
+            addDebugLog(`按名称找到记录: ${diagram.name}`, { id: existing.activityDiagramId });
+          }
+        } catch (e2) {
+          addDebugLog(`按名称查询失败: ${diagram.name}`, { error: e2.message });
+        }
+      }
+
+      const payload = {
+        activityDiagramId: existing ? existing.activityDiagramId : diagram.id,
+        activityDiagramName: diagram.name,
+        launchModeName: launchModeName || ''
+      };
+
+      if (existing) {
+        await api.put('/api/activity-diagram/update', payload);
+        addDebugLog(`更新成功: ${diagram.name}`);
+      } else {
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        payload.createTime = now;
+        payload.updateTime = now;
+        await api.post('/api/activity-diagram/save', payload);
+        addDebugLog(`新增成功: ${diagram.name}`);
+      }
+
+      if (launchModeName) {
+        launchModeMap.set(diagram.id, launchModeName);
+      }
+      syncedIds.add(diagram.id);
+      syncedNames.add(diagram.name);
+
+      return { success: true, action: existing ? 'update' : 'insert' };
+    } catch (error) {
+      addDebugLog(`保存失败: ${diagram.name}`, { error: error.message });
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =====================================================================
+  // 保存图的测发模式
+  // =====================================================================
+  async function saveDiagramLaunchMode(diagramId, modeId, diagramName) {
+    try {
+      const api = getAxios();
+      await api.put('/api/activity-diagram/update-launch-mode', null, {
+        params: {
+          diagramId: diagramId,
+          modeId: modeId || '',
+          diagramName: diagramName || ''
+        }
+      });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =====================================================================
+  // 保存单个图的测发模式
+  // =====================================================================
+  async function saveLaunchMode(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const diagram = allFlowsData.find(f => f.id === diagramId);
+    if (!diagram) {
+      showToast('未找到该图数据', 'error');
+      return;
+    }
+
+    const selectEl = document.getElementById(`launch_mode_${diagramId}`);
+    if (!selectEl) {
+      showToast('未找到测发模式选择器', 'error');
+      return;
+    }
+
+    const modeName = selectEl.value;
+    if (!modeName) {
+      showToast('请选择测发模式', 'error');
+      return;
+    }
+
+    const mode = launchModeList.find(m => m.launchModeName === modeName);
+    if (!mode) {
+      showToast('未找到对应的测发模式', 'error');
+      return;
+    }
+
+    showLoading(`正在保存测发模式: ${modeName}`);
+    const result = await saveDiagramLaunchMode(diagramId, mode.launchModeId, diagram.name);
+    hideLoading();
+
+    if (result.success) {
+      launchModeMap.set(diagram.id, modeName);
+      pendingModeChanges.delete(diagram.id);
+      updateLaunchModeUI(diagram.id, modeName, true);
+      await loadSyncedData();
+      applyFilters();
+      showToast(`测发模式已保存: ${modeName}`, 'success');
+      updateSyncStatus();
+    } else {
+      showToast(`保存失败: ${result.error}`, 'error');
+    }
+  }
+
+  // =====================================================================
+  // 更新测发模式UI
+  // =====================================================================
+  function updateLaunchModeUI(diagramId, launchMode, isSaved) {
+    const selectEl = document.getElementById(`launch_mode_${diagramId}`);
+    const saveBtn = document.getElementById(`save_mode_${diagramId}`);
+    const badgeEl = document.getElementById(`mode_badge_${diagramId}`);
+
+    if (selectEl) {
+      selectEl.value = launchMode || '';
+      selectEl.className = 'launch-mode-select' + (isSaved ? ' saved' : '');
+    }
+
+    if (saveBtn) {
+      if (isSaved) {
+        saveBtn.textContent = '已保存';
+        saveBtn.className = 'save-mode-btn saved';
+        saveBtn.disabled = true;
+      } else {
+        saveBtn.textContent = '保存';
+        saveBtn.className = 'save-mode-btn';
+        saveBtn.disabled = false;
+      }
+    }
+
+    if (badgeEl) {
+      badgeEl.textContent = launchMode || '未设置';
+      badgeEl.className = 'mode-badge ' + (launchMode ? 'mode-badge-saved' : 'mode-badge-unsaved');
+    }
+  }
+
+  // =====================================================================
+  // 测发模式选择变化
+  // =====================================================================
+  function onLaunchModeChange(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const selectEl = document.getElementById(`launch_mode_${diagramId}`);
+    const saveBtn = document.getElementById(`save_mode_${diagramId}`);
+
+    if (!selectEl || !saveBtn) return;
+
+    const selected = selectEl.value;
+    const saved = launchModeMap.get(diagramId) || '';
+
+    if (selected !== saved) {
+      selectEl.className = 'launch-mode-select changed';
+      saveBtn.textContent = '保存';
+      saveBtn.className = 'save-mode-btn';
+      saveBtn.disabled = false;
+      pendingModeChanges.set(diagramId, selected);
+    } else {
+      selectEl.className = 'launch-mode-select saved';
+      saveBtn.textContent = '已保存';
+      saveBtn.className = 'save-mode-btn saved';
+      saveBtn.disabled = true;
+      pendingModeChanges.delete(diagramId);
+    }
+
+    if (selectedMode) {
+      applyFilters();
+    }
+  }
+
+  // =====================================================================
+  // 筛选
+  // =====================================================================
+  function applyFilters() {
+    let data = allFlowsData.filter(d => isActivityDiagram(d));
+
+    if (searchKeyword.trim()) {
+      const keyword = searchKeyword.trim().toLowerCase();
+      data = data.filter(d => (d.name || '').toLowerCase().includes(keyword));
+    }
+
+    if (selectedMode) {
+      data = data.filter(d => {
+        const savedMode = launchModeMap.get(d.id) || '';
+        const pending = pendingModeChanges.get(d.id);
+        const currentMode = pending !== undefined ? pending : savedMode;
+        return currentMode === selectedMode;
+      });
+    }
+
+    filteredData = data;
+    currentPage = 1;
+    renderTable();
+    updateSyncStatus();
+    document.getElementById('totalCount').textContent = filteredData.length;
+
+    const hintEl = document.getElementById('filterHint');
+    if (selectedMode) {
+      hintEl.textContent = `已筛选: ${selectedMode}`;
+      hintEl.style.display = 'inline';
+    } else {
+      hintEl.style.display = 'none';
+    }
+  }
+
+  function searchFlows() {
+    searchKeyword = document.getElementById('searchInput').value || '';
+    selectedMode = document.getElementById('modeFilterSelect').value || '';
+    applyFilters();
+  }
+
+  function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('modeFilterSelect').value = '';
+    searchKeyword = '';
+    selectedMode = '';
+    applyFilters();
+  }
+
+  function onSearchKeyup(event) {
+    if (event.key === 'Enter') searchFlows();
+  }
+
+  // =====================================================================
+  // 同步状态
+  // =====================================================================
+  function updateSyncStatus() {
+    const statusEl = document.getElementById('syncStatus');
+    const total = filteredData.length;
+    const synced = filteredData.filter(f => syncedIds.has(f.id) || syncedNames.has(f.name)).length;
+
+    if (total === 0) {
+      statusEl.textContent = '暂无数据';
+      statusEl.className = 'sync-status';
+      return;
+    }
+
+    if (synced === total) {
+      statusEl.textContent = `全部已同步 (${synced}/${total})`;
+      statusEl.className = 'sync-status success';
+    } else if (synced === 0) {
+      statusEl.textContent = `未同步 (${synced}/${total})`;
+      statusEl.className = 'sync-status';
+    } else {
+      statusEl.textContent = `部分同步 (${synced}/${total})`;
+      statusEl.className = 'sync-status';
+    }
+  }
+
+  // =====================================================================
+  // 批量同步
+  // =====================================================================
+  async function syncAllToDatabase() {
+    if (filteredData.length === 0) {
+      showToast('没有数据可同步', 'error');
+      return;
+    }
+
+    showLoading(`正在同步 ${filteredData.length} 条图...`);
+    let successCount = 0,
+            updateCount = 0,
+            insertCount = 0,
+            failCount = 0;
+    const errors = [];
+
+    for (const diagram of filteredData) {
+      const pending = pendingModeChanges.get(diagram.id);
+      const launchMode = pending !== undefined ? pending : (launchModeMap.get(diagram.id) || '');
+      const result = await saveDiagramToDatabase(diagram, launchMode);
+      if (result.success) {
+        successCount++;
+        if (result.action === 'update') updateCount++;
+        else insertCount++;
+        pendingModeChanges.delete(diagram.id);
+        updateLaunchModeUI(diagram.id, launchMode, true);
+      } else {
+        failCount++;
+        errors.push(`${diagram.name}: ${result.error}`);
+      }
+    }
+
+    hideLoading();
+    await loadSyncedData();
+    applyFilters();
+
+    if (failCount === 0) {
+      showToast(`全部同步成功！新增 ${insertCount}，更新 ${updateCount}`, 'success');
+    } else {
+      showToast(`成功 ${successCount}，失败 ${failCount} 条`, 'error');
+      addDebugLog('同步失败详情', errors);
+    }
+  }
+
+  // =====================================================================
+  // 单个同步
+  // =====================================================================
+  async function syncSingleDiagram(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const diagram = allFlowsData.find(f => f.id === diagramId);
+    if (!diagram) {
+      showToast('未找到该图数据', 'error');
+      return;
+    }
+
+    const pending = pendingModeChanges.get(diagram.id);
+    const launchMode = pending !== undefined ? pending : (launchModeMap.get(diagram.id) || '');
+
+    showLoading(`正在同步: ${diagram.name}`);
+    const result = await saveDiagramToDatabase(diagram, launchMode);
+    hideLoading();
+
+    if (result.success) {
+      pendingModeChanges.delete(diagram.id);
+      updateLaunchModeUI(diagram.id, launchMode, true);
+      await loadSyncedData();
+      applyFilters();
+      showToast(`${result.action === 'update' ? '更新' : '新增'}成功: ${diagram.name}`, 'success');
+    } else {
+      showToast(`同步失败: ${result.error}`, 'error');
+    }
+  }
+
+  // =====================================================================
+  // WebSocket
+  // =====================================================================
+  function connectMagicDrawAndLoadDiagrams() {
+    addDebugLog('正在连接 MagicDraw WebSocket...');
+    indexWs = new WebSocket('ws://127.0.0.1:8765');
+
+    indexWs.onopen = () => {
+      addDebugLog('WebSocket 连接成功');
+      showToast('已连接到 MagicDraw', 'info');
+      indexWs.send(JSON.stringify({ command: 'list_diagrams' }));
+      addDebugLog('已发送 list_diagrams');
+    };
+
+    indexWs.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        addDebugLog('收到 WebSocket 消息', msg);
+        handleIndexBackendMessage(msg);
+      } catch (e) {
+        addDebugLog('收到非 JSON 消息', { data: evt.data });
+      }
+    };
+
+    indexWs.onerror = (error) => {
+      addDebugLog('WebSocket 错误', error);
+      showToast('无法连接 MagicDraw 插件', 'error');
+    };
+
+    indexWs.onclose = () => {
+      addDebugLog('WebSocket 已断开');
+    };
+  }
+
+  function handleIndexBackendMessage(msg) {
+    if (msg.event === 'backend_error') {
+      showToast(msg.message || 'MagicDraw 后端错误', 'error');
+      return;
+    }
+
+    if (msg.event === 'diagram_list') {
+      addDebugLog('收到 diagram_list', { count: msg.diagrams?.length });
+
+      allFlowsData = (msg.diagrams || []).map((d, index) => ({
+        id: d.id,
+        name: d.name || '未命名图',
+        diagramType: d.diagramType || 'Other Diagram',
+        diagramTypeKey: d.diagramTypeKey || 'other',
+        ownerName: d.ownerName || '',
+        executable: d.executable === true,
+        canRunWithContext: d.canRunWithContext === true,
+        contextName: d.contextName || '',
+        index: index + 1,
+      }));
+
+      addDebugLog(`总共加载 ${allFlowsData.length} 个图`);
+
+      loadSyncedData().then(() => {
+        applyFilters();
+        const activityCount = filteredData.length;
+        showToast(`加载成功，共 ${activityCount} 个 Activity Diagram`, 'success');
+      });
+    }
+  }
+
+  function refreshFromMagicDraw() {
+    if (indexWs && indexWs.readyState === WebSocket.OPEN) {
+      showToast('正在刷新数据...', 'info');
+      indexWs.send(JSON.stringify({ command: 'list_diagrams' }));
+    } else {
+      showToast('未连接到 MagicDraw', 'error');
+      connectMagicDrawAndLoadDiagrams();
+    }
+  }
+
+  // =====================================================================
+  // 查看仿真记录
+  // =====================================================================
+  function viewSimulationHistory(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const flow = allFlowsData.find(f => f.id === diagramId);
+    if (!flow) {
+      showToast('未找到对应的图', 'error');
+      return;
+    }
+    const url = `simulation-history.html?diagramId=${encodeURIComponent(diagramId)}&name=${encodeURIComponent(flow.name)}`;
+    window.open(url, '_blank');
+  }
+
+  // =====================================================================
+  // 渲染测发模式列
+  // =====================================================================
+  function renderLaunchModeCell(diagramId) {
+    const saved = launchModeMap.get(diagramId) || '';
+    const pending = pendingModeChanges.get(diagramId);
+    const current = pending !== undefined ? pending : saved;
+    const isSaved = pending === undefined && saved !== '';
+    const enabledModes = launchModeList.filter(m => m.status === '1');
+
+    let options = '<option value="">未选择</option>';
+    enabledModes.forEach(m => {
+      options += `<option value="${escapeHtml(m.launchModeName)}" ${current === m.launchModeName ? 'selected' : ''}>${escapeHtml(m.launchModeName)}</option>`;
+    });
+
+    const selectClass = 'launch-mode-select' + (isSaved ? ' saved' : '');
+    const btnText = isSaved ? '已保存' : '保存';
+    const btnClass = 'save-mode-btn' + (isSaved ? ' saved' : '');
+    const btnDisabled = isSaved ? 'disabled' : '';
+
+    return `
+            <div class="launch-mode-inline">
+              <select id="launch_mode_${diagramId}"
+                      class="${selectClass}"
+                      onchange="onLaunchModeChange('${encodeURIComponent(diagramId)}')">
+                ${options}
+              </select>
+              <button id="save_mode_${diagramId}"
+                      class="${btnClass}"
+                      onclick="saveLaunchMode('${encodeURIComponent(diagramId)}')"
+                      ${btnDisabled}>
+                ${btnText}
+              </button>
+              <span id="mode_badge_${diagramId}"
+                    class="mode-badge ${current ? 'mode-badge-saved' : 'mode-badge-unsaved'}">
+                ${current || '未设置'}
+              </span>
+            </div>
+          `;
+  }
+
+  // =====================================================================
+  // 渲染表格
+  // =====================================================================
+  function renderTable() {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    const pageData = filteredData.slice(start, end);
+    const tbody = document.getElementById('flowTableBody');
+
+    if (pageData.length === 0) {
+      tbody.innerHTML = `
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <div>暂无 Activity Diagram</div>
+                  ${selectedMode ? `<div style="font-size:12px;margin-top:8px;color:#718096;">当前筛选: ${selectedMode}</div>` : ''}
+                  <div style="font-size:12px;margin-top:8px;">点击「从 MagicDraw 刷新」加载数据</div>
+                </td>
+              </tr>
+            `;
+      document.getElementById('totalCount').textContent = filteredData.length;
+      return;
+    }
+
+    tbody.innerHTML = pageData.map((flow, index) => {
+      const serialNumber = start + index + 1;
+      const isSynced = syncedIds.has(flow.id) || syncedNames.has(flow.name);
+
+      let tags = '';
+      if (flow.executable) tags += `<span class="tag executable">可启动仿真</span>`;
+      if (flow.canRunWithContext) tags += `<span class="tag context">Run with Context</span>`;
+      if (flow.contextName) tags += `<span class="tag">Context: ${escapeHtml(flow.contextName)}</span>`;
+
+      const launchModeHtml = renderLaunchModeCell(flow.id);
+
+      let actions = `
+              <button class="view-btn" onclick="viewFlow('${encodeURIComponent(flow.id)}')">查看图</button>
+              <button class="history-btn" onclick="viewSimulationHistory('${encodeURIComponent(flow.id)}')">仿真记录</button>
+              <button class="context-btn" onclick="checkRunWithContext('${encodeURIComponent(flow.id)}')">Run with Context</button>
+              <button class="sync-btn-small" onclick="syncSingleDiagram('${encodeURIComponent(flow.id)}')" ${isSynced ? 'disabled' : ''}>
+                ${isSynced ? '已同步' : '同步'}
+              </button>
+            `;
+
+      return `
+              <tr>
+                <td class="serial-number" style="text-align:center;">${serialNumber}</td>
+                <td class="col-diagram">
+                  <div class="diagram-name-row">
+                    <span class="name">${escapeHtml(flow.name)}</span>
+                    <span>${getDiagramTypeBadge()}</span>
+                    <div class="tags">${tags}</div>
+                  </div>
+                </td>
+                <td class="col-launch-mode">${launchModeHtml}</td>
+                <td class="col-status" style="text-align:center;">${getSyncBadge(flow.id, flow.name)}</td>
+                <td class="col-actions">
+                  <div class="action-buttons">${actions}</div>
+                </td>
+              </tr>
+            `;
+    }).join('');
+
+    document.getElementById('totalCount').textContent = filteredData.length;
+    renderPagination();
+  }
+
+  // =====================================================================
+  // 分页
+  // =====================================================================
+  function renderPagination() {
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    const paginationDiv = document.getElementById('pagination');
+
+    if (totalPages <= 1) {
+      paginationDiv.innerHTML = '';
+      return;
+    }
+
+    let html =
+            `<button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>首页</button>
+           <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+    }
+
+    html += `
+            <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一页</button>
+            <button onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>末页</button>
+            <span class="page-info">第 ${currentPage} / ${totalPages} 页，共 ${filteredData.length} 条</span>
+          `;
+
+    paginationDiv.innerHTML = html;
+  }
+
+  function goToPage(page) {
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderTable();
+  }
+
+  // =====================================================================
+  // 业务操作
+  // =====================================================================
+  function viewFlow(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const flow = allFlowsData.find(f => f.id === diagramId);
+    if (!flow) { alert('未找到对应的图'); return; }
+    window.location.href = `viewer.html?diagramId=${encodeURIComponent(flow.id)}&name=${encodeURIComponent(flow.name)}`;
+  }
+
+  function checkRunWithContext(encodedDiagramId) {
+    const diagramId = decodeURIComponent(encodedDiagramId);
+    const flow = allFlowsData.find(f => f.id === diagramId);
+    if (!flow) { alert('未找到对应的图'); return; }
+    if (!flow.canRunWithContext) {
+      alert('当前图没有可用运行上下文，不能 Run with Context。');
+      return;
+    }
+    alert(`该图支持 Run with Context，Context = ${flow.contextName || '未知'}`);
+  }
+
+  // =====================================================================
+  // 调试
+  // =====================================================================
+  function toggleDebug() {
+    const el = document.getElementById('debugInfo');
+    el.classList.toggle('show');
+    if (el.classList.contains('show')) updateDebugInfo();
+  }
+
+  function addDebugLog(message, data = null) {
+    const time = new Date().toLocaleTimeString();
+    debugLogs.push({ time, message, data });
+    if (debugLogs.length > 100) debugLogs.shift();
+    updateDebugInfo();
+  }
+
+  function updateDebugInfo() {
+    const content = document.getElementById('debugContent');
+    content.innerHTML = debugLogs.map(log => {
+      let line = `[${log.time}] ${log.message}`;
+      if (log.data) line += `\n  └─ ${JSON.stringify(log.data, null, 2)}`;
+      return line;
+    }).join('\n');
+  }
+
+  // =====================================================================
+  // 测发模式管理 - CRUD
+  // =====================================================================
+  function openModeManage() {
+    document.getElementById('modeManageModal').classList.add('show');
+    renderModeList();
+  }
+
+  function closeModeManage() {
+    document.getElementById('modeManageModal').classList.remove('show');
+    editingModeId = null;
+  }
+
+  function renderModeList() {
+    const container = document.getElementById('modeList');
+    const countEl = document.getElementById('modeCount');
+    countEl.textContent = `共 ${launchModeList.length} 个测发模式`;
+
+    if (launchModeList.length === 0) {
+      container.innerHTML = '<div class="mode-empty">暂无测发模式，请在下方添加</div>';
+      return;
+    }
+
+    container.innerHTML = launchModeList.map(mode => {
+      const isEditing = editingModeId === mode.launchModeId;
+      const isUsed = isModeInUse(mode.launchModeName);
+      const statusText = mode.status === '1' ? '启用' : '禁用';
+      const statusClass = mode.status === '1' ? 'enabled' : 'disabled';
+
+      if (isEditing) {
+        return `
+                <div class="mode-item">
+                  <div class="mode-info" style="flex:1;flex-wrap:wrap;gap:8px;">
+                    <input id="modeEditName_${mode.launchModeId}" class="mode-edit-input" value="${escapeHtml(mode.launchModeName)}" placeholder="名称" style="width:120px;" />
+                    <input id="modeEditCode_${mode.launchModeId}" class="mode-edit-input" value="${escapeHtml(mode.launchModeCode || '')}" placeholder="编码" style="width:100px;" />
+                    <input id="modeEditDesc_${mode.launchModeId}" class="mode-edit-input" value="${escapeHtml(mode.description || '')}" placeholder="描述" style="width:150px;" />
+                  </div>
+                  <div class="mode-edit-actions">
+                    <button class="confirm-btn" onclick="confirmEditMode('${mode.launchModeId}')">确认</button>
+                    <button class="cancel-btn" onclick="cancelEditMode()">取消</button>
+                  </div>
+                </div>
+              `;
+      }
+
+      return `
+              <div class="mode-item">
+                <div class="mode-info">
+                  <span class="mode-name">${escapeHtml(mode.launchModeName)}</span>
+                  ${mode.launchModeCode ? `<span class="mode-code">${escapeHtml(mode.launchModeCode)}</span>` : ''}
+                  ${mode.description ? `<span class="mode-desc">${escapeHtml(mode.description)}</span>` : ''}
+                  <span class="mode-status ${statusClass}">${statusText}</span>
+                  <span class="mode-diagram-count">${mode.diagrams ? mode.diagrams.length : 0} 个流程</span>
+                </div>
+                <div class="mode-actions">
+                  <button class="edit-btn" onclick="startEditMode('${mode.launchModeId}')">编辑</button>
+                  <button class="toggle-btn ${mode.status === '1' ? '' : 'disabled-action'}" onclick="toggleModeStatus('${mode.launchModeId}')">
+                    ${mode.status === '1' ? '禁用' : '启用'}
+                  </button>
+                  <button class="delete-btn" onclick="deleteMode('${mode.launchModeId}')" ${isUsed ? 'disabled title="该模式正在使用中，无法删除"' : ''}>
+                    删除
+                  </button>
+                </div>
+              </div>
+            `;
+    }).join('');
+  }
+
+  function isModeInUse(modeName) {
+    let inUse = false;
+    launchModeMap.forEach(value => {
+      if (value === modeName) inUse = true;
+    });
+    return inUse;
+  }
+
+  function startEditMode(modeId) {
+    editingModeId = modeId;
+    renderModeList();
+    setTimeout(() => {
+      const input = document.getElementById(`modeEditName_${modeId}`);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 100);
+  }
+
+  function cancelEditMode() {
+    editingModeId = null;
+    renderModeList();
+  }
+
+  async function confirmEditMode(modeId) {
+    const nameInput = document.getElementById(`modeEditName_${modeId}`);
+    const codeInput = document.getElementById(`modeEditCode_${modeId}`);
+    const descInput = document.getElementById(`modeEditDesc_${modeId}`);
+    const newName = nameInput.value.trim();
+    const newCode = codeInput.value.trim();
+    const newDesc = descInput.value.trim();
+
+    if (!newName) {
+      showToast('模式名称不能为空', 'error');
+      return;
+    }
+
+    const mode = launchModeList.find(m => m.launchModeId === modeId);
+    if (!mode) {
+      showToast('未找到该模式', 'error');
+      return;
+    }
+
+    if (newName === mode.launchModeName && newCode === (mode.launchModeCode || '') && newDesc === (mode.description ||
+            '')) {
+      editingModeId = null;
+      renderModeList();
+      return;
+    }
+
+    if (newName !== mode.launchModeName) {
+      const exists = launchModeList.some(m => m.launchModeId !== modeId && m.launchModeName === newName);
+      if (exists) {
+        showToast('该模式名称已存在', 'error');
+        return;
+      }
+    }
+
+    try {
+      showLoading('正在更新测发模式...');
+      const api = getAxios();
+
+      const oldName = mode.launchModeName;
+      await api.put('/launchMode/update', {
+        launchModeId: modeId,
+        launchModeName: newName,
+        launchModeCode: newCode,
+        description: newDesc,
+        sortOrder: mode.sortOrder,
+        status: mode.status
+      });
+
+      if (oldName !== newName) {
+        launchModeMap.forEach((value, key) => {
+          if (value === oldName) {
+            launchModeMap.set(key, newName);
+          }
+        });
+      }
+
+      mode.launchModeName = newName;
+      mode.launchModeCode = newCode;
+      mode.description = newDesc;
+
+      editingModeId = null;
+      await loadLaunchModes();
+      renderModeList();
+      renderTable();
+      showToast(`模式已更新`, 'success');
+    } catch (error) {
+      showToast(`更新失败: ${error.message}`, 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  async function addNewMode() {
+    const nameInput = document.getElementById('newModeName');
+    const codeInput = document.getElementById('newModeCode');
+    const descInput = document.getElementById('newModeDesc');
+    const name = nameInput.value.trim();
+    const code = codeInput.value.trim();
+    const description = descInput.value.trim();
+
+    if (!name) {
+      showToast('请输入模式名称', 'error');
+      return;
+    }
+
+    if (launchModeList.some(m => m.launchModeName === name)) {
+      showToast('该模式已存在', 'error');
+      return;
+    }
+
+    try {
+      showLoading('正在添加测发模式...');
+      const api = getAxios();
+
+      await api.post('/launchMode/save', {
+        launchModeName: name,
+        launchModeCode: code || null,
+        description: description || null,
+        sortOrder: launchModeList.length + 1,
+        status: '1'
+      });
+
+      nameInput.value = '';
+      codeInput.value = '';
+      descInput.value = '';
+      await loadLaunchModes();
+      renderModeList();
+      renderTable();
+      showToast(`已添加模式: ${name}`, 'success');
+    } catch (error) {
+      showToast(`添加失败: ${error.message}`, 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  async function toggleModeStatus(modeId) {
+    try {
+      showLoading('正在切换状态...');
+      const api = getAxios();
+      await api.put(`/launchMode/${modeId}/status`);
+
+      await loadLaunchModes();
+      renderModeList();
+      showToast(`状态已切换`, 'success');
+    } catch (error) {
+      showToast(`操作失败: ${error.message}`, 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  async function deleteMode(modeId) {
+    const mode = launchModeList.find(m => m.launchModeId === modeId);
+    if (!mode) return;
+
+    if (isModeInUse(mode.launchModeName)) {
+      showToast('该模式正在使用中，无法删除', 'error');
+      return;
+    }
+
+    if (!confirm(`确定要删除测发模式 "${mode.launchModeName}" 吗？`)) return;
+
+    try {
+      showLoading('正在删除测发模式...');
+      const api = getAxios();
+      await api.delete(`/launchMode/${modeId}`);
+
+      await loadLaunchModes();
+      renderModeList();
+      renderTable();
+      showToast(`已删除模式: ${mode.launchModeName}`, 'success');
+    } catch (error) {
+      showToast(`删除失败: ${error.message}`, 'error');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // =====================================================================
+  // 初始化
+  // =====================================================================
+  function init() {
+    addDebugLog('页面初始化开始');
+    renderTable();
+
+    document.getElementById('modeManageModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModeManage();
+    });
+
+    loadLaunchModes().then(() => {
+      connectMagicDrawAndLoadDiagrams();
+    });
+
+    addDebugLog('页面初始化完成');
+  }
+
+  // 暴露全局函数
+  window.viewFlow = viewFlow;
+  window.viewSimulationHistory = viewSimulationHistory;
+  window.checkRunWithContext = checkRunWithContext;
+  window.syncSingleDiagram = syncSingleDiagram;
+  window.syncAllToDatabase = syncAllToDatabase;
+  window.refreshFromMagicDraw = refreshFromMagicDraw;
+  window.saveLaunchMode = saveLaunchMode;
+  window.onLaunchModeChange = onLaunchModeChange;
+  window.openModeManage = openModeManage;
+  window.closeModeManage = closeModeManage;
+  window.addNewMode = addNewMode;
+  window.startEditMode = startEditMode;
+  window.confirmEditMode = confirmEditMode;
+  window.cancelEditMode = cancelEditMode;
+  window.deleteMode = deleteMode;
+  window.toggleModeStatus = toggleModeStatus;
+  window.searchFlows = searchFlows;
+  window.resetSearch = resetSearch;
+  window.toggleDebug = toggleDebug;
+  window.goToPage = goToPage;
+  window.onSearchKeyup = onSearchKeyup;
+
+  init();
+</script>
+</body>
+</html>

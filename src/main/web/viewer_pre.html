@@ -1,0 +1,2906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MagicDraw 动态仿真同步看板 · 前端控制台</title>
+    <script src="lib/d3.v7.min.js"></script>
+    <script src="lib/axios.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #d0d5da;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── Canvas ── */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #c4ccd4;
+            overflow: hidden;
+        }
+
+        svg#diagramSvg {
+            display: block;
+            cursor: grab;
+            background: #ffffff;
+            box-shadow: 0 0 0 1px #aaa, 0 6px 24px rgba(0,0,0,0.15);
+            margin: 24px;
+            border-radius: 0;
+        }
+        svg#diagramSvg:active { cursor: grabbing; }
+
+        /* ── UML 活动图节点样式 ── */
+        .uml-action {
+            fill: #e8dfc0;
+            stroke: #6b5e40;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: filter .12s;
+        }
+        .uml-action:hover { filter: brightness(.95); }
+
+        .uml-action.sim-active { fill: #ffe0e0 !important; stroke: #b81c1c !important; stroke-width: 2.5 !important; }
+        .uml-action.node-done  { fill: #d8f0d8 !important; stroke: #27682a !important; stroke-width: 2   !important; }
+        .uml-action.selected   { stroke: #d45000 !important; stroke-width: 3 !important; }
+
+        .uml-bar {
+            fill: #1e1e1e;
+            stroke: none;
+            cursor: pointer;
+        }
+        .uml-bar.sim-active { fill: #b81c1c !important; }
+        .uml-bar.node-done  { fill: #27682a !important; }
+
+        .uml-initial {
+            fill: #1e1e1e;
+            stroke: none;
+            cursor: pointer;
+        }
+        .uml-initial.sim-active { fill: #b81c1c !important; }
+        .uml-initial.node-done  { fill: #27682a !important; }
+
+        .uml-final-ring {
+            fill: none;
+            stroke: #1e1e1e;
+            stroke-width: 2;
+            cursor: pointer;
+        }
+        .uml-final-dot  { fill: #1e1e1e; stroke: none; cursor: pointer; }
+        .uml-final-ring.sim-active { stroke: #b81c1c !important; }
+        .uml-final-dot.sim-active  { fill:  #b81c1c !important; }
+        .uml-final-ring.node-done  { stroke: #27682a !important; }
+        .uml-final-dot.node-done   { fill:  #27682a !important; }
+
+        [data-selected="true"] .uml-action,
+        [data-selected="true"] .uml-bar,
+        [data-selected="true"] .uml-initial,
+        [data-selected="true"] .uml-final-ring {
+            stroke: #d45000 !important;
+            stroke-width: 3 !important;
+        }
+
+        /* ── 连线 ── */
+        .uml-edge {
+            fill: none;
+            stroke: #444;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: stroke .15s, stroke-width .15s;
+        }
+        .uml-edge.dashed { stroke-dasharray: 7 4; }
+        .uml-edge:hover  { stroke: #d45000; stroke-width: 2; }
+        .uml-edge.edge-active { stroke: #d45000 !important; stroke-width: 2.2 !important; marker-end: url(#arr-a) !important; }
+        .uml-edge.edge-done   { stroke: #27682a !important; stroke-width: 2   !important; marker-end: url(#arr-d) !important; }
+        .uml-edge.selected    { stroke: #d45000 !important; stroke-width: 2.5 !important; }
+
+        .edge-hit { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; }
+
+        .edge-lbl {
+            font-size: 11px;
+            fill: #3a3020;
+            font-family: 'Segoe UI', sans-serif;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .node-lbl {
+            font-size: 11.5px;
+            fill: #1e140a;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 400;
+            pointer-events: none;
+            user-select: none;
+            dominant-baseline: middle;
+            text-anchor: middle;
+        }
+
+        .flow-particle { pointer-events: none; }
+
+        /* ── 右侧面板 ── */
+        .info-panel {
+            width: 380px;
+            background: white;
+            border-left: 1px solid #ccd0d6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .panel-header {
+            padding: 18px 18px 12px;
+            border-bottom: 1px solid #edf0f4;
+            background: #f7f8fa;
+            flex-shrink: 0;
+        }
+        .panel-header h2 { font-size: 14.5px; font-weight: 600; color: #1e293b; }
+        .panel-header p  { font-size: 11px; color: #7e8c9e; margin-top: 3px; }
+        .panel-content   { flex: 1; padding: 14px 18px 4px; overflow-y: auto; }
+        .info-section    { margin-bottom: 14px; border-bottom: 1px solid #f0f2f5; padding-bottom: 10px; }
+        .info-section h3 { font-size: 10px; font-weight: 700; color: #5b6e8c; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+        .info-row        { display: flex; margin-bottom: 5px; font-size: 12px; }
+        .info-label      { width: 70px; font-weight: 600; color: #8f9eb2; flex-shrink: 0; }
+        .info-value      { flex: 1; color: #1f2a44; word-break: break-word; }
+        .badge           { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .badge-active    { background: #FFEBEE; color: #b81c1c; }
+        .badge-done      { background: #E8F5E9; color: #27682a; }
+        .badge-idle      { background: #eceff3; color: #546e7a; }
+        .badge-waiting   { background: #FFF8E1; color: #F57F17; }
+        .empty-state     { text-align: center; padding: 40px 16px; color: #94a3b8; font-size: 12px; }
+
+        /* ── 节点配置编辑区 ── */
+        .config-editor {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .config-editor .field-group {
+            margin-bottom: 8px;
+        }
+        .config-editor .field-group:last-of-type {
+            margin-bottom: 10px;
+        }
+        .config-editor label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+        .config-editor input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .config-editor input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        .config-editor input:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+        .config-editor .submit-btn {
+            width: 100%;
+            padding: 7px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .config-editor .submit-btn:hover { background: #2563eb; }
+        .config-editor .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .config-editor .submit-status {
+            font-size: 11px;
+            margin-top: 6px;
+            color: #64748b;
+        }
+        .config-editor .submit-status.success { color: #16a34a; }
+        .config-editor .submit-status.error { color: #dc2626; }
+        .config-editor .submit-status.loading { color: #3b82f6; }
+
+        /* ── 子流程选择器 ── */
+        .subprocess-selector {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        .subprocess-selector label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .subprocess-selector select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+        }
+        .subprocess-selector select:focus { outline: none; border-color: #3b82f6; }
+        .subprocess-selector .current-binding {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+            padding: 6px 8px;
+            background: #e0f2fe;
+            border-radius: 4px;
+        }
+        .subprocess-selector .bind-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .subprocess-selector .bind-btn:hover    { background: #2563eb; }
+        .subprocess-selector .bind-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* ── 运行变量表 ── */
+        .runtime-card {
+            margin: 0 18px 14px;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            background: #ffffff;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .runtime-card-header {
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .runtime-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .runtime-table th, .runtime-table td { padding: 8px 10px; border-bottom: 1px solid #eef2f7; text-align: left; }
+        .runtime-table th { color: #64748b; background: #fbfdff; font-weight: 700; }
+        .runtime-value          { font-weight: 700; color: #2563eb; }
+        .runtime-value.false, .runtime-value.error { color: #dc2626; }
+        .runtime-value.true     { color: #16a34a; }
+
+        /* ── 事件日志 ── */
+        .event-log-box {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px 12px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.65;
+            color: #334155;
+            background: #fbfdff;
+        }
+        .log-line             { white-space: pre-wrap; border-bottom: 1px dashed #eef2f7; padding: 3px 0; }
+        .log-line.error       { color: #dc2626; font-weight: 700; }
+        .log-line.warn        { color: #d97706; }
+        .replay-badge {
+            display: inline-block; padding: 3px 8px; border-radius: 999px;
+            background: #eef2ff; color: #1d4ed8; font-weight: 700; margin-left: 6px;
+        }
+
+        /* ── 顶部控制栏 ── */
+        .sim-control-bar {
+            position: fixed;
+            top: 12px; left: 280px; right: 398px;
+            background: white;
+            border-radius: 48px;
+            padding: 4px 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 200;
+            border: 1px solid #dde3ea;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            white-space: nowrap;
+            max-width: calc(100vw - 280px - 398px - 20px);
+        }
+        .speed-control {
+            display: flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 32px;
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+            flex-shrink: 0;
+        }
+        .speed-label  { font-size: 11px; font-weight: 600; color: #475569; }
+        .speed-control input[type=range] { width: 60px; accent-color: #3b82f6; }
+        .speed-value  { min-width: 30px; font-size: 11px; font-weight: 700; color: #1e293b; }
+
+        .sim-status           { padding: 3px 8px; border-radius: 32px; font-size: 11px; font-weight: 600; background: #f1f3f6; color: #475569; flex-shrink: 0; }
+        .sim-status.connected { background: #E3F2FD; color: #0b5e8a; }
+        .sim-status.running   { background: #FFF4E5; color: #e65100; }
+        .sim-status.ended     { background: #E8F5E9; color: #1e5e2d; }
+
+        .ctrl-btn         { padding: 3px 10px; border: none; border-radius: 32px; font-weight: 600; font-size: 11px; cursor: pointer; transition: all .2s; background: #f1f5f9; color: #1e293b; flex-shrink: 0; }
+        .ctrl-btn-primary { background: #3b82f6; color: white; }
+        .ctrl-btn-primary:hover { background: #2563eb; }
+        .ctrl-btn-danger  { background: #ef4444; color: white; }
+        .ctrl-btn-danger:hover  { background: #dc2626; }
+        .ctrl-btn-warning { background: #f97316; color: white; }
+        .ctrl-btn-warning:hover { background: #ea580c; }
+        .ctrl-btn:active  { transform: scale(.96); }
+
+        /* ── 底部工具栏 ── */
+        .toolbar {
+            position: fixed;
+            bottom: 22px; right: 398px;
+            background: white; border-radius: 48px; padding: 5px 14px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.1);
+            display: flex; gap: 8px; z-index: 100; border: 1px solid #e2e8f0;
+        }
+        .toolbar button { background: #f8fafc; border: none; padding: 5px 10px; border-radius: 30px; font-size: 11.5px; cursor: pointer; font-weight: 500; color: #334155; }
+        .toolbar button:hover { background: #eef2ff; color: #1e40af; }
+        .zoom-level { background: #f1f5f9; padding: 5px 10px; border-radius: 30px; font-size: 11.5px; font-weight: bold; color: #0f172a; }
+
+        /* ── 图例 ── */
+        .legend {
+            position: fixed; bottom: 22px; left: 22px;
+            background: rgba(255,255,255,.97);
+            border-radius: 10px; padding: 10px 14px; font-size: 11px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08); border: 1px solid #e2e8f0; z-index: 100;
+        }
+        .legend-title { font-weight: 700; color: #2c3e66; margin-bottom: 6px; }
+        .legend-item  { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: #334155; }
+        .legend-swatch { width: 20px; height: 12px; border-radius: 3px; border: 1.5px solid; }
+        .legend-line   { width: 24px; height: 3px; border-radius: 3px; }
+
+        /* ── 返回按钮 ── */
+        .back-btn {
+            position: fixed; top: 18px; left: 24px;
+            background: white; border: 1px solid #cfdfed; border-radius: 40px;
+            padding: 6px 16px; cursor: pointer; font-size: 12px; color: #2c3e50;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 100; font-weight: 500;
+        }
+        .back-btn:hover { background: #f8fafc; border-color: #5b8cbf; }
+
+        /* ── 通知 Toast ── */
+        .notification {
+            position: fixed; bottom: 84px; right: 398px;
+            background: #1e293b; color: white;
+            padding: 7px 18px; border-radius: 40px; font-size: 12px;
+            z-index: 300; animation: fadeOut 2.5s forwards; pointer-events: none;
+        }
+        @keyframes fadeOut {
+            0%   { opacity: 1; transform: translateY(0); }
+            70%  { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-8px); }
+        }
+
+        .db-status {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .db-status.online { background: #E8F5E9; color: #27682a; }
+        .db-status.offline { background: #FFEBEE; color: #b81c1c; }
+        .db-status.recording { background: #FFF3E0; color: #e65100; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* ── 统计高亮样式 ── */
+        .info-section.active-stats {
+            border-left: 3px solid #e65100;
+            padding-left: 10px;
+            background: #fff8e1;
+            border-radius: 0 6px 6px 0;
+        }
+        .highlight-wait {
+            color: #e65100;
+            font-weight: 700;
+        }
+
+        /* ── 滚动条美化 ── */
+        .info-panel::-webkit-scrollbar,
+        .event-log-box::-webkit-scrollbar,
+        .panel-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .info-panel::-webkit-scrollbar-track,
+        .event-log-box::-webkit-scrollbar-track,
+        .panel-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .info-panel::-webkit-scrollbar-thumb,
+        .event-log-box::-webkit-scrollbar-thumb,
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .info-panel::-webkit-scrollbar-thumb:hover,
+        .event-log-box::-webkit-scrollbar-thumb:hover,
+        .panel-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* ── 左侧指标树面板 ── */
+        .indicator-panel {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #ccd0d6;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width 0.3s ease, margin 0.3s ease;
+            z-index: 150;
+        }
+        .indicator-panel.collapsed {
+            width: 0;
+            border-right: none;
+        }
+        .indicator-header {
+            padding: 14px 12px;
+            border-bottom: 1px solid #edf0f4;
+            background: #f7f8fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .indicator-header h3 { font-size: 13px; font-weight: 600; color: #1e293b; margin: 0; }
+        .indicator-toggle {
+            background: none; border: none; font-size: 12px; color: #64748b;
+            cursor: pointer; padding: 2px 4px; border-radius: 4px;
+        }
+        .indicator-toggle:hover { background: #e2e8f0; }
+        .indicator-search {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f2f5;
+            flex-shrink: 0;
+        }
+        .indicator-search input {
+            width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 12px; background: #f8fafc;
+            outline: none; transition: border-color 0.2s;
+        }
+        .indicator-search input:focus { border-color: #3b82f6; }
+        .indicator-tree {
+            flex: 1; overflow-y: auto; padding: 6px 0;
+            font-size: 12px; user-select: none;
+        }
+        .tree-node-content {
+            display: flex; align-items: center;
+            padding: 5px 10px 5px 12px;
+            cursor: pointer; transition: background 0.12s;
+            gap: 5px;
+        }
+        .tree-node-content:hover { background: #f1f5f9; }
+        .tree-node-content.matched { background: #fff8e1; }
+        .tree-toggle {
+            width: 14px; height: 14px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 10px; color: #64748b; cursor: pointer;
+            flex-shrink: 0; transition: transform 0.2s;
+        }
+        .tree-toggle.collapsed { transform: rotate(-90deg); }
+        .tree-toggle.leaf { visibility: hidden; }
+        .tree-checkbox {
+            width: 14px; height: 14px; cursor: pointer;
+            flex-shrink: 0; accent-color: #3b82f6; margin: 0;
+        }
+        .tree-label {
+            color: #334155; flex: 1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 12px;
+        }
+        .tree-children { overflow: hidden; transition: max-height 0.25s ease; }
+        .tree-children.collapsed { max-height: 0; }
+        .indicator-footer {
+            padding: 10px 12px; border-top: 1px solid #edf0f4;
+            display: flex; gap: 8px; flex-shrink: 0;
+        }
+        .indicator-footer button {
+            flex: 1; padding: 7px; border: none; border-radius: 6px;
+            font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+        }
+        .indicator-footer .btn-primary { background: #3b82f6; color: white; }
+        .indicator-footer .btn-primary:hover { background: #2563eb; }
+        .indicator-footer .btn-secondary { background: #f1f5f9; color: #475569; }
+        .indicator-footer .btn-secondary:hover { background: #e2e8f0; }
+        .indicator-badge {
+            display: inline-block; padding: 1px 6px; border-radius: 10px;
+            background: #dbeafe; color: #1d4ed8; font-size: 10px; font-weight: 700; margin-left: auto;
+        }
+        .back-btn { transition: left 0.3s ease; }
+
+    </style>
+    <base target="_blank">
+</head>
+<body>
+
+<!-- 左侧指标树面板 -->
+<div class="indicator-panel" id="indicatorPanel">
+    <div class="indicator-header">
+        <h3>📊 指标树绑定</h3>
+        <button class="indicator-toggle" onclick="toggleIndicatorPanel()" title="折叠/展开">◀</button>
+    </div>
+    <div class="indicator-search">
+        <input type="text" id="indicatorSearch" placeholder="搜索指标..." oninput="searchIndicators(this.value)">
+    </div>
+    <div class="indicator-tree" id="indicatorTree">
+        <!-- 动态渲染 -->
+    </div>
+    <div class="indicator-footer">
+        <button class="btn-primary" onclick="confirmIndicatorBind()">✅ 确认绑定</button>
+        <button class="btn-secondary" onclick="clearIndicatorSelection()">清空</button>
+    </div>
+</div>
+
+
+<button class="back-btn" id="backBtn" onclick="goBack()">← 返回仪表板</button>
+
+<!-- 顶部仿真控制栏 -->
+<div class="sim-control-bar">
+    <span id="simStatus" class="sim-status">⚪ 未连接</span>
+    <span id="dbStatus" class="db-status offline">数据库离线</span>
+
+    <div class="speed-control">
+        <span class="speed-label">速度</span>
+        <input id="speedSlider" type="range" min="0.25" max="3" step="0.25" value="1"
+               oninput="onSpeedChange(this.value)">
+        <span id="speedValue" class="speed-value">1.0x</span>
+    </div>
+
+    <button id="connectBtn"      class="ctrl-btn"                onclick="toggleConnection()">🔌 连接</button>
+    <button id="startSimBtn"     class="ctrl-btn ctrl-btn-primary" onclick="sendStartSimulation()"        disabled>▶ 开始</button>
+    <button id="startContextBtn" class="ctrl-btn ctrl-btn-primary" onclick="sendStartSimulationWithContext()" disabled>▶ Context</button>
+    <button id="stopSimBtn"      class="ctrl-btn ctrl-btn-danger"  onclick="sendStopSimulation()"         disabled>⏹ 终止</button>
+    <button id="startConfigBtn"  class="ctrl-btn ctrl-btn-warning" onclick="sendStartSimulationConfig()"  disabled>🛠 配置</button>
+    <button id="replayBtn"       class="ctrl-btn"                  onclick="requestLatestReplay()"        disabled>🎞 回放</button>
+</div>
+
+<div class="canvas-container">
+    <div id="loadingMsg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+         background:white;padding:24px 40px;border-radius:28px;box-shadow:0 8px 20px rgba(0,0,0,0.1);">
+        📂 正在加载流程图模型 ...
+    </div>
+    <svg id="diagramSvg" style="display:none;"></svg>
+</div>
+
+<div class="toolbar">
+    <button onclick="zoomIn()">➕ 放大</button>
+    <span id="zoomLevel" class="zoom-level">100%</span>
+    <button onclick="zoomOut()">🔍 缩小</button>
+    <button onclick="resetView()">⟳ 复位</button>
+    <button onclick="fitView()">⛶ 适应画布</button>
+    <button onclick="getBDDParameters(null, getUrlParam('diagramId'))">📊 读取BDD参数</button>
+</div>
+
+<div class="info-panel">
+    <div class="panel-header">
+        <h2 id="diagramTitle">📋 仿真流程跟踪</h2>
+        <p>点击节点/连线 · 实时同步 MagicDraw</p>
+    </div>
+    <div class="panel-content" id="panelContent">
+        <div class="empty-state">✨ 点击任意节点或连线<br>查看详细属性</div>
+    </div>
+
+
+
+    <div class="runtime-card">
+        <div class="runtime-card-header">🎞 仿真回放</div>
+        <div id="replayInfo" style="font-size:12px;color:#334155;margin-top:0;padding:0 12px 10px;">暂无回放数据</div>
+    </div>
+
+    <div class="runtime-card">
+        <div class="runtime-card-header">🧾 事件日志</div>
+        <div id="eventLogBox" class="event-log-box">
+            <div class="log-line">等待连接 MagicDraw 插件...</div>
+        </div>
+    </div>
+</div>
+
+<div class="legend">
+    <div class="legend-title">🔖 仿真图例</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#ffe0e0;border-color:#b81c1c;"></div>当前执行节点</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#d8f0d8;border-color:#27682a;"></div>已完成节点</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#e8dfc0;border-color:#6b5e40;"></div>待执行节点</div>
+    <div class="legend-item"><div class="legend-line" style="background:#d45000;"></div>流动中 (边)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#27682a;"></div>已完成边</div>
+</div>
+
+<script>
+    // ========================= 全局状态 =========================
+    let currentData     = null;
+    let zoomGroup       = null;
+    let zoomBehavior    = null;
+    let currentZoom     = 1;
+    let isConnected     = false;
+    let ws              = null;
+    let diagramRequested = false;
+    let simSpeed        = 1.0;
+
+    // ★ 新增：节点配置缓存
+    const nodeConfigCache = new Map();  // key: taskName, value: config对象
+
+    // ★ 新增：配置加载回调
+    window._configCallbacks = {};
+
+    // 回放状态
+    let replayTimer     = null;
+    let replayEvents    = [];
+    let replayIndex     = 0;
+    let replayStartTime = 0;
+    let replaySpeed     = 1.0;
+
+    // 仿真动态数据
+    const activeNodes      = new Set();
+    const visitedNodes     = new Set();
+    const visitedEdges     = new Set();
+    const deactivateTimers = new Map();
+    const particleHandles  = new Map();
+
+    // 子流程列表缓存
+    let availableActivities = [];
+
+    // ========== 节点统计数据缓存 ==========
+    const nodeStatsCache = {};
+
+    // ========== 节点配置缓存 ==========
+    let currentNodeConfig = null;
+    let currentConfigTaskName = null;
+
+    // 配置常量
+    const BASE_MIN_ACTIVE_MS    = 800;
+    const BASE_PARTICLE_DURATION = 500;
+    const PARTICLE_RADIUS       = 5;
+
+    // ========================= 数据库相关 =========================
+    const API_BASE_URL = 'http://localhost:8001';
+    let currentRunId = null;
+    let sequenceCounter = 0;
+    let isDbOnline = false;
+    let isRecording = false;
+    let runStartTime = null;
+    let lastVariableTime = null;
+    let diagramId = getUrlParam('diagramId') || '';
+    let diagramName = getUrlParam('name') || '未命名流程';
+
+    // ========================= 节点样式映射 =========================
+    const NODE_STYLE_MAP = {
+        CallBehaviorActionImpl: { shape: 'action',   rake: true  },
+        ActivityFinalNodeImpl:  { shape: 'final'               },
+        InitialNodeImpl:        { shape: 'initial'             },
+        ActionImpl:             { shape: 'action'              },
+        DecisionNodeImpl:       { shape: 'diamond'             },
+        ForkNodeImpl:           { shape: 'bar',   label: '分叉' },
+        JoinNodeImpl:           { shape: 'bar',   label: '汇合' },
+        OutputPinImpl:          { shape: 'pin'                 },
+        InputPinImpl:           { shape: 'pin'                 },
+        default:                { shape: 'action'              }
+    };
+    function getNodeStyle(type) { return NODE_STYLE_MAP[type] || NODE_STYLE_MAP.default; }
+
+    // ========================= 辅助函数 =========================
+    function getUrlParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+
+    function showNotification(msg, isError = false) {
+        const div = document.createElement('div');
+        div.className = 'notification';
+        div.textContent = msg;
+        if (isError) div.style.backgroundColor = '#c62828';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2800);
+    }
+
+    function getMinActiveMs()      { return BASE_MIN_ACTIVE_MS    / simSpeed; }
+    function getParticleDuration() { return BASE_PARTICLE_DURATION / simSpeed; }
+
+    function calculateBounds() {
+        if (!currentData) return { minX: 0, minY: 0, width: 1000, height: 700 };
+        let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+        currentData.nodes.forEach(n => {
+            minX = Math.min(minX, n.x); minY = Math.min(minY, n.y);
+            maxX = Math.max(maxX, n.x + n.w); maxY = Math.max(maxY, n.y + n.h);
+        });
+        currentData.edges.forEach(e => (e.points || []).forEach(p => {
+            minX = Math.min(minX, p[0]); minY = Math.min(minY, p[1]);
+            maxX = Math.max(maxX, p[0]); maxY = Math.max(maxY, p[1]);
+        }));
+        const pad = 90;
+        return { minX: minX - pad, minY: minY - pad, width: maxX - minX + pad * 2, height: maxY - minY + pad * 2 };
+    }
+
+    function allEls(id) {
+        return zoomGroup ? [...zoomGroup.querySelectorAll(`[data-id="${id}"]`)] : [];
+    }
+
+    function setSimClass(id, add, remove) {
+        allEls(id).forEach(el => {
+            remove.forEach(c => el.classList.remove(c));
+            if (add) el.classList.add(add);
+        });
+    }
+
+    // ========================= 节点激活 / 失活 =========================
+    function activateNode(nodeId) {
+        if (!zoomGroup) return;
+        activeNodes.add(nodeId);
+        if (deactivateTimers.has(nodeId)) {
+            clearTimeout(deactivateTimers.get(nodeId));
+            deactivateTimers.delete(nodeId);
+        }
+        setSimClass(nodeId, 'sim-active', ['node-done']);
+
+        // ★ 新增：记录节点开始执行
+        if (isRecording && currentRunId) {
+            // 获取节点信息
+            const node = currentData?.nodes?.find(n => n.id === nodeId);
+            if (node) {
+                recordNodeStart(currentRunId, nodeId);
+                // 如果有变量，也记录
+                if (node.variables) {
+                    recordNodeVars(currentRunId, nodeId, node.name || '', node.variables, false, false);
+                }
+            }
+        }
+
+        if (currentData) {
+            currentData.edges.forEach(edge => {
+                if (edge.targetId !== nodeId) return;
+                const pathEl = zoomGroup.querySelector(`.uml-edge[data-id="${edge.id}"]`);
+                if (!pathEl) return;
+                pathEl.classList.remove('edge-done');
+                pathEl.classList.add('edge-active');
+                if (particleHandles.has(edge.id)) particleHandles.get(edge.id).cancel();
+                particleHandles.set(edge.id, spawnParticle(pathEl, '#d45000'));
+            });
+        }
+        updatePanelIfSelected(nodeId, true);
+    }
+
+    function deactivateNode(nodeId) {
+        if (!zoomGroup) return;
+        const timer = setTimeout(() => {
+            deactivateTimers.delete(nodeId);
+            activeNodes.delete(nodeId);
+            visitedNodes.add(nodeId);
+            setSimClass(nodeId, 'node-done', ['sim-active']);
+
+            // ★ 新增：记录节点完成
+            if (isRecording && currentRunId) {
+                recordNodeFinish(currentRunId, nodeId);
+
+                // 记录节点的最终变量值
+                const node = currentData?.nodes?.find(n => n.id === nodeId);
+                if (node && node.variables) {
+                    recordNodeVars(currentRunId, nodeId, node.name || '', node.variables, false, true);
+                }
+            }
+
+            if (currentData) {
+                currentData.edges.forEach(edge => {
+                    if (edge.targetId !== nodeId) return;
+                    if (particleHandles.has(edge.id)) {
+                        particleHandles.get(edge.id).cancel();
+                        particleHandles.delete(edge.id);
+                    }
+                    visitedEdges.add(edge.id);
+                    const pathEl = zoomGroup.querySelector(`.uml-edge[data-id="${edge.id}"]`);
+                    if (pathEl) {
+                        pathEl.classList.remove('edge-active');
+                        pathEl.classList.add('edge-done');
+                    }
+                });
+            }
+            updatePanelIfSelected(nodeId, false);
+        }, getMinActiveMs());
+        deactivateTimers.set(nodeId, timer);
+    }
+    function spawnParticle(pathEl, color) {
+        if (!pathEl || !zoomGroup) return { cancel: () => {} };
+        let alive = true;
+        let dot = null;
+
+        dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('r', PARTICLE_RADIUS);
+        dot.setAttribute('fill', color);
+        dot.setAttribute('class', 'flow-particle');
+        dot.style.filter = `drop-shadow(0 0 3px ${color})`;
+        zoomGroup.appendChild(dot);
+
+        const len = pathEl.getTotalLength();
+        const t0  = performance.now();
+
+        (function step(now) {
+            if (!alive) { if (dot) dot.remove(); return; }
+            let t = Math.min((now - t0) / getParticleDuration(), 1);
+            const ease = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            const pt = pathEl.getPointAtLength(ease * len);
+            dot.setAttribute('cx', pt.x);
+            dot.setAttribute('cy', pt.y);
+            dot.setAttribute('opacity', .4 + .6 * Math.sin(t * Math.PI));
+            if (t < 1) {
+                requestAnimationFrame(step);
+            } else {
+                if (dot) dot.remove();
+            }
+        })(performance.now());
+
+        return { cancel() { alive = false; if (dot) dot.remove(); } };
+    }
+
+    function clearAllActiveStates() {
+        deactivateTimers.forEach(clearTimeout);
+        deactivateTimers.clear();
+        particleHandles.forEach(h => h.cancel());
+        particleHandles.clear();
+        if (zoomGroup) {
+            zoomGroup.querySelectorAll('.sim-active,.node-done').forEach(e => e.classList.remove('sim-active', 'node-done'));
+            zoomGroup.querySelectorAll('.edge-active,.edge-done').forEach(e => e.classList.remove('edge-active', 'edge-done'));
+        }
+        activeNodes.clear();
+        visitedNodes.clear();
+        visitedEdges.clear();
+    }
+
+    function updatePanelIfSelected(nodeId, isActive) {
+        if (!zoomGroup?.querySelector(`[data-id="${nodeId}"][data-selected="true"]`) || !currentData) return;
+        const node = currentData.nodes.find(n => n.id === nodeId);
+        if (node) showNodePanel(node, isActive);
+    }
+
+    // ========================= SVG 初始化与渲染 =========================
+    async function loadJSON() {
+        diagramId = getUrlParam('diagramId') || '';
+        diagramName = getUrlParam('name') || '未命名流程';
+        document.getElementById('diagramTitle').innerHTML = '📋 ' + escapeHtml(diagramName);
+
+        checkDbConnection();
+
+        if (diagramId) {
+            document.getElementById('loadingMsg').textContent = '📡 正在从 MagicDraw 获取流程图 ...';
+            connectWS();
+            return;
+        }
+
+        const jsonFile = getUrlParam('file') || 'model1.json';
+        try {
+            const resp = await fetch(jsonFile);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            currentData = await resp.json();
+            if (currentData.nodes) currentData.nodes = currentData.nodes.filter(n => n.type !== 'DiagramImpl');
+            document.getElementById('loadingMsg').style.display = 'none';
+            document.getElementById('diagramSvg').style.display = 'block';
+            initSVG(); renderDiagram();
+        } catch (err) {
+            document.getElementById('loadingMsg').innerHTML =
+                `<div style="color:#D32F2F">❌ 加载失败: ${escapeHtml(err.message)}</div>
+                 <button onclick="goBack()" style="margin-top:14px;padding:6px 20px;border-radius:40px;border:none;background:#e2e8f0;cursor:pointer;">返回</button>`;
+        }
+    }
+
+    function initSVG() {
+        const svgEl = document.getElementById('diagramSvg');
+        svgEl.innerHTML = '';
+
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = `
+            <marker id="arr"   markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arr-a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M1,1 L9,5 L1,9" fill="none" stroke="#d45000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arr-d" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M1,1 L9,5 L1,9" fill="none" stroke="#27682a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>`;
+        svgEl.appendChild(defs);
+
+        const b = calculateBounds();
+        svgEl.setAttribute('width',   b.width);
+        svgEl.setAttribute('height',  b.height);
+        svgEl.setAttribute('viewBox', `${b.minX} ${b.minY} ${b.width} ${b.height}`);
+
+        zoomGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        svgEl.appendChild(zoomGroup);
+
+        zoomBehavior = d3.zoom().scaleExtent([.1, 6]).on('zoom', ev => {
+            currentZoom = ev.transform.k;
+            document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+            d3.select(zoomGroup).attr('transform', ev.transform);
+        });
+        d3.select(svgEl).call(zoomBehavior);
+    }
+
+    function renderDiagram() {
+        if (!currentData || !zoomGroup) return;
+        while (zoomGroup.firstChild) zoomGroup.removeChild(zoomGroup.firstChild);
+        drawGrid();
+        currentData.edges.forEach(drawEdge);
+        currentData.nodes.forEach(drawNode);
+    }
+
+    function drawGrid() {
+        const b = calculateBounds(), step = 20;
+        const frag = document.createDocumentFragment();
+        for (let x = b.minX; x <= b.minX + b.width; x += step) {
+            const l = svgEl('line');
+            l.setAttribute('x1', x); l.setAttribute('y1', b.minY);
+            l.setAttribute('x2', x); l.setAttribute('y2', b.minY + b.height);
+            l.setAttribute('stroke', '#eef2f8'); l.setAttribute('stroke-width', '.5');
+            frag.appendChild(l);
+        }
+        for (let y = b.minY; y <= b.minY + b.height; y += step) {
+            const l = svgEl('line');
+            l.setAttribute('x1', b.minX); l.setAttribute('y1', y);
+            l.setAttribute('x2', b.minX + b.width); l.setAttribute('y2', y);
+            l.setAttribute('stroke', '#eef2f8'); l.setAttribute('stroke-width', '.5');
+            frag.appendChild(l);
+        }
+        zoomGroup.appendChild(frag);
+    }
+
+    function svgEl(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+
+    function addLabel(g, text, cx, cy, maxW) {
+        if (!text) return;
+        const LH = 14, CPL = Math.max(4, Math.floor(maxW / 7));
+        const words = [...text], lines = [];
+        let cur = '';
+        for (const ch of words) {
+            if (cur.length >= CPL) { lines.push(cur); cur = ''; }
+            cur += ch;
+        }
+        if (cur) lines.push(cur);
+        const top = cy - (lines.length - 1) * LH / 2;
+        lines.forEach((ln, i) => {
+            const t = svgEl('text');
+            t.setAttribute('x', cx); t.setAttribute('y', top + i * LH);
+            t.setAttribute('class', 'node-lbl'); t.textContent = ln;
+            g.appendChild(t);
+        });
+    }
+
+    // ========================= 节点绘制 =========================
+    function drawNode(node) {
+        const { x, y, w, h, id } = node;
+        const style = getNodeStyle(node.type);
+        const name  = node.name || (style.label || style.shape);
+
+        const g = svgEl('g');
+        g.setAttribute('data-node-grp', id);
+        g.setAttribute('data-selected', 'false');
+        g.style.cursor = 'pointer';
+        g.addEventListener('click', ev => { ev.stopPropagation(); selectNode(node); });
+
+        switch (style.shape) {
+            case 'initial': {
+                const r = Math.min(w, h) / 2;
+                const c = svgEl('circle');
+                c.setAttribute('cx', x + w / 2); c.setAttribute('cy', y + h / 2); c.setAttribute('r', r);
+                c.setAttribute('class', 'uml-initial'); c.setAttribute('data-id', id);
+                g.appendChild(c);
+                break;
+            }
+            case 'final': {
+                const r = Math.min(w, h) / 2, cx = x + w / 2, cy = y + h / 2;
+                const ring = svgEl('circle');
+                ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', r);
+                ring.setAttribute('class', 'uml-final-ring'); ring.setAttribute('data-id', id);
+                g.appendChild(ring);
+                const dot = svgEl('circle');
+                dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', r * .55);
+                dot.setAttribute('class', 'uml-final-dot'); dot.setAttribute('data-id', id);
+                g.appendChild(dot);
+                break;
+            }
+            case 'bar': {
+                const barH = Math.max(h, 8);
+                const rect = svgEl('rect');
+                rect.setAttribute('x', x); rect.setAttribute('y', y);
+                rect.setAttribute('width', w); rect.setAttribute('height', barH);
+                rect.setAttribute('rx', '2');
+                rect.setAttribute('class', 'uml-bar'); rect.setAttribute('data-id', id);
+                g.appendChild(rect);
+                break;
+            }
+            case 'pin': {
+                const sz = Math.max(w, h, 6);
+                const px = x + (w - sz) / 2, py = y + (h - sz) / 2;
+                const rect = svgEl('rect');
+                rect.setAttribute('x', px); rect.setAttribute('y', py);
+                rect.setAttribute('width', sz); rect.setAttribute('height', sz);
+                rect.setAttribute('rx', '1');
+                rect.setAttribute('class', 'uml-bar'); rect.setAttribute('data-id', id);
+                g.appendChild(rect);
+                if (node.labelBounds && node.name) {
+                    const lb = node.labelBounds;
+                    const lbl = svgEl('text');
+                    lbl.setAttribute('x', lb.x);
+                    lbl.setAttribute('y', lb.y + lb.h / 2);
+                    lbl.setAttribute('text-anchor', 'start');
+                    lbl.setAttribute('dominant-baseline', 'middle');
+                    lbl.setAttribute('font-size', '10');
+                    lbl.setAttribute('fill', '#333');
+                    lbl.setAttribute('font-family', 'Segoe UI, sans-serif');
+                    lbl.setAttribute('pointer-events', 'none');
+                    lbl.textContent = node.name;
+                    g.appendChild(lbl);
+                }
+                break;
+            }
+            case 'diamond': {
+                const cx = x + w / 2, cy = y + h / 2;
+                const poly = svgEl('polygon');
+                poly.setAttribute('points', `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`);
+                poly.setAttribute('class', 'uml-action'); poly.setAttribute('data-id', id);
+                g.appendChild(poly);
+                if (name) {
+                    const lbl = svgEl('text');
+                    lbl.setAttribute('x', cx); lbl.setAttribute('y', cy + 1);
+                    lbl.setAttribute('class', 'node-lbl'); lbl.setAttribute('font-size', '10');
+                    lbl.textContent = name.length > 6 ? name.slice(0, 5) + '…' : name;
+                    g.appendChild(lbl);
+                }
+                break;
+            }
+            default: {
+                const rx = Math.min(h / 2, 18);
+                const rect = svgEl('rect');
+                rect.setAttribute('x', x); rect.setAttribute('y', y);
+                rect.setAttribute('width', w); rect.setAttribute('height', h);
+                rect.setAttribute('rx', rx); rect.setAttribute('ry', rx);
+                rect.setAttribute('class', 'uml-action'); rect.setAttribute('data-id', id);
+                g.appendChild(rect);
+                addLabel(g, name, x + w / 2, y + h / 2, w - 22);
+                break;
+            }
+        }
+
+        zoomGroup.appendChild(g);
+    }
+
+    // ========================= 连线绘制 =========================
+    function drawEdge(edge) {
+        if (!edge.points || edge.points.length < 2) return;
+
+        const pts = [...edge.points].reverse();
+        const d   = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ');
+
+        const t = edge.type || '';
+        let isDashed;
+        if      (t === 'ControlFlowImpl') isDashed = true;
+        else if (t === 'ObjectFlowImpl')  isDashed = false;
+        else isDashed = t.toLowerCase().includes('control') || !!edge.isDashed;
+
+        const hit = svgEl('path');
+        hit.setAttribute('d', d); hit.setAttribute('class', 'edge-hit');
+        hit.addEventListener('click', ev => { ev.stopPropagation(); selectEdge(edge); });
+        zoomGroup.appendChild(hit);
+
+        const path = svgEl('path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', `uml-edge${isDashed ? ' dashed' : ''}`);
+        path.setAttribute('data-id', edge.id);
+        path.setAttribute('marker-end', 'url(#arr)');
+        path.addEventListener('click', ev => { ev.stopPropagation(); selectEdge(edge); });
+        zoomGroup.appendChild(path);
+
+        if (edge.label) {
+            const mid = pts[Math.floor(pts.length / 2)];
+            const p0  = pts[Math.max(0, Math.floor(pts.length / 2) - 1)];
+            const dx = mid[0] - p0[0], dy = mid[1] - p0[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
+            const ox = -dy / len * 10, oy = dx / len * 10;
+            const lbl = svgEl('text');
+            lbl.setAttribute('x', mid[0] + ox); lbl.setAttribute('y', mid[1] + oy);
+            lbl.setAttribute('class', 'edge-lbl'); lbl.setAttribute('text-anchor', 'middle');
+            lbl.textContent = edge.label;
+            zoomGroup.appendChild(lbl);
+        }
+    }
+
+    // ========================= 选中 & 面板 =========================
+    let selectedNodeId = null;
+    let selectedEdgeId = null;
+
+    function selectNode(node) {
+        clearSelection();
+        selectedNodeId = node.id;
+        selectedEdgeId = null;
+        const g = zoomGroup?.querySelector(`[data-node-grp="${node.id}"]`);
+        if (g) g.setAttribute('data-selected', 'true');
+        allEls(node.id).forEach(e => e.classList.add('selected'));
+
+        showNodePanel(node, activeNodes.has(node.id));
+
+        if (node.name) loadNodeConfig(node.name);
+
+        // ★ 新增：如果是 OpaqueAction，顺便拉取 Body
+        if (node.type && node.type.includes('OpaqueAction') || node.type === 'ActionImpl') {
+            loadInitNodeBody(node.id);
+        }
+    }
+
+    function loadInitNodeBody(nodeId) {
+        if (!wsReady()) return;
+        ws.send(JSON.stringify({ command: 'get_init_node_body', nodeId }));
+    }
+
+    function selectEdge(edge) {
+        clearSelection();
+        selectedEdgeId = edge.id;
+        selectedNodeId = null;
+        zoomGroup?.querySelectorAll(`[data-id="${edge.id}"]`).forEach(e => e.classList.add('selected'));
+        showEdgePanel(edge);
+    }
+
+    function clearSelection() {
+        zoomGroup?.querySelectorAll('[data-selected="true"]').forEach(g => g.setAttribute('data-selected', 'false'));
+        zoomGroup?.querySelectorAll('.selected').forEach(e => e.classList.remove('selected'));
+    }
+
+    // ========================= 面板内容 =========================
+    function showNodePanel(node, isActive) {
+        // 基础状态判断
+        let bdg = `<span class="badge badge-idle">⚪ 未执行</span>`;
+        if (isActive) {
+            bdg = `<span class="badge badge-active">🔴 执行中</span>`;
+        } else if (visitedNodes.has(node.id)) {
+            bdg = `<span class="badge badge-done">✅ 已完成</span>`;
+        }
+
+        // 获取节点统计数据
+        const nodeName = node.name || '';
+        const stats = nodeStatsCache[nodeName];
+
+        // 构建统计信息HTML
+        let statsHtml = '';
+        if (stats) {
+            if (stats.status === 'running') {
+                bdg = `<span class="badge badge-active">🔴 执行中</span>`;
+            } else if (stats.status === 'done') {
+                bdg = `<span class="badge badge-done">✅ 已完成</span>`;
+            } else if (stats.status === 'waiting') {
+                bdg = `<span class="badge badge-waiting">⏳ 等待资源</span>`;
+            }
+
+            let queueInfo = '';
+            if (stats.queuePosition !== undefined && stats.queuePosition !== null) {
+                queueInfo = `
+                <div class="info-row">
+                    <div class="info-label">队列位置</div>
+                    <div class="info-value highlight-wait">第 ${stats.queuePosition} / ${stats.queueSize} 位</div>
+                </div>`;
+            }
+
+            statsHtml = `
+            <div class="info-section${stats.status === 'running' ? ' active-stats' : ''}">
+                <h3>📊 仿真统计</h3>
+
+                ${stats.readyTime !== undefined && stats.readyTime !== null ? `
+                <div class="info-row">
+                    <div class="info-label">就绪时间</div>
+                    <div class="info-value">${stats.readyTime}</div>
+                </div>` : ''}
+                ${stats.startTime !== undefined && stats.startTime !== null ? `
+                <div class="info-row">
+                    <div class="info-label">开始时间</div>
+                    <div class="info-value">${stats.startTime}</div>
+                </div>` : ''}
+                ${stats.finishTime !== undefined && stats.finishTime !== null ? `
+                <div class="info-row">
+                    <div class="info-label">完成时间</div>
+                    <div class="info-value">${stats.finishTime}</div>
+                </div>` : ''}
+                ${stats.waitTime !== undefined && stats.waitTime !== null ? `
+                <div class="info-row">
+                    <div class="info-label">等待时间</div>
+                    <div class="info-value${parseFloat(stats.waitTime) > 0 ? ' highlight-wait' : ''}">${stats.waitTime}</div>
+                </div>` : ''}
+                ${stats.totalTime !== undefined && stats.totalTime !== null ? `
+                <div class="info-row">
+                    <div class="info-label">总耗时</div>
+                    <div class="info-value">${stats.totalTime}</div>
+                </div>` : ''}
+                ${queueInfo}
+            </div>`;
+        }
+
+        // 构建配置编辑HTML
+        let configHtml = '';
+        if (nodeName) {
+            configHtml = `
+            <div class="info-section">
+                <h3>⚙️ ResourceTask 配置</h3>
+                <div id="nodeConfigArea">
+                    <div id="configLoading" style="color:#94a3b8;font-size:12px;">⏳ 加载配置...</div>
+                </div>
+            </div>`;
+        }
+
+        let subprocessHtml = '';
+
+        document.getElementById('panelContent').innerHTML = `
+        <div class="info-section">
+            <h3>📌 节点</h3>
+            <div class="info-row">
+                <div class="info-label">名称</div>
+                <div class="info-value">${escapeHtml(nodeName || getNodeStyle(node.type).shape)}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">状态</div>
+                <div class="info-value">${bdg}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">ID</div>
+                <div class="info-value" style="font:11px monospace;word-break:break-all">${escapeHtml(node.id || '—')}</div>
+            </div>
+        </div>
+        ${statsHtml}
+        ${configHtml}
+        ${subprocessHtml}`;
+
+        // 加载节点配置
+        if (nodeName) {
+            loadNodeConfig(nodeName);
+        }
+    }
+
+    function showEdgePanel(edge) {
+        const src = currentData.nodes.find(n => n.id === edge.sourceId);
+        const tgt = currentData.nodes.find(n => n.id === edge.targetId);
+        document.getElementById('panelContent').innerHTML = `
+        <div class="info-section"><h3>🔀 连线</h3>
+            <div class="info-row"><div class="info-label">类型</div><div class="info-value">${escapeHtml(edge.type || 'ControlFlow')}</div></div>
+            <div class="info-row"><div class="info-label">标签</div><div class="info-value">${escapeHtml(edge.label || '—')}</div></div>
+            <div class="info-row"><div class="info-label">ID</div><div class="info-value" style="font:11px monospace;word-break:break-all">${escapeHtml(edge.id || '—')}</div></div></div>
+        <div class="info-section"><h3>⚡ 端点</h3>
+            <div class="info-row"><div class="info-label">源</div><div class="info-value">${escapeHtml(src ? src.name || src.type : '?')}</div></div>
+            <div class="info-row"><div class="info-label">目标</div><div class="info-value">${escapeHtml(tgt ? tgt.name || tgt.type : '?')}</div></div></div>`;
+    }
+
+    // ========================= 节点配置加载与编辑 =========================
+    function loadNodeConfig(taskName) {
+        if (!wsReady()) {
+            const configArea = document.getElementById('nodeConfigArea');
+            if (configArea) {
+                configArea.innerHTML = '<span style="color:#dc2626;">❌ 未连接，无法加载配置</span>';
+            }
+            return;
+        }
+
+        currentConfigTaskName = taskName;
+
+        ws.send(JSON.stringify({
+            command: 'get_node_config',
+            taskName: taskName
+        }));
+    }
+
+    function renderConfigEditor(config) {
+        const area = document.getElementById('nodeConfigArea');
+        if (!area) return;
+
+        if (config && config.error) {
+            area.innerHTML = `
+        <div style="color:#94a3b8;font-size:12px;">${escapeHtml(config.error)}</div>`;
+            return;
+        }
+
+        if (!config || !config.taskName) {
+            area.innerHTML = `
+        <div style="color:#94a3b8;font-size:12px;">此节点没有应用 <<ResourceTask>> 或不是 ResourceTask 节点</div>`;
+            return;
+        }
+
+        const taskName = config.taskName;
+        const requiredPeople = config.requiredPeople !== undefined ? config.requiredPeople : 0;
+        const duration = config.duration !== undefined ? config.duration : 0;
+
+        currentNodeConfig = config;
+
+        area.innerHTML = `
+    <div class="config-editor">
+        <div class="field-group">
+            <label for="editRequiredPeople">👤 需要人员 (requiredPeople)</label>
+            <input id="editRequiredPeople" type="number" min="0" step="1"
+                   value="${requiredPeople}">
+        </div>
+        <div class="field-group">
+            <label for="editDuration">⏱ 执行时长 (duration)</label>
+            <input id="editDuration" type="number" min="0" step="0.1"
+                   value="${duration}">
+        </div>
+        <button class="submit-btn" onclick="submitNodeConfig('${taskName}')">
+            💾 提交到 MagicDraw
+        </button>
+        <!-- ★ 添加状态显示 -->
+        <div id="configSubmitStatus" class="submit-status"></div>
+        <!-- ★ 添加调试按钮 -->
+        <button onclick="debugShowStereotype('${taskName}')"
+                style="width:100%;padding:5px;margin-top:6px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;cursor:pointer;color:#475569;">
+            🔍 调试：查看 Stereotype 属性
+        </button>
+    </div>`;
+    }
+
+    function debugShowStereotype(taskName) {
+        if (!wsReady()) {
+            showNotification('❌ 未连接', true);
+            return;
+        }
+        ws.send(JSON.stringify({
+            command: 'debug_show_stereotype',
+            taskName: taskName
+        }));
+        showNotification('🔍 已发送调试请求，请查看日志');
+    }
+
+    function submitNodeConfig(taskName) {
+        if (!wsReady()) {
+            showNotification('❌ 未连接，无法提交修改', true);
+            return;
+        }
+
+        const peopleInput = document.getElementById('editRequiredPeople');
+        const durationInput = document.getElementById('editDuration');
+        const statusDiv = document.getElementById('configSubmitStatus');
+
+        if (!peopleInput || !durationInput || !statusDiv) {
+            return;
+        }
+
+        const requiredPeople = parseInt(peopleInput.value);
+        const duration = parseFloat(durationInput.value);
+
+        if (isNaN(requiredPeople) || requiredPeople < 0) {
+            statusDiv.className = 'submit-status error';
+            statusDiv.textContent = '❌ 请输入有效的人员数量（≥0）';
+            return;
+        }
+
+        if (isNaN(duration) || duration < 0) {
+            statusDiv.className = 'submit-status error';
+            statusDiv.textContent = '❌ 请输入有效的时长（≥0）';
+            return;
+        }
+
+        statusDiv.className = 'submit-status loading';
+        statusDiv.textContent = '⏳ 提交中...';
+
+        // ★ 生成 callbackId
+        const callbackId = 'update_' + Date.now() + '_' + taskName.replace(/\s+/g, '_');
+
+        // ★ 注册回调
+        window._configCallbacks[callbackId] = (msg) => {
+            console.log('📥 [更新回调] 收到配置更新响应:', msg);
+
+            if (msg.success) {
+                statusDiv.className = 'submit-status success';
+                statusDiv.textContent = '✅ 配置已保存到 MagicDraw';
+                showNotification('✅ 节点 "' + msg.taskName + '" 配置已更新');
+
+                // 更新本地缓存
+                if (currentNodeConfig && currentNodeConfig.taskName === msg.taskName) {
+                    if (msg.requiredPeople !== undefined) {
+                        currentNodeConfig.requiredPeople = msg.requiredPeople;
+                    }
+                    if (msg.duration !== undefined) {
+                        currentNodeConfig.duration = msg.duration;
+                    }
+                }
+
+                // ★ 清除前端缓存，强制重新加载
+                nodeConfigCache.delete(msg.taskName);
+
+                // 重新加载配置以确认
+                setTimeout(() => {
+                    if (msg.taskName) {
+                        loadNodeConfig(msg.taskName);
+                    }
+                }, 500);
+            } else {
+                statusDiv.className = 'submit-status error';
+                statusDiv.textContent = '❌ 保存失败: ' + escapeHtml(msg.error || '未知错误');
+                showNotification('❌ 配置保存失败: ' + (msg.error || '未知错误'), true);
+            }
+
+            // 清理回调
+            delete window._configCallbacks[callbackId];
+        };
+
+        // ★ 发送请求，带上 callbackId
+        ws.send(JSON.stringify({
+            command: 'update_node_config',
+            taskName: taskName,
+            requiredPeople: requiredPeople,
+            duration: duration,
+            _callbackId: callbackId  // 添加 callbackId
+        }));
+    }
+    function handleNodeConfigResponse(msg) {
+        // ★ 检查是否有 callbackId（来自更新响应）
+        if (msg._callbackId && window._configCallbacks && window._configCallbacks[msg._callbackId]) {
+            console.log('✅ 找到回调 ' + msg._callbackId + '，执行中...');
+            const callback = window._configCallbacks[msg._callbackId];
+            // 注意：不要在这里删除回调，让回调自己清理
+            callback(msg);
+            return;
+        }
+
+        // 原有的处理逻辑
+        if (msg.event === 'node_config') {
+            // 收到配置数据
+            renderConfigEditor(msg.config);
+
+            if (msg.config && msg.config.error) {
+                appendEventLog('⚠️ 节点 "' + msg.taskName + '" 配置加载失败: ' + msg.config.error, 'warn');
+            }
+        }
+        else if (msg.event === 'node_config_updated') {
+            // 配置更新结果（没有 callbackId 的旧版本，作为降级处理）
+            const statusDiv = document.getElementById('configSubmitStatus');
+            if (statusDiv) {
+                if (msg.success) {
+                    statusDiv.className = 'submit-status success';
+                    statusDiv.textContent = '✅ 配置已保存到 MagicDraw';
+                    showNotification('✅ 节点 "' + msg.taskName + '" 配置已更新');
+
+                    // 更新本地缓存
+                    if (currentNodeConfig && currentNodeConfig.taskName === msg.taskName) {
+                        if (msg.requiredPeople !== undefined) {
+                            currentNodeConfig.requiredPeople = msg.requiredPeople;
+                        }
+                        if (msg.duration !== undefined) {
+                            currentNodeConfig.duration = msg.duration;
+                        }
+                    }
+
+                    // ★ 清除前端缓存
+                    nodeConfigCache.delete(msg.taskName);
+
+                    // 重新加载配置以确认
+                    setTimeout(() => {
+                        if (msg.taskName) {
+                            loadNodeConfig(msg.taskName);
+                        }
+                    }, 500);
+                } else {
+                    statusDiv.className = 'submit-status error';
+                    statusDiv.textContent = '❌ 保存失败: ' + escapeHtml(msg.error || '未知错误');
+                    showNotification('❌ 配置保存失败: ' + (msg.error || '未知错误'), true);
+                }
+            }
+        }
+    }
+
+    // ========================= 外部交互表单 =========================
+    let lastExternalRequest = null;
+
+    function renderExternalInteractionForm(msg) {
+        lastExternalRequest = msg;
+        appendEventLog('⚡ 渲染外部参数表单，节点: ' + (msg.nodeName || ''), 'info');
+
+        window._currentTaskId = msg.taskId || '';
+        window._currentSpacecraftId = msg.spacecraftId || '';
+
+        document.getElementById('panelContent').innerHTML = `
+    <div class="info-section">
+        <h3>⚡ 外部交互请求</h3>
+        <div class="info-row">
+            <div class="info-label">节点</div>
+            <div class="info-value">${escapeHtml(msg.nodeName || '—')}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">类型</div>
+            <div class="info-value">${escapeHtml(msg.type || '—')}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">任务编号</div>
+            <div class="info-value">${escapeHtml(msg.taskId || '—')}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">航天器</div>
+            <div class="info-value">${escapeHtml(msg.spacecraftId || '—')}</div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>✏️ 参数编辑</h3>
+        <div class="info-row">
+            <div class="info-label">电压</div>
+            <div class="info-value">
+                <input id="voltageInput" type="number" step="0.1"
+                       value="${msg.currentVoltage ?? 29}"
+                       style="width:100%;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;">
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">功率</div>
+            <div class="info-value">
+                <input id="powerInput" type="number" step="0.1"
+                       value="${msg.currentPower ?? 118}"
+                       style="width:100%;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;">
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">温度</div>
+            <div class="info-value">
+                <input id="temperatureInput" type="number" step="0.1"
+                       value="${msg.currentTemperature ?? 36}"
+                       style="width:100%;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;">
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">健康阈值</div>
+            <div class="info-value">
+                <input id="thresholdInput" type="number" step="0.01"
+                       value="${msg.healthThreshold ?? 0.85}" readonly
+                       style="width:100%;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;background:#f8fafc;color:#94a3b8;">
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">健康状态</div>
+            <div class="info-value">
+                <select id="healthStatusInput"
+                        style="width:100%;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;">
+                    <option value="正常">正常</option>
+                    <option value="异常">异常</option>
+                    <option value="需检查">需检查</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="submitExternalInteractionResult()"
+            style="width:100%;padding:9px;background:#3b82f6;color:white;border:none;
+                   border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;">
+        ✅ 提交外部返回
+    </button>
+    <button onclick="cancelExternalInteraction()"
+            style="width:100%;padding:7px;background:#f1f5f9;color:#475569;border:none;
+                   border-radius:8px;font-size:12px;cursor:pointer;margin-top:6px;">
+        取消
+    </button>`;
+    }
+
+    function submitExternalInteractionResult() {
+        if (!wsReady()) {
+            showNotification('❌ 未连接，无法提交', true);
+            return;
+        }
+        if (!lastExternalRequest) {
+            showNotification('❌ 没有待处理的外部交互请求', true);
+            return;
+        }
+
+        var voltage = Number(document.getElementById("voltageInput").value);
+        var power = Number(document.getElementById("powerInput").value);
+        var temperature = Number(document.getElementById("temperatureInput").value);
+        var healthStatus = document.getElementById("healthStatusInput").value;
+
+        var result = {
+            event: "external_interaction_result",
+            type: "spacecraft_check_result",
+            taskId: lastExternalRequest.taskId || '',
+            spacecraftId: lastExternalRequest.spacecraftId || '',
+            voltage: voltage,
+            power: power,
+            temperature: temperature,
+            healthStatus: healthStatus
+        };
+
+        appendEventLog("📤 提交参数: 电压=" + voltage + "，功率=" + power + "，温度=" + temperature + "，健康状态=" + healthStatus, 'info');
+        appendEventLog("📤 完整JSON: " + JSON.stringify(result), 'info');
+
+        ws.send(JSON.stringify(result));
+        showNotification('✅ 外部参数已提交');
+
+        document.getElementById('panelContent').innerHTML =
+            '<div class="empty-state">✅ 已提交，等待仿真继续...</div>';
+        lastExternalRequest = null;
+    }
+
+    function cancelExternalInteraction() {
+        lastExternalRequest = null;
+        document.getElementById('panelContent').innerHTML =
+            '<div class="empty-state">❌ 已取消外部交互</div>';
+        appendEventLog('❌ 已取消外部交互', 'warn');
+    }
+
+    // ========================= 运行变量表 & 事件日志 =========================
+    function updateRuntimeValues(values) {
+        const tbody = document.getElementById('runtimeValuesBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const entries = Object.entries(values || {});
+        if (entries.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" style="color:#94a3b8;text-align:center;padding:10px;">暂无运行变量</td></tr>';
+            return;
+        }
+        entries.forEach(([name, value]) => {
+            const valueText = (value === null || value === undefined) ? '—' : String(value);
+            const lower = valueText.toLowerCase();
+            const cls   = lower === 'true' ? 'true' : (lower === 'false' ? 'false' : '');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${escapeHtml(name)}</td><td class="runtime-value ${cls}">${escapeHtml(valueText)}</td>`;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('varCount').textContent = `(${entries.length}个变量)`;
+    }
+
+    function appendEventLog(message, level, time) {
+        const box = document.getElementById('eventLogBox');
+        if (!box) return;
+        if (box.children.length === 1 && box.children[0].textContent.includes('等待连接')) {
+            box.innerHTML = '';
+        }
+        const div = document.createElement('div');
+        div.className = 'log-line ' + (level || 'info');
+        div.textContent = (time ? time + '  ' : '') + (message || '');
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        // 限制日志行数
+        while (box.children.length > 1000) {
+            box.removeChild(box.firstChild);
+        }
+    }
+
+    // ========================= 数据库操作 =========================
+    function checkDbConnection() {
+        axios.get(`${API_BASE_URL}/simulationRun/page`, {
+            params: { current: 1, size: 1 }
+        })
+            .then(response => {
+                if (response.data.code === 200) {
+                    isDbOnline = true;
+                    document.getElementById('dbStatus').className = 'db-status online';
+                    document.getElementById('dbStatus').textContent = '数据库在线';
+                    appendEventLog('✅ 数据库连接成功', 'info');
+                } else {
+                    isDbOnline = false;
+                    document.getElementById('dbStatus').className = 'db-status offline';
+                    document.getElementById('dbStatus').textContent = '数据库离线';
+                    appendEventLog('⚠️ 数据库连接失败: ' + (response.data.msg || '未知错误'), 'warn');
+                }
+            })
+            .catch(error => {
+                isDbOnline = false;
+                document.getElementById('dbStatus').className = 'db-status offline';
+                document.getElementById('dbStatus').textContent = '数据库离线';
+                appendEventLog('⚠️ 无法连接数据库: ' + error.message, 'warn');
+            });
+    }
+
+    // ========================= 节点记录API =========================
+    async function recordNodeReady(runId, nodeId, nodeName, nodeType, requiredPeople, isStartNode, isEndNode, description) {
+
+
+        console.log('🔍 ========== recordNodeReady 调用 ==========');
+        console.log('   nodeName:', nodeName);
+        console.log('   requiredPeople 原始值:', requiredPeople);
+        console.log('   requiredPeople 类型:', typeof requiredPeople);
+        console.log('   runId:', runId);
+        console.log('   nodeId:', nodeId);
+
+        // 检查是否有值
+        if (requiredPeople === null || requiredPeople === undefined) {
+            console.warn('⚠️ requiredPeople 为 null 或 undefined！');
+        }
+        if (!isDbOnline || !runId) return;
+        try {
+            const params = new URLSearchParams({
+                runId: runId,
+                nodeId: nodeId,
+                nodeName: nodeName || '',
+                nodeType: nodeType || '',
+                requiredPeople: requiredPeople ,
+                isStartNode: isStartNode || false,
+                isEndNode: isEndNode || false,
+                description: description || ''
+            });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/ready?${params.toString()}`);
+            console.debug(`✅ 节点就绪记录成功: ${nodeName}`);
+        } catch (error) {
+            console.error('记录节点就绪失败:', error);
+        }
+    }
+
+    async function recordNodeStart(runId, nodeId) {
+        if (!isDbOnline || !runId) return;
+        try {
+            const params = new URLSearchParams({ runId, nodeId });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/start?${params.toString()}`);
+            console.debug(`✅ 节点开始记录成功: ${nodeId}`);
+        } catch (error) {
+            console.error('记录节点开始失败:', error);
+        }
+    }
+
+    async function recordNodeFinish(runId, nodeId) {
+        if (!isDbOnline || !runId) return;
+        try {
+            const params = new URLSearchParams({ runId, nodeId });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/finish?${params.toString()}`);
+            console.debug(`✅ 节点完成记录成功: ${nodeId}`);
+        } catch (error) {
+            console.error('记录节点完成失败:', error);
+        }
+    }
+
+    async function recordNodeWaiting(runId, nodeId, queuePosition, queueSize) {
+        if (!isDbOnline || !runId) return;
+        try {
+            const params = new URLSearchParams({
+                runId,
+                nodeId,
+                queuePosition: queuePosition || 0,
+                queueSize: queueSize || 0
+            });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/waiting?${params.toString()}`);
+            console.debug(`✅ 节点等待记录成功: ${nodeId}, 位置: ${queuePosition}`);
+        } catch (error) {
+            console.error('记录节点等待失败:', error);
+        }
+    }
+
+    async function recordNodeError(runId, nodeId, errorMessage) {
+        if (!isDbOnline || !runId) return;
+        try {
+            const params = new URLSearchParams({
+                runId,
+                nodeId,
+                errorMessage: errorMessage || ''
+            });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/error?${params.toString()}`);
+            console.debug(`✅ 节点错误记录成功: ${nodeId}`);
+        } catch (error) {
+            console.error('记录节点错误失败:', error);
+        }
+    }
+
+    async function recordNodeVars(runId, nodeId, nodeName, values, isInitial, isFinal) {
+        if (!isDbOnline || !runId || !values || Object.keys(values).length === 0) return;
+        try {
+            const params = new URLSearchParams({
+                runId,
+                nodeId,
+                nodeName: nodeName || '',
+                isInitial: isInitial || false,
+                isFinal: isFinal || false
+            });
+            await axios.post(`${API_BASE_URL}/simulationNode/record/vars?${params.toString()}`, values);
+            console.debug(`✅ 节点变量记录成功: ${nodeId}, 变量数: ${Object.keys(values).length}`);
+        } catch (error) {
+            console.error('记录节点变量失败:', error);
+        }
+    }
+
+    // ========================= 自动记录功能 =========================
+    function startRecording(msg) {
+        if (isRecording) {
+            appendEventLog('⚠️ 已有正在记录的仿真', 'warn');
+            return;
+        }
+
+        isRecording = true;
+        runStartTime = Date.now();
+        sequenceCounter = 0;
+
+        document.getElementById('dbStatus').className = 'db-status recording';
+        document.getElementById('dbStatus').textContent = '🔴 记录中';
+
+        if (isDbOnline) {
+            const runData = {
+                diagramId: diagramId || '',
+                diagramName: diagramName || '未命名流程',
+                startMode: msg.mode || 'auto',
+                contextName: msg.contextName || '',
+                status: 'running',
+                userId: 'system',
+                remark: '自动记录 - MagicDraw仿真中'
+            };
+
+            axios.post(`${API_BASE_URL}/simulationRun/start`, runData)
+                .then(response => {
+                    if (response.data.code === 200) {
+                        currentRunId = response.data.data.id;
+                        appendEventLog(`📝 开始自动记录，运行ID: ${currentRunId}`, 'info');
+
+                        // ★ 修改后的配置加载逻辑
+                        if (currentData && currentData.nodes) {
+                            // 收集所有需要加载配置的节点
+                            const actionNodes = currentData.nodes.filter(node =>
+                                node.type === 'ActionImpl' ||
+                                node.type === 'CallBehaviorActionImpl' ||
+                                node.type === 'OpaqueActionImpl' ||
+                                node.type === 'OpaqueAction'
+                            );
+
+                            console.log(`🔍 需要加载配置的节点数量: ${actionNodes.length}`);
+
+                            // 为每个节点创建配置加载 Promise
+                            const configPromises = actionNodes.map(node => {
+                                return new Promise((resolve) => {
+                                    const taskName = node.name;
+
+                                    // 如果节点没有名称，使用默认值
+                                    if (!taskName || taskName.trim() === '') {
+                                        console.warn(`⚠️ 节点 ${node.id} 没有名称，使用默认 requiredPeople=1`);
+                                        resolve({ node, requiredPeople: 1 });
+                                        return;
+                                    }
+
+                                    console.log(`🔍 [配置加载] 请求节点配置: ${taskName}`);
+
+                                    // ★ 检查缓存
+                                    if (nodeConfigCache.has(taskName)) {
+                                        const cached = nodeConfigCache.get(taskName);
+                                        console.log(`✅ [配置加载] 使用缓存: ${taskName}, requiredPeople=${cached.requiredPeople}`);
+                                        resolve({ node, requiredPeople: cached.requiredPeople || 1 });
+                                        return;
+                                    }
+
+                                    // 检查 WebSocket 是否连接
+                                    if (!wsReady()) {
+                                        console.warn(`⚠️ [配置加载] WebSocket未连接，使用默认值: ${taskName}`);
+                                        resolve({ node, requiredPeople: 1 });
+                                        return;
+                                    }
+
+                                    // ★ 创建回调ID
+                                    const callbackId = 'config_' + Date.now() + '_' + node.id;
+
+                                    // 在 startRecording 中修改
+                                    window._configCallbacks[callbackId] = (config) => {
+                                        console.log(`📥 [配置加载] 收到回调 ${callbackId}:`, config);
+
+                                        if (config && config.requiredPeople !== undefined && !config.error) {
+                                            // ★ 修复：使用 ?? 而不是 ||，保留 0 值
+                                            const people = config.requiredPeople ?? 1;
+                                            console.log(`✅ [配置加载] ${taskName} 配置成功: requiredPeople=${people}`);
+                                            nodeConfigCache.set(taskName, config);
+                                            resolve({ node, requiredPeople: people });
+                                        } else {
+                                            console.warn(`⚠️ [配置加载] ${taskName} 配置失败:`, config?.error || '未知错误');
+                                            resolve({ node, requiredPeople: 1 });  // 默认值
+                                        }
+                                    };
+
+                                    // ★ 发送请求
+                                    const request = {
+                                        command: 'get_node_config',
+                                        taskName: taskName,
+                                        _callbackId: callbackId
+                                    };
+                                    console.log(`📤 [配置加载] 发送请求:`, request);
+                                    ws.send(JSON.stringify(request));
+
+                                    // ★ 超时处理（5秒后如果还没有回调，使用默认值）
+                                    setTimeout(() => {
+                                        if (window._configCallbacks && window._configCallbacks[callbackId]) {
+                                            console.warn(`⏰ [配置加载] ${taskName} 配置加载超时，使用默认值`);
+                                            delete window._configCallbacks[callbackId];
+                                            resolve({ node, requiredPeople: 1 });
+                                        }
+                                    }, 5000);
+                                });
+                            });
+
+                            // ★ 等待所有配置加载完成
+                            Promise.all(configPromises).then(results => {
+                                console.log('🔍 配置加载结果:', JSON.stringify(results, null, 2));
+
+                                results.forEach(({ node, requiredPeople }) => {
+                                    console.log(`📝 节点 ${node.name} 的 requiredPeople = ${requiredPeople}`);
+
+                                    recordNodeReady(
+                                        currentRunId,
+                                        node.id,
+                                        node.name || '',
+                                        node.type || '',
+                                        requiredPeople ?? 0,
+                                        node.isStartNode || false,
+                                        node.isEndNode || false,
+                                        node.description || ''
+                                    );
+                                });
+                                appendEventLog(`📝 已初始化 ${results.length} 个节点记录 (requiredPeople 已从配置读取)`, 'info');
+                            });
+                        }
+                    } else {
+                        currentRunId = 'run_' + Date.now();
+                        appendEventLog(`⚠️ 创建运行记录失败: ${response.data.msg}，使用临时ID`, 'warn');
+                    }
+                })
+                .catch(error => {
+                    currentRunId = 'run_' + Date.now();
+                    appendEventLog(`⚠️ 创建运行记录失败: ${error.message}，使用临时ID`, 'warn');
+                });
+        } else {
+            currentRunId = 'local_' + Date.now();
+            appendEventLog(`⚠️ 数据库离线，使用本地记录ID: ${currentRunId}`, 'warn');
+        }
+    }
+
+    function stopRecording() {
+        if (!isRecording) {
+            return;
+        }
+
+        isRecording = false;
+
+        document.getElementById('dbStatus').className = 'db-status online';
+        document.getElementById('dbStatus').textContent = '数据库在线';
+
+        if (currentRunId && isDbOnline) {
+            const runId = currentRunId;
+            const duration = runStartTime ? (Date.now() - runStartTime) : 0;
+
+            axios.post(`${API_BASE_URL}/simulationRun/end`, null, {
+                params: { id: runId }
+            })
+                .then(response => {
+                    if (response.data.code === 200) {
+                        appendEventLog(
+                            `📝 自动记录结束，运行ID: ${runId}，持续 ${(duration/1000).toFixed(1)}s`,
+                            'info'
+                        );
+
+                        // ★ 新增：获取并显示整体统计
+                        axios.get(`${API_BASE_URL}/simulationNode/stats/run/${runId}`)
+                            .then(statsResp => {
+                                if (statsResp.data.code === 200) {
+                                    const stats = statsResp.data.data;
+                                    appendEventLog(
+                                        `📊 统计: 总节点=${stats.totalNodes}, 完成=${stats.completedNodes}, ` +
+                                        `运行中=${stats.runningNodes}, 错误=${stats.errorNodes}`,
+                                        'info'
+                                    );
+                                }
+                            })
+                            .catch(err => console.error('获取统计失败:', err));
+                    }
+                })
+                .catch(error => {
+                    console.error('结束运行记录失败:', error);
+                })
+                .finally(() => {
+                    currentRunId = null;
+                    runStartTime = null;
+                });
+        } else {
+            currentRunId = null;
+            runStartTime = null;
+        }
+    }
+
+    function saveVariable(values) {
+        if (!isRecording || !values || Object.keys(values).length === 0) {
+            return;
+        }
+
+        updateRuntimeValues(values);
+
+        if (!currentRunId || !isDbOnline) {
+            return;
+        }
+
+        const variables = Object.entries(values).map(([name, value]) => {
+            sequenceCounter++;
+            return {
+                runId: currentRunId,
+                variableName: name,
+                variableValue: value !== null && value !== undefined ? String(value) : '',
+                valueType: detectValueType(value),
+                timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                sequenceNo: sequenceCounter
+            };
+        });
+
+        axios.post(`${API_BASE_URL}/simulationVariable/batchSave`, variables)
+            .then(response => {
+                if (response.data.code === 200) {
+                    console.debug(`✅ 自动保存 ${variables.length} 个变量成功`);
+                } else {
+                    console.warn('自动保存变量失败:', response.data.msg);
+                }
+            })
+            .catch(error => {
+                console.error('自动保存变量失败:', error);
+            });
+    }
+
+    function detectValueType(value) {
+        if (value === null || value === undefined) return 'null';
+        if (typeof value === 'boolean') return 'boolean';
+        if (typeof value === 'number') {
+            if (Number.isInteger(value)) return 'integer';
+            return 'number';
+        }
+        if (typeof value === 'object') return 'object';
+        return 'string';
+    }
+
+    // ========================= 仿真回放 =========================
+    function requestLatestReplay() {
+        if (!wsReady()) { showNotification('❌ 未连接服务器，无法获取回放', true); return; }
+        ws.send(JSON.stringify({ command: 'get_latest_replay' }));
+        showNotification('🎞 正在读取最近一次仿真回放');
+    }
+
+    function startReplay(record) {
+        if (!record || !Array.isArray(record.events)) {
+            showNotification('❌ 回放数据格式不正确', true); return;
+        }
+        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+
+        replayEvents    = record.events.slice().sort((a, b) => (a.time || 0) - (b.time || 0));
+        replayIndex     = 0;
+        replayStartTime = Date.now();
+        replaySpeed     = simSpeed || 1.0;
+
+        const info = document.getElementById('replayInfo');
+        if (info) {
+            info.innerHTML = `当前回放：<span class="replay-badge">${escapeHtml(record.runId || 'latest')}</span><br>`
+                + `图：${escapeHtml(record.diagramName || '未知')}<br>`
+                + `启动方式：${escapeHtml(record.startMode || '未知')}`;
+        }
+
+        if (record.diagramSnapshot && record.diagramSnapshot.nodes) {
+            currentData = record.diagramSnapshot;
+            document.getElementById('loadingMsg').style.display = 'none';
+            document.getElementById('diagramSvg').style.display = 'block';
+            initSVG(); renderDiagram(); setTimeout(fitView, 100);
+        }
+
+        clearAllActiveStates();
+        updateRuntimeValues({});
+        appendEventLog('开始回放：' + (record.runId || 'latest'), 'info');
+        const statusEl = document.getElementById('simStatus');
+        if (statusEl) { statusEl.className = 'sim-status running'; statusEl.textContent = '🎞 回放中'; }
+
+        replayTimer = setInterval(tickReplay, 30);
+    }
+
+    function tickReplay() {
+        if (replayIndex >= replayEvents.length) {
+            clearInterval(replayTimer); replayTimer = null;
+            appendEventLog('回放结束', 'info');
+            const statusEl = document.getElementById('simStatus');
+            if (statusEl) { statusEl.className = 'sim-status ended'; statusEl.textContent = '⏹ 回放结束'; }
+            return;
+        }
+        const elapsed = (Date.now() - replayStartTime) * replaySpeed;
+        while (replayIndex < replayEvents.length && (replayEvents[replayIndex].time || 0) <= elapsed) {
+            applyReplayEvent(replayEvents[replayIndex++]);
+        }
+    }
+
+    function applyReplayEvent(e) {
+        if (!e || !e.event) return;
+        switch (e.event) {
+            case 'sim_start':       clearAllActiveStates(); appendEventLog('回放：仿真开始', 'info'); break;
+            case 'node_activate':   activateNode(e.nodeId); break;
+            case 'node_deactivate': deactivateNode(e.nodeId); break;
+            case 'runtime_values':  updateRuntimeValues(e.values || {}); break;
+            case 'log':             appendEventLog(e.message || '', e.level || 'info', e.timeText || ''); break;
+            case 'sim_end':         appendEventLog('回放：仿真结束 ' + (e.status || ''), 'info'); break;
+        }
+    }
+
+    // ========================= WebSocket 通信 =========================
+    function wsReady() { return isConnected && ws && ws.readyState === WebSocket.OPEN; }
+
+    function toggleConnection() { isConnected ? disconnectWS() : connectWS(); }
+
+    function connectWS() {
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+        const statusEl = document.getElementById('simStatus');
+        statusEl.className = 'sim-status'; statusEl.textContent = '⏳ 连接中...';
+        ws = new WebSocket('ws://127.0.0.1:8765');
+
+        ws.onopen = () => {
+            isConnected = true;
+            statusEl.className = 'sim-status connected';
+            statusEl.textContent = '🟢 已连接 MagicDraw';
+            document.getElementById('connectBtn').textContent = '🔌 断开';
+            updateControlButtons(true);
+            showNotification('✅ WebSocket 已就绪，可控制仿真');
+            sendSpeedToBackend();
+            const diagramId = getUrlParam('diagramId');
+            if (diagramId && !diagramRequested) {
+                diagramRequested = true;
+                ws.send(JSON.stringify({ command: 'get_diagram_json', diagramId }));
+            }
+        };
+
+        ws.onclose = () => {
+            isConnected = false; ws = null;
+            statusEl.className = 'sim-status'; statusEl.textContent = '⚪ 未连接';
+            document.getElementById('connectBtn').textContent = '🔌 连接';
+            updateControlButtons(false);
+            if (isRecording) {
+                stopRecording();
+            }
+        };
+
+        ws.onerror = () => {
+            statusEl.className = 'sim-status'; statusEl.textContent = '⚠️ 连接失败';
+            showNotification('❌ 无法连接至 MagicDraw 插件，请确认插件已运行', true);
+        };
+
+        ws.onmessage = evt => {
+            try { handleSimEvent(JSON.parse(evt.data)); }
+            catch (e) { console.warn('非JSON消息', evt.data); }
+        };
+    }
+
+    function disconnectWS() { ws?.close(); ws = null; }
+
+    function updateControlButtons(on) {
+        ['startSimBtn', 'startContextBtn', 'startConfigBtn', 'stopSimBtn', 'replayBtn'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = !on;
+        });
+    }
+
+    // ========================= MagicDraw 仿真控制 =========================
+    function sendStartSimulation() {
+        if (!wsReady()) { showNotification('❌ 未连接，请先连接', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', diagramId: getUrlParam('diagramId') || '' }));
+        showNotification('🚀 已发送开始仿真请求，当前播放速度 ' + simSpeed + 'x');
+    }
+
+    function sendStartSimulationWithContext() {
+        if (!wsReady()) { showNotification('❌ 未连接至 MagicDraw 插件，请先连接', true); return; }
+        const diagramId = getUrlParam('diagramId');
+        if (!diagramId) { showNotification('❌ 当前页面没有 diagramId，不能 Run with Context', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', mode: 'run_with_context', diagramId }));
+        showNotification('🚀 已发送 Run with Context 请求');
+    }
+
+    function sendStartSimulationConfig() {
+        if (!wsReady()) { showNotification('❌ 未连接至 MagicDraw 插件，请先连接', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', useConfig: true, configName: 'Simulation Config' }));
+        showNotification('🛠 已发送 Simulation Config 启动请求');
+    }
+
+    function sendStopSimulation() {
+        if (!wsReady()) { showNotification('❌ 未连接服务器', true); return; }
+        ws.send(JSON.stringify({ command: 'stop_simulation' }));
+        showNotification('⏹ 已发送「终止仿真」指令');
+    }
+
+    function sendSpeedToBackend() {
+        if (wsReady()) ws.send(JSON.stringify({ command: 'set_sim_speed', speed: simSpeed }));
+    }
+
+    function onSpeedChange(value) {
+        simSpeed = parseFloat(value) || 1.0;
+        document.getElementById('speedValue').textContent = simSpeed.toFixed(2).replace(/\.00$/, '.0') + 'x';
+        sendSpeedToBackend();
+    }
+
+    // ========================= 消息分发 =========================
+    function handleSimEvent(msg) {
+        const statusEl = document.getElementById('simStatus');
+        switch (msg.event) {
+
+            case 'backend_error':
+                appendEventLog(msg.message || '后端发生错误', 'error', msg.time);
+                showNotification('❌ ' + (msg.message || '后端错误'), true);
+            { const ld = document.getElementById('loadingMsg'); if (ld && ld.style.display !== 'none') ld.innerHTML = `<div style="color:#D32F2F">❌ ${escapeHtml(msg.message || '')}</div>`; }
+                break;
+
+            case 'backend_info':
+                appendEventLog(msg.message || '后端提示', 'info', msg.time);
+                showNotification('ℹ️ ' + (msg.message || ''));
+                break;
+
+            case 'log':
+                appendEventLog(msg.message || '', msg.level || 'info', msg.time);
+                break;
+
+            case 'status':
+                if (msg.status === 'ready') showNotification('✅ MagicDraw 后端已就绪');
+                break;
+
+            case 'diagram_json':
+                applyDiagramData(msg.data, msg.name);
+                break;
+
+            case 'sim_start':
+                clearAllActiveStates();
+                statusEl.className = 'sim-status running';
+                statusEl.textContent = '▶ 仿真运行中';
+                showNotification('▶ MagicDraw 仿真已开始');
+                startRecording(msg);
+                break;
+
+            case 'sim_end':
+                // ★ 关键修复：立即强制完成所有正在执行的节点
+                if (isRecording && currentRunId) {
+                    activeNodes.forEach(nodeId => {
+                        if (deactivateTimers.has(nodeId)) {
+                            clearTimeout(deactivateTimers.get(nodeId));
+                            deactivateTimers.delete(nodeId);
+                        }
+                        recordNodeFinish(currentRunId, nodeId);
+                    });
+                    activeNodes.clear();
+
+                    // 同时清理所有粒子动画
+                    particleHandles.forEach(h => h.cancel());
+                    particleHandles.clear();
+                }
+
+                if (wsReady()) {
+                    ws.send(JSON.stringify({ command: 'get_all_node_stats' }));
+                    setTimeout(() => {
+                        statusEl.className = 'sim-status ended';
+                        statusEl.textContent = '⏹ 仿真已结束';
+                        showNotification('⏹ 仿真结束');
+                        stopRecording();
+                    }, 500);
+                }
+                break;
+            case 'node_activate':
+                activateNode(msg.nodeId);
+                break;
+
+            case 'node_deactivate':
+                deactivateNode(msg.nodeId);
+                break;
+
+            case 'clear_all':
+                clearAllActiveStates();
+                break;
+
+            case 'runtime_values':
+                saveVariable(msg.values || {});
+                break;
+
+            case 'replay_data':
+                startReplay(msg.record);
+                break;
+
+            case 'replay_saved': {
+                const info = document.getElementById('replayInfo');
+                if (info) info.innerHTML = `已保存最近一次回放：<span class="replay-badge">${escapeHtml(msg.runId || '')}</span>`;
+                appendEventLog('回放记录已保存：' + (msg.runId || ''), 'info', msg.time);
+                break;
+            }
+
+            case 'external_interaction_request':
+                appendEventLog('⚡ 外部交互请求: ' + (msg.nodeName || ''), 'warn', msg.time);
+                showNotification('⚡ 需要外部输入: ' + (msg.nodeName || ''));
+                renderExternalInteractionForm(msg);
+                break;
+
+            // ========== 节点统计信息 ==========
+            case 'node_stats':
+                if (msg.nodeName) {
+                    nodeStatsCache[msg.nodeName] = {
+                        requiredPeople: msg.requiredPeople,
+                        duration: msg.duration,
+                        readyTime: msg.readyTime,
+                        startTime: msg.startTime,
+                        finishTime: msg.finishTime,
+                        waitTime: msg.waitTime,
+                        totalTime: msg.totalTime,
+                        status: msg.status,
+                        queuePosition: msg.queuePosition,
+                        queueSize: msg.queueSize
+                    };
+
+                    // ★ 新增：根据状态记录到数据库
+                    if (isRecording && currentRunId) {
+                        const node = currentData?.nodes?.find(n => n.name === msg.nodeName);
+                        if (node) {
+                            if (msg.status === 'ready') {
+                                // 使用消息中的 requiredPeople（这里有真实值）
+                                recordNodeReady(
+                                    currentRunId,
+                                    node.id,
+                                    node.name || '',
+                                    node.type || '',
+                                    msg.requiredPeople || 0,  // ← 使用消息中的值
+                                    node.isStartNode || false,
+                                    node.isEndNode || false,
+                                    node.description || ''
+                                );
+                            } else if (msg.status === 'waiting') {
+                                recordNodeWaiting(currentRunId, node.id, msg.queuePosition, msg.queueSize);
+                            } else if (msg.status === 'error') {
+                                recordNodeError(currentRunId, node.id, msg.errorMessage || '执行错误');
+                            }
+                        }
+                    }
+
+                    // 如果该节点当前被选中，刷新面板
+                    if (currentData) {
+                        const selectedNode = currentData.nodes.find(n => n.id === selectedNodeId);
+                        if (selectedNode && selectedNode.name === msg.nodeName) {
+                            const nodeIsActive = msg.status === 'running';
+                            showNodePanel(selectedNode, nodeIsActive);
+                        }
+                    }
+                }
+                break;
+
+            // ========== 资源池状态 ==========
+            case 'resource_pool_status':
+                appendEventLog(
+                    `📊 资源池：总数=${msg.total}，可用=${msg.available}，等待队列=${msg.waitingQueueSize}`,
+                    'info',
+                    ''
+                );
+                break;
+
+            case 'init_body_data':
+                renderInitBodyEditor(msg.nodeId, msg.bodies || []);
+                break;
+
+            case 'init_body_updated':
+                handleInitBodyUpdateResult(msg);
+                break;
+
+            // ========== 资源管理日志 ==========
+            case 'resource_log':
+                appendEventLog(msg.message || '', msg.level || 'info', msg.time);
+                break;
+
+            // ========== 节点配置相关 ==========
+            case 'node_config':
+                console.log('📥 [node_config] 收到配置:', msg);
+
+                // ★ 1. 更新缓存
+                if (msg.config && msg.taskName) {
+                    if (typeof nodeConfigCache !== 'undefined') {
+                        nodeConfigCache.set(msg.taskName, msg.config);
+                        console.log(`✅ 缓存已更新: ${msg.taskName}, requiredPeople=${msg.config.requiredPeople}`);
+                    }
+                }
+
+                // ★ 2. 检查是否有等待的回调（用于配置加载）
+                if (msg._callbackId && window._configCallbacks && window._configCallbacks[msg._callbackId]) {
+                    console.log(`✅ 找到回调 ${msg._callbackId}，执行中...`);
+                    const callback = window._configCallbacks[msg._callbackId];
+                    delete window._configCallbacks[msg._callbackId];
+                    callback(msg.config);
+                } else {
+                    console.log('ℹ️ 没有对应的回调，作为普通配置查询处理');
+                    // 普通查询：更新UI
+                    handleNodeConfigResponse(msg);
+                }
+                break;
+
+            // 在 handleSimEvent 中，将 node_config_updated 的处理改为：
+            case 'node_config_updated':
+                console.log('📥 [node_config_updated] 收到配置更新结果:', msg);
+                // ★ 检查是否有 callbackId
+                if (msg._callbackId && window._configCallbacks && window._configCallbacks[msg._callbackId]) {
+                    console.log('✅ 通过 callbackId 处理更新响应');
+                    const callback = window._configCallbacks[msg._callbackId];
+                    callback(msg);
+                } else {
+                    // 降级处理
+                    handleNodeConfigResponse(msg);
+                }
+                break;
+
+            // 在 handleSimEvent 的 switch 中添加
+            case 'debug_stereotype_info':
+                appendEventLog(
+                    `🔍 节点 "${msg.taskName}" 的 Stereotype 属性: ` +
+                    `hasStereotype=${msg.hasStereotype}, ` +
+                    `requiredPeople=${msg.requiredPeople}, ` +
+                    `duration=${msg.duration}, ` +
+                    `elementType=${msg.elementType}`,
+                    'info'
+                );
+                showNotification(`🔍 节点 "${msg.taskName}" requiredPeople=${msg.requiredPeople}, duration=${msg.duration}`);
+                break;
+
+            default:
+                console.log('未处理的后端事件：', msg);
+                break;
+        }
+    }
+
+
+    function renderInitBodyEditor(nodeId, bodies) {
+        // 找到当前面板，追加一个 section
+        const panel = document.getElementById('panelContent');
+        if (!panel) return;
+
+        // 移除旧的 body-editor（避免重复）
+        const old = panel.querySelector('#initBodySection');
+        if (old) old.remove();
+
+        if (!bodies || bodies.length === 0) return;
+
+        const firstBody = bodies[0];
+        const lang = firstBody.language || 'English';
+        const body = firstBody.body || '';
+
+        // 解析 initResourcePool 参数（可选高亮）
+        const parsed = parseInitResourcePoolArgs(body);
+
+        const section = document.createElement('div');
+        section.id = 'initBodySection';
+        section.className = 'info-section';
+        section.innerHTML = `
+
+        ${parsed ? `
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:12px;">
+            <div style="font-weight:600;color:#0369a1;margin-bottom:4px;">📊 解析到的参数</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <span>操作人员总数：<b style="color:#0284c7">${parsed.total}</b></span>
+                <span>时间缩放(ms)：<b style="color:#0284c7">${parsed.scale}</b></span>
+            </div>
+        </div>` : ''}
+
+        <div style="margin-bottom:6px;">
+            <label style="font-size:11px;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Body 内容（可直接编辑）</label>
+            <textarea id="initBodyTextarea" rows="4"
+                style="width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:4px;
+                       font-size:12px;font-family:Consolas,monospace;resize:vertical;
+                       background:white;box-sizing:border-box;"
+            >${escapeHtml(body)}</textarea>
+        </div>
+
+        ${parsed ? `
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:600;color:#475569;margin-bottom:6px;">⚡ 快速调参</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;">
+                <label style="width:80px;color:#475569;flex-shrink:0;">操作人员</label>
+                <input id="quickTotal" type="number" min="0" step="1" value="${parsed.total}"
+                    style="width:80px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;"
+                    oninput="syncInitBodyFromQuick('${escapeHtml(nodeId)}')">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;font-size:12px;">
+                <label style="width:80px;color:#475569;flex-shrink:0;">时间缩放</label>
+                <input id="quickScale" type="number" min="0" step="1" value="${parsed.scale}"
+                    style="width:80px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;"
+                    oninput="syncInitBodyFromQuick('${escapeHtml(nodeId)}')">
+            </div>
+        </div>` : ''}
+
+        <button onclick="submitInitBody('${escapeHtml(nodeId)}')"
+            style="width:100%;padding:7px;background:#3b82f6;color:white;border:none;
+                   border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:4px;">
+            💾 写回 MagicDraw
+        </button>
+
+    `;
+
+        panel.appendChild(section);
+    }
+
+    /** 从快速调参同步到 textarea */
+    function syncInitBodyFromQuick(nodeId) {
+        const ta   = document.getElementById('initBodyTextarea');
+        const total = document.getElementById('quickTotal')?.value;
+        const scale = document.getElementById('quickScale')?.value;
+        if (!ta || total === undefined || scale === undefined) return;
+
+        // 替换 initResourcePool 的第2、3参数
+        ta.value = ta.value.replace(
+            /(Packages\.myplugin\.OperatorResourceManager\.initResourcePool\s*\(\s*ALH\s*,\s*)[\d.]+(\s*,\s*)[\d.]+/,
+            `$1${total}$2${scale}`
+        );
+    }
+
+    /** 提交 Body 到后端 */
+    function submitInitBody(nodeId) {
+        if (!wsReady()) { showNotification('❌ 未连接，无法提交', true); return; }
+        const ta = document.getElementById('initBodyTextarea');
+        if (!ta) return;
+        const statusDiv = document.getElementById('initBodyStatus');
+        if (statusDiv) { statusDiv.style.color = '#3b82f6'; statusDiv.textContent = '⏳ 提交中...'; }
+
+        ws.send(JSON.stringify({
+            command: 'update_init_node_body',
+            nodeId,
+            body: ta.value
+        }));
+    }
+
+    /** 处理写回结果 */
+    function handleInitBodyUpdateResult(msg) {
+        const statusDiv = document.getElementById('initBodyStatus');
+        if (!statusDiv) return;
+        if (msg.success) {
+            statusDiv.style.color = '#16a34a';
+            statusDiv.textContent = '✅ 已写回 MagicDraw';
+            showNotification('✅ 初始化 Body 已更新');
+        } else {
+            statusDiv.style.color = '#dc2626';
+            statusDiv.textContent = '❌ ' + (msg.error || '未知错误');
+            showNotification('❌ 写回失败: ' + (msg.error || ''), true);
+        }
+    }
+
+    /** 解析 initResourcePool(ALH, 35, 100) 中的参数 */
+    function parseInitResourcePoolArgs(body) {
+        const m = body.match(/initResourcePool\s*\(\s*ALH\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);
+        if (!m) return null;
+        return { total: m[1], scale: m[2] };
+    }
+
+    // ========================= 图数据应用 =========================
+    function applyDiagramData(data, name) {
+        currentData = data;
+        if (!currentData || !currentData.nodes || currentData.nodes.length === 0) {
+            showNotification('❌ 图中没有可渲染节点', true);
+            const ld = document.getElementById('loadingMsg');
+            if (ld) ld.innerHTML = `<div style="color:#D32F2F">❌ 图中没有可渲染节点</div>`;
+            return;
+        }
+        currentData.nodes = currentData.nodes.filter(n => n.type !== 'DiagramImpl');
+        if (name) document.getElementById('diagramTitle').innerHTML = '📋 ' + escapeHtml(name);
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('diagramSvg').style.display = 'block';
+        initSVG(); renderDiagram();
+        setTimeout(fitView, 100);
+        showNotification('✅ 已从 MagicDraw 加载图');
+    }
+
+    // ========================= 视图控制 =========================
+    function zoomIn()    { d3.select('#diagramSvg').transition().duration(200).call(zoomBehavior.scaleBy, 1.2); }
+    function zoomOut()   { d3.select('#diagramSvg').transition().duration(200).call(zoomBehavior.scaleBy, .85); }
+    function resetView() { d3.select('#diagramSvg').transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity); }
+    function fitView() {
+        const b = calculateBounds(), svgEl = document.getElementById('diagramSvg');
+        const w = svgEl.clientWidth || 800, h = svgEl.clientHeight || 600;
+        const sc = Math.min(w / b.width, h / b.height) * .88;
+        const tx = (w - b.width * sc) / 2 - b.minX * sc;
+        const ty = (h - b.height * sc) / 2 - b.minY * sc;
+        d3.select('#diagramSvg').transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(sc));
+    }
+    function goBack() { ws?.close(); location.href = 'index.html'; }
+
+    // 点击空白处取消选中
+    document.getElementById('diagramSvg').addEventListener('click', ev => {
+        if (ev.target === ev.currentTarget || ev.target.tagName === 'svg') {
+            clearSelection();
+            document.getElementById('panelContent').innerHTML = '<div class="empty-state">✨ 点击节点或连线，查看仿真详情</div>';
+            currentNodeConfig = null;
+            currentConfigTaskName = null;
+        }
+    });
+
+    // ========================= 启动 =========================
+
+    // ========================= 指标树绑定功能 =========================
+    const indicatorTreeData = [
+        {
+            id: 'root',
+            name: '关联指标',
+            children: [
+                {
+                    id: 'comprehensive',
+                    name: '综合指标',
+                    children: [
+                        { id: 'time_index', name: '时间指标' },
+                        { id: 'manpower_index', name: '人力指标' }
+                    ]
+                },
+                { id: 'install_time', name: '装备安装时间' },
+                { id: 'pipe_check_time', name: '管路检测时间' },
+                { id: 'subsystem_test_time', name: '分系统测试时间' },
+                { id: 'install_manpower', name: '装备安装人力' },
+                { id: 'pipe_check_manpower', name: '管路检测人力' },
+                { id: 'subsystem_test_manpower', name: '分系统测试人力' },
+                { id: 'filling_time', name: '加注时间' },
+                { id: 'transfer_time', name: '转场时间' },
+                { id: 'filling_manpower', name: '加注人力' },
+                { id: 'transfer_manpower', name: '转场人力' }
+            ]
+        }
+    ];
+
+    let selectedIndicators = new Set();
+    let expandedNodes = new Set(['root', 'comprehensive']);
+    let indicatorSearchKeyword = '';
+
+    function toggleIndicatorPanel() {
+        const panel = document.getElementById('indicatorPanel');
+        const btn = document.getElementById('backBtn');
+        panel.classList.toggle('collapsed');
+        const collapsed = panel.classList.contains('collapsed');
+        if (btn) btn.style.left = collapsed ? '24px' : '284px';
+        const toggleBtn = panel.querySelector('.indicator-toggle');
+        if (toggleBtn) toggleBtn.textContent = collapsed ? '▶' : '◀';
+    }
+
+    function renderIndicatorTree(data, container, level, parentPath) {
+        if (!container) return;
+        if (level === undefined) level = 0;
+        if (parentPath === undefined) parentPath = [];
+
+        container.innerHTML = '';
+        data.forEach(node => {
+            renderIndicatorNode(node, container, level, parentPath);
+        });
+        updateIndicatorBadge();
+    }
+
+    function renderIndicatorNode(node, container, level, parentPath) {
+        const hasChildren = node.children && node.children.length > 0;
+        const isExpanded = expandedNodes.has(node.id);
+        const isSelected = selectedIndicators.has(node.id);
+        const currentPath = [...parentPath, node];
+
+        // 搜索过滤：如果有关键词，只显示匹配节点及其路径
+        if (indicatorSearchKeyword) {
+            const keyword = indicatorSearchKeyword.toLowerCase();
+            const matchSelf = node.name.toLowerCase().includes(keyword);
+            const matchChild = hasChildren && treeNodeHasMatch(node, keyword);
+            if (!matchSelf && !matchChild) return; // 跳过不匹配的叶子或无关分支
+        }
+
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'tree-node';
+        nodeEl.dataset.id = node.id;
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'tree-node-content';
+        if (indicatorSearchKeyword && node.name.toLowerCase().includes(indicatorSearchKeyword.toLowerCase())) {
+            contentEl.classList.add('matched');
+        }
+        contentEl.style.paddingLeft = (12 + level * 16) + 'px';
+
+        // 展开/折叠按钮
+        const toggleEl = document.createElement('span');
+        toggleEl.className = 'tree-toggle' + (hasChildren ? '' : ' leaf') + (isExpanded ? '' : ' collapsed');
+        toggleEl.innerHTML = '▼';
+        toggleEl.onclick = (e) => {
+            e.stopPropagation();
+            if (!hasChildren) return;
+            if (expandedNodes.has(node.id)) {
+                expandedNodes.delete(node.id);
+            } else {
+                expandedNodes.add(node.id);
+            }
+            refreshIndicatorTree();
+        };
+
+        // 复选框
+        const checkboxEl = document.createElement('input');
+        checkboxEl.type = 'checkbox';
+        checkboxEl.className = 'tree-checkbox';
+        checkboxEl.checked = isSelected;
+        checkboxEl.indeterminate = getIndeterminateState(node);
+        checkboxEl.onclick = (e) => {
+            e.stopPropagation();
+            toggleIndicatorNode(node, checkboxEl.checked);
+        };
+
+        // 标签
+        const labelEl = document.createElement('span');
+        labelEl.className = 'tree-label';
+        labelEl.textContent = node.name;
+        labelEl.title = node.name;
+        labelEl.onclick = () => {
+            if (hasChildren) {
+                if (expandedNodes.has(node.id)) {
+                    expandedNodes.delete(node.id);
+                } else {
+                    expandedNodes.add(node.id);
+                }
+                refreshIndicatorTree();
+            }
+        };
+
+        contentEl.appendChild(toggleEl);
+        contentEl.appendChild(checkboxEl);
+        contentEl.appendChild(labelEl);
+        nodeEl.appendChild(contentEl);
+
+        // 子节点
+        if (hasChildren) {
+            const childrenEl = document.createElement('div');
+            childrenEl.className = 'tree-children' + (isExpanded ? '' : ' collapsed');
+            node.children.forEach(child => {
+                renderIndicatorNode(child, childrenEl, level + 1, currentPath);
+            });
+            nodeEl.appendChild(childrenEl);
+        }
+
+        container.appendChild(nodeEl);
+    }
+
+    function treeNodeHasMatch(node, keyword) {
+        if (node.name.toLowerCase().includes(keyword)) return true;
+        if (node.children) {
+            for (const child of node.children) {
+                if (treeNodeHasMatch(child, keyword)) return true;
+            }
+        }
+        return false;
+    }
+
+    function getIndeterminateState(node) {
+        if (!node.children || node.children.length === 0) return false;
+        const childIds = getAllDescendantIds(node);
+        const selectedCount = childIds.filter(id => selectedIndicators.has(id)).length;
+        if (selectedCount === 0) return false;
+        if (selectedCount === childIds.length) return false; // 全选时由checked体现
+        return true;
+    }
+
+    function getAllDescendantIds(node) {
+        let ids = [];
+        if (node.children) {
+            node.children.forEach(child => {
+                ids.push(child.id);
+                ids = ids.concat(getAllDescendantIds(child));
+            });
+        }
+        return ids;
+    }
+
+    function getAllDescendants(node) {
+        let nodes = [];
+        if (node.children) {
+            node.children.forEach(child => {
+                nodes.push(child);
+                nodes = nodes.concat(getAllDescendants(child));
+            });
+        }
+        return nodes;
+    }
+
+    function toggleIndicatorNode(node, checked) {
+        if (checked) {
+            selectedIndicators.add(node.id);
+        } else {
+            selectedIndicators.delete(node.id);
+        }
+        // 同步子孙节点
+        const descendants = getAllDescendants(node);
+        descendants.forEach(d => {
+            if (checked) selectedIndicators.add(d.id);
+            else selectedIndicators.delete(d.id);
+        });
+        // 同步祖先节点状态
+        syncAncestorStates();
+        refreshIndicatorTree();
+    }
+
+    function syncAncestorStates() {
+        // 简单处理：遍历所有非叶子节点，如果子孙全选则选中，否则不选
+        // 由于数据量小，直接全量刷新即可，视觉状态由render时重新计算
+    }
+
+    function refreshIndicatorTree() {
+        const container = document.getElementById('indicatorTree');
+        renderIndicatorTree(indicatorTreeData, container);
+    }
+
+    function searchIndicators(keyword) {
+        indicatorSearchKeyword = keyword.trim();
+        if (indicatorSearchKeyword) {
+            // 搜索时自动展开所有包含匹配项的父节点
+            expandForSearch(indicatorTreeData, indicatorSearchKeyword.toLowerCase());
+        }
+        refreshIndicatorTree();
+    }
+
+    function expandForSearch(nodes, keyword) {
+        nodes.forEach(node => {
+            if (node.children) {
+                const childMatch = treeNodeHasMatch(node, keyword);
+                if (childMatch) {
+                    expandedNodes.add(node.id);
+                }
+                expandForSearch(node.children, keyword);
+            }
+        });
+    }
+
+    function updateIndicatorBadge() {
+        const header = document.querySelector('.indicator-header h3');
+        if (!header) return;
+        const count = selectedIndicators.size;
+        let badge = header.querySelector('.indicator-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'indicator-badge';
+            header.appendChild(badge);
+        }
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    function getSelectedIndicators() {
+        // 返回选中的叶子节点（真正可绑定的指标）
+        const result = [];
+        const collect = (nodes) => {
+            nodes.forEach(node => {
+                if (selectedIndicators.has(node.id)) {
+                    // 如果是叶子节点或希望返回所有选中节点
+                    result.push({ id: node.id, name: node.name });
+                }
+                if (node.children) collect(node.children);
+            });
+        };
+        collect(indicatorTreeData);
+        return result;
+    }
+
+    function confirmIndicatorBind() {
+        const selected = getSelectedIndicators();
+        if (selected.length === 0) {
+            showNotification('⚠️ 请至少选择一个指标', true);
+            return;
+        }
+        // 如果有当前选中的节点，可以执行绑定逻辑
+        if (selectedNodeId && currentData) {
+            const node = currentData.nodes.find(n => n.id === selectedNodeId);
+            if (node) {
+                appendEventLog(`📌 绑定指标到节点 "${node.name || node.id}": ${selected.map(s => s.name).join(', ')}`, 'info');
+                showNotification(`✅ 已绑定 ${selected.length} 个指标到当前节点`);
+                // TODO: 发送到后端保存绑定关系
+                // ws.send(JSON.stringify({ command: 'bind_indicators', nodeId: selectedNodeId, indicators: selected }));
+                return;
+            }
+        }
+        // 未选中节点时，仅展示列表
+        appendEventLog(`📌 已选指标: ${selected.map(s => s.name).join(', ')}`, 'info');
+        showNotification(`✅ 已选择 ${selected.length} 个指标（未绑定到具体节点）`);
+    }
+
+    function clearIndicatorSelection() {
+        selectedIndicators.clear();
+        refreshIndicatorTree();
+        showNotification('🗑 已清空指标选择');
+    }
+
+    // 初始化指标树
+    refreshIndicatorTree();
+
+    loadJSON();
+</script>
+</body>
+</html>

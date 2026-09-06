@@ -7,7 +7,7 @@ spring:
     driver-class-name: dm.jdbc.driver.DmDriver
     url: jdbc:dm://localhost:5236?compatibleMode=oracle&useUnicode=true&characterEncoding=utf8
     username: SYSDBA
-    password: Jc0258888
+    password: 20041006Song
   servlet:
     multipart:
       # 单个文件最大 50MB
@@ -18,29 +18,6 @@ spring:
     pathmatch:
       # 配置策略 如sping版本高于2.4以上则需要添加，否则会导致swagger文档不适配
       matching-strategy: ant-path-matcher
-  # Flowable 6.3.0 适配 DM8 核心配置
-# Flowable 达梦适配核心配置
-flowable:
-  # 关闭自带liquibase（用我们自定义适配）
-  liquibase.enabled: false
-  # 强制数据库类型为 oracle（达梦兼容模式）
-  database-type: oracle
-  # 首次启动自动建表，生产改为 false
-  database-schema-update: true
-  # 异步线程激活
-  async-executor-activate: true
-  # 关闭定时任务（可选）
-  async-executor-activate-timer: false
-  process-definition-location-prefix: classpath*:/processes/**.bpmn20.xml
-    #datasource:
-    #url: jdbc:mysql://localhost:3306/flowable?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&useSSL=true&verifyServerCertificate=false&requireSSL=false
-    #username: root
-    #password: zj5211314
-    #driver-class-name: com.mysql.jdbc.Driver
-
-file:
-    # 本地存储根路径（可配置，Windows 示例：D:/upload_files，Linux示例：/home/uploads）
-  uploadPath: D:/uploads
 
 
 # mybaentitytis-plus

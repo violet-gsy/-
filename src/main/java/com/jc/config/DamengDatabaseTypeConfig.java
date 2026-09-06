@@ -1,7 +1,7 @@
 package com.jc.config;
 
 
-import org.flowable.engine.common.impl.AbstractEngineConfiguration;
+import org.flowable.common.engine.impl.AbstractEngineConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;

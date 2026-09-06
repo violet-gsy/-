@@ -13,6 +13,8 @@
             <result property="remark" column="REMARK" jdbcType="VARCHAR"/>
             <result property="createtime" column="CREATETIME" jdbcType="TIMESTAMP"/>
             <result property="subsystem" column="SUBSYSTEM" jdbcType="VARCHAR"/>
+            <result property="code" column="CODE" jdbcType="VARCHAR"/>
+            <result property="majorid" column="MAJORID" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
