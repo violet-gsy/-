@@ -9,7 +9,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8001',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')
+        // 活动图控制器本身带 /api 前缀，其他仿真接口没有此前缀。
+        rewrite: path => path.startsWith('/api/activity-diagram')
+          ? path
+          : path.replace(/^\/api/, '')
       }
     }
   },
