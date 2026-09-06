@@ -13,9 +13,10 @@ npm run dev
 
 ## 页面
 
-- `/flows`：流程管理和测发模式关联
-- `/simulation-history`：仿真运行记录和多方案对比
-- `/viewer/:diagramId`：D3 流程图、节点信息和 WebSocket 状态
+- `/flows`：原版流程管理页面（完整保留原样式和功能）
+- `/simulation-history`：原版仿真运行记录和多方案对比页面
+- `/viewer/:diagramId`：原版 D3 流程图、节点配置和 WebSocket 看板
+- `/vue/flows`、`/vue/simulation-history`、`/vue/viewer/:diagramId`：Vue 组件迁移版本
 
 ## 构建
 
