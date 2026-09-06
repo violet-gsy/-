@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MagicDraw 动态仿真同步看板 · 前端控制台</title>
+    <script src="./d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #d0d5da;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #c4ccd4;
+            overflow: hidden;
+        }
+
+        svg#diagramSvg {
+            display: block;
+            cursor: grab;
+            background: #ffffff;
+            box-shadow: 0 0 0 1px #aaa, 0 6px 24px rgba(0,0,0,0.15);
+            margin: 24px;
+            border-radius: 0;
+        }
+        svg#diagramSvg:active { cursor: grabbing; }
+
+        .uml-action {
+            fill: #e8dfc0;
+            stroke: #6b5e40;
+            stroke-width: 1.5;
+            cursor: pointer;
+        }
+        .uml-action:hover { filter: brightness(.95); }
+
+        .uml-action.sim-active { fill: #ffe0e0 !important; stroke: #b81c1c !important; stroke-width: 2.5 !important; }
+        .uml-action.node-done  { fill: #d8f0d8 !important; stroke: #27682a !important; stroke-width: 2   !important; }
+        .uml-action.selected   { stroke: #d45000 !important; stroke-width: 3 !important; }
+
+        .uml-bar {
+            fill: #1e1e1e;
+            stroke: none;
+            cursor: pointer;
+        }
+        .uml-bar.sim-active { fill: #b81c1c !important; }
+        .uml-bar.node-done  { fill: #27682a !important; }
+
+        .uml-initial {
+            fill: #1e1e1e;
+            stroke: none;
+            cursor: pointer;
+        }
+        .uml-initial.sim-active { fill: #b81c1c !important; }
+        .uml-initial.node-done  { fill: #27682a !important; }
+
+        .uml-final-ring {
+            fill: none;
+            stroke: #1e1e1e;
+            stroke-width: 2;
+            cursor: pointer;
+        }
+        .uml-final-dot  { fill: #1e1e1e; stroke: none; cursor: pointer; }
+        .uml-final-ring.sim-active { stroke: #b81c1c !important; }
+        .uml-final-dot.sim-active  { fill:  #b81c1c !important; }
+        .uml-final-ring.node-done  { stroke: #27682a !important; }
+        .uml-final-dot.node-done   { fill:  #27682a !important; }
+
+        .uml-edge {
+            fill: none;
+            stroke: #444;
+            stroke-width: 1.5;
+            cursor: pointer;
+        }
+        .uml-edge.dashed { stroke-dasharray: 7 4; }
+        .uml-edge:hover  { stroke: #d45000; stroke-width: 2; }
+        .uml-edge.edge-active { stroke: #d45000 !important; stroke-width: 2.2 !important; }
+        .uml-edge.edge-done   { stroke: #27682a !important; stroke-width: 2   !important; }
+        .uml-edge.selected    { stroke: #d45000 !important; stroke-width: 2.5 !important; }
+
+        .edge-hit { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; }
+
+        .edge-lbl {
+            font-size: 11px;
+            fill: #3a3020;
+            font-family: 'Segoe UI', sans-serif;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .node-lbl {
+            font-size: 11.5px;
+            fill: #1e140a;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 400;
+            pointer-events: none;
+            user-select: none;
+            dominant-baseline: middle;
+            text-anchor: middle;
+        }
+
+        .flow-particle { pointer-events: none; }
+
+        .info-panel {
+            width: 360px;
+            background: white;
+            border-left: 1px solid #ccd0d6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .panel-header {
+            padding: 18px 18px 12px;
+            border-bottom: 1px solid #edf0f4;
+            background: #f7f8fa;
+        }
+        .panel-header h2 { font-size: 14.5px; font-weight: 600; color: #1e293b; }
+        .panel-header p  { font-size: 11px; color: #7e8c9e; margin-top: 3px; }
+        .panel-content   { flex: 1; padding: 14px 18px 4px; }
+        .info-section    { margin-bottom: 14px; border-bottom: 1px solid #f0f2f5; padding-bottom: 10px; }
+        .info-section h3 { font-size: 10px; font-weight: 700; color: #5b6e8c; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+        .info-row        { display: flex; margin-bottom: 5px; font-size: 12px; }
+        .info-label      { width: 70px; font-weight: 600; color: #8f9eb2; flex-shrink: 0; }
+        .info-value      { flex: 1; color: #1f2a44; word-break: break-word; }
+        .badge           { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .badge-active    { background: #FFEBEE; color: #b81c1c; }
+        .badge-done      { background: #E8F5E9; color: #27682a; }
+        .badge-idle      { background: #eceff3; color: #546e7a; }
+        .empty-state     { text-align: center; padding: 40px 16px; color: #94a3b8; font-size: 12px; }
+
+        .subprocess-selector {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        .subprocess-selector label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .subprocess-selector select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+        }
+        .subprocess-selector select:focus { outline: none; border-color: #3b82f6; }
+        .subprocess-selector .current-binding {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+            padding: 6px 8px;
+            background: #e0f2fe;
+            border-radius: 4px;
+        }
+        .subprocess-selector .bind-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .subprocess-selector .bind-btn:hover    { background: #2563eb; }
+        .subprocess-selector .bind-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .runtime-card {
+            margin: 0 18px 14px;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+        .runtime-card-header {
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .runtime-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .runtime-table th, .runtime-table td { padding: 8px 10px; border-bottom: 1px solid #eef2f7; text-align: left; }
+        .runtime-table th { color: #64748b; background: #fbfdff; font-weight: 700; }
+        .runtime-value          { font-weight: 700; color: #2563eb; }
+        .runtime-value.false, .runtime-value.error { color: #dc2626; }
+        .runtime-value.true     { color: #16a34a; }
+
+        .event-log-box {
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 10px 12px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.65;
+            color: #334155;
+            background: #fbfdff;
+        }
+        .log-line             { white-space: pre-wrap; border-bottom: 1px dashed #eef2f7; padding: 3px 0; }
+        .log-line.error       { color: #dc2626; font-weight: 700; }
+        .log-line.warn        { color: #d97706; }
+        .replay-badge {
+            display: inline-block; padding: 3px 8px; border-radius: 999px;
+            background: #eef2ff; color: #1d4ed8; font-weight: 700; margin-left: 6px;
+        }
+
+        .sim-control-bar {
+            position: fixed;
+            top: 16px; right: 378px;
+            background: white;
+            border-radius: 48px;
+            padding: 5px 14px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 200;
+            border: 1px solid #dde3ea;
+            flex-wrap: wrap;
+        }
+        .speed-control {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 10px; border-radius: 32px;
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+        }
+        .speed-label  { font-size: 11.5px; font-weight: 600; color: #475569; }
+        .speed-control input[type=range] { width: 80px; accent-color: #3b82f6; }
+        .speed-value  { min-width: 34px; font-size: 11.5px; font-weight: 700; color: #1e293b; }
+
+        .sim-status           { padding: 4px 12px; border-radius: 32px; font-size: 11.5px; font-weight: 600; background: #f1f3f6; color: #475569; }
+        .sim-status.connected { background: #E3F2FD; color: #0b5e8a; }
+        .sim-status.running   { background: #FFF4E5; color: #e65100; }
+        .sim-status.ended     { background: #E8F5E9; color: #1e5e2d; }
+
+        .ctrl-btn         { padding: 4px 12px; border: none; border-radius: 32px; font-weight: 600; font-size: 11.5px; cursor: pointer; background: #f1f5f9; color: #1e293b; }
+        .ctrl-btn-primary { background: #3b82f6; color: white; }
+        .ctrl-btn-primary:hover { background: #2563eb; }
+        .ctrl-btn-danger  { background: #ef4444; color: white; }
+        .ctrl-btn-danger:hover  { background: #dc2626; }
+        .ctrl-btn-warning { background: #f97316; color: white; }
+        .ctrl-btn-warning:hover { background: #ea580c; }
+        .ctrl-btn:active  { transform: scale(.96); }
+
+        .toolbar {
+            position: fixed;
+            bottom: 22px; right: 378px;
+            background: white; border-radius: 48px; padding: 5px 14px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.1);
+            display: flex; gap: 8px; z-index: 100; border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .toolbar button { background: #f8fafc; border: none; padding: 5px 10px; border-radius: 30px; font-size: 11.5px; cursor: pointer; font-weight: 500; color: #334155; }
+        .toolbar button:hover { background: #eef2ff; color: #1e40af; }
+        .zoom-level { background: #f1f5f9; padding: 5px 10px; border-radius: 30px; font-size: 11.5px; font-weight: bold; color: #0f172a; }
+
+        .legend {
+            position: fixed; bottom: 22px; left: 22px;
+            background: rgba(255,255,255,.97);
+            border-radius: 10px; padding: 10px 14px; font-size: 11px;
+            box-shadow: 0 3px 10px rgba(0,0,0,.08); border: 1px solid #e2e8f0; z-index: 100;
+        }
+        .legend-title { font-weight: 700; color: #2c3e66; margin-bottom: 6px; }
+        .legend-item  { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; color: #334155; }
+        .legend-swatch { width: 20px; height: 12px; border-radius: 3px; border: 1.5px solid; }
+        .legend-line   { width: 24px; height: 3px; border-radius: 3px; }
+
+        .back-btn {
+            position: fixed; top: 18px; left: 24px;
+            background: white; border: 1px solid #cfdfed; border-radius: 40px;
+            padding: 6px 16px; cursor: pointer; font-size: 12px; color: #2c3e50;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 100; font-weight: 500;
+        }
+        .back-btn:hover { background: #f8fafc; border-color: #5b8cbf; }
+
+        .notification {
+            position: fixed; bottom: 84px; right: 378px;
+            background: #1e293b; color: white;
+            padding: 7px 18px; border-radius: 40px; font-size: 12px;
+            z-index: 300; animation: fadeOut 2.5s forwards; pointer-events: none;
+        }
+        @keyframes fadeOut {
+            0%   { opacity: 1; transform: translateY(0); }
+            70%  { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+
+<button class="back-btn" onclick="goBack()">← 返回仪表板</button>
+
+<div class="sim-control-bar">
+    <span id="simStatus" class="sim-status">⚪ 未连接</span>
+
+    <div class="speed-control">
+        <span class="speed-label">速度</span>
+        <input id="speedSlider" type="range" min="0.25" max="3" step="0.25" value="1"
+               oninput="onSpeedChange(this.value)">
+        <span id="speedValue" class="speed-value">1.0x</span>
+    </div>
+
+    <button id="connectBtn"      class="ctrl-btn"                onclick="toggleConnection()">🔌 连接</button>
+    <button id="startSimBtn"     class="ctrl-btn ctrl-btn-primary" onclick="sendStartSimulation()"        disabled>▶ 开始仿真</button>
+    <button id="startContextBtn" class="ctrl-btn ctrl-btn-primary" onclick="sendStartSimulationWithContext()" disabled>▶ Run with Context</button>
+    <button id="stopSimBtn"      class="ctrl-btn ctrl-btn-danger"  onclick="sendStopSimulation()"         disabled>⏹ 终止仿真</button>
+    <button id="startConfigBtn"  class="ctrl-btn ctrl-btn-warning" onclick="sendStartSimulationConfig()"  disabled>🛠 启动仿真配置</button>
+    <button id="replayBtn"       class="ctrl-btn"                  onclick="requestLatestReplay()"        disabled>🎞 回放最近一次</button>
+</div>
+
+<div class="canvas-container">
+    <div id="loadingMsg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+         background:white;padding:24px 40px;border-radius:28px;box-shadow:0 8px 20px rgba(0,0,0,0.1);">
+        📂 正在加载流程图模型 ...
+    </div>
+    <svg id="diagramSvg" style="display:none;"></svg>
+</div>
+
+<div class="toolbar">
+    <button onclick="zoomIn()">➕ 放大</button>
+    <span id="zoomLevel" class="zoom-level">100%</span>
+    <button onclick="zoomOut()">🔍 缩小</button>
+    <button onclick="resetView()">⟳ 复位</button>
+    <button onclick="fitView()">⛶ 适应画布</button>
+</div>
+
+<div class="info-panel">
+    <div class="panel-header">
+        <h2 id="diagramTitle">📋 仿真流程跟踪</h2>
+        <p>点击节点/连线 · 实时同步 MagicDraw</p>
+    </div>
+    <div class="panel-content" id="panelContent">
+        <div class="empty-state">✨ 点击任意节点或连线<br>查看详细属性</div>
+    </div>
+
+    <div class="runtime-card">
+        <div class="runtime-card-header">📊 运行变量</div>
+        <table class="runtime-table">
+            <thead><tr><th>变量名</th><th>当前值</th></tr></thead>
+            <tbody id="runtimeValuesBody">
+            <tr><td colspan="2" style="color:#94a3b8;text-align:center;padding:10px;">暂无运行变量</td></tbody>
+        </table>
+    </div>
+
+    <div class="runtime-card">
+        <div class="runtime-card-header">🎞 仿真回放</div>
+        <div style="font-size:12px;color:#64748b;line-height:1.8;padding:10px 12px;">
+            回放不会重新调用 MagicDraw 仿真，只按上一次保存的事件流复现节点动画和变量。
+        </div>
+        <div id="replayInfo" style="font-size:12px;color:#334155;margin-top:0;padding:0 12px 10px;">暂无回放数据</div>
+    </div>
+
+    <div class="runtime-card">
+        <div class="runtime-card-header">🧾 事件日志</div>
+        <div id="eventLogBox" class="event-log-box">
+            <div class="log-line">等待连接 MagicDraw 插件...</div>
+        </div>
+    </div>
+</div>
+
+<div class="legend">
+    <div class="legend-title">🔖 仿真图例</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#ffe0e0;border-color:#b81c1c;"></div>当前执行节点</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#d8f0d8;border-color:#27682a;"></div>已完成节点</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#e8dfc0;border-color:#6b5e40;"></div>待执行节点</div>
+    <div class="legend-item"><div class="legend-line" style="background:#d45000;"></div>流动中 (边)</div>
+    <div class="legend-item"><div class="legend-line" style="background:#27682a;"></div>已完成边</div>
+</div>
+
+<script>
+    // ========================= 全局状态 =========================
+    var currentData     = null;
+    var zoomGroup       = null;
+    var zoomBehavior    = null;
+    var currentZoom     = 1;
+    var isConnected     = false;
+    var ws              = null;
+    var diagramRequested = false;
+    var simSpeed        = 1.0;
+
+    var replayTimer     = null;
+    var replayEvents    = [];
+    var replayIndex     = 0;
+    var replayStartTime = 0;
+    var replaySpeed     = 1.0;
+
+    var activeNodes     = {};
+    var visitedNodes    = {};
+    var visitedEdges    = {};
+    var deactivateTimers = {};
+    var particleHandles = {};
+
+    var availableActivities = [];
+
+    var BASE_MIN_ACTIVE_MS    = 800;
+    var BASE_PARTICLE_DURATION = 500;
+    var PARTICLE_RADIUS       = 5;
+
+    var selectedNodeId = null;
+    var selectedEdgeId = null;
+
+    function getMinActiveMs()      { return BASE_MIN_ACTIVE_MS    / simSpeed; }
+    function getParticleDuration() { return BASE_PARTICLE_DURATION / simSpeed; }
+
+    var NODE_STYLE_MAP = {
+        'CallBehaviorActionImpl': { shape: 'action',   rake: true  },
+        'ActivityFinalNodeImpl':  { shape: 'final'               },
+        'InitialNodeImpl':        { shape: 'initial'             },
+        'ActionImpl':             { shape: 'action'              },
+        'DecisionNodeImpl':       { shape: 'diamond'             },
+        'ForkNodeImpl':           { shape: 'bar',   label: '分叉' },
+        'JoinNodeImpl':           { shape: 'bar',   label: '汇合' },
+        'OutputPinImpl':          { shape: 'pin'                 },
+        'InputPinImpl':           { shape: 'pin'                 }
+    };
+
+    function getNodeStyle(type) {
+        return NODE_STYLE_MAP[type] || { shape: 'action' };
+    }
+
+    function getUrlParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+            return map[m];
+        });
+    }
+
+    function showNotification(msg, isError) {
+        var div = document.createElement('div');
+        div.className = 'notification';
+        div.textContent = msg;
+        if (isError) div.style.backgroundColor = '#c62828';
+        document.body.appendChild(div);
+        setTimeout(function() { div.remove(); }, 2800);
+    }
+
+    function calculateBounds() {
+        if (!currentData) return { minX: 0, minY: 0, width: 1000, height: 700 };
+        var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+        for (var i = 0; i < currentData.nodes.length; i++) {
+            var n = currentData.nodes[i];
+            minX = Math.min(minX, n.x); minY = Math.min(minY, n.y);
+            maxX = Math.max(maxX, n.x + n.w); maxY = Math.max(maxY, n.y + n.h);
+        }
+        for (var j = 0; j < currentData.edges.length; j++) {
+            var e = currentData.edges[j];
+            var pts = e.points || [];
+            for (var k = 0; k < pts.length; k++) {
+                minX = Math.min(minX, pts[k][0]); minY = Math.min(minY, pts[k][1]);
+                maxX = Math.max(maxX, pts[k][0]); maxY = Math.max(maxY, pts[k][1]);
+            }
+        }
+        var pad = 90;
+        return { minX: minX - pad, minY: minY - pad, width: maxX - minX + pad * 2, height: maxY - minY + pad * 2 };
+    }
+
+    function allEls(id) {
+        if (!zoomGroup) return [];
+        var els = [];
+        var children = zoomGroup.querySelectorAll('[data-id="' + id + '"]');
+        for (var i = 0; i < children.length; i++) {
+            els.push(children[i]);
+        }
+        return els;
+    }
+
+    function setSimClass(id, addClass, removeClasses) {
+        var els = allEls(id);
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            for (var j = 0; j < removeClasses.length; j++) {
+                el.classList.remove(removeClasses[j]);
+            }
+            if (addClass) el.classList.add(addClass);
+        }
+    }
+
+    function activateNode(nodeId) {
+        if (!zoomGroup) return;
+        activeNodes[nodeId] = true;
+        if (deactivateTimers[nodeId]) {
+            clearTimeout(deactivateTimers[nodeId]);
+            delete deactivateTimers[nodeId];
+        }
+        setSimClass(nodeId, 'sim-active', ['node-done']);
+
+        if (currentData) {
+            for (var i = 0; i < currentData.edges.length; i++) {
+                var edge = currentData.edges[i];
+                if (edge.targetId !== nodeId) continue;
+                var pathEl = zoomGroup.querySelector('.uml-edge[data-id="' + edge.id + '"]');
+                if (!pathEl) continue;
+                pathEl.classList.remove('edge-done');
+                pathEl.classList.add('edge-active');
+                if (particleHandles[edge.id]) {
+                    particleHandles[edge.id].cancel();
+                }
+                particleHandles[edge.id] = spawnParticle(pathEl, '#d45000');
+            }
+        }
+        updatePanelIfSelected(nodeId, true);
+    }
+
+    function deactivateNode(nodeId) {
+        if (!zoomGroup) return;
+        var timer = setTimeout(function() {
+            delete deactivateTimers[nodeId];
+            delete activeNodes[nodeId];
+            visitedNodes[nodeId] = true;
+            setSimClass(nodeId, 'node-done', ['sim-active']);
+
+            if (currentData) {
+                for (var i = 0; i < currentData.edges.length; i++) {
+                    var edge = currentData.edges[i];
+                    if (edge.targetId !== nodeId) continue;
+                    if (particleHandles[edge.id]) {
+                        particleHandles[edge.id].cancel();
+                        delete particleHandles[edge.id];
+                    }
+                    visitedEdges[edge.id] = true;
+                    var pathEl = zoomGroup.querySelector('.uml-edge[data-id="' + edge.id + '"]');
+                    if (pathEl) {
+                        pathEl.classList.remove('edge-active');
+                        pathEl.classList.add('edge-done');
+                    }
+                }
+            }
+            updatePanelIfSelected(nodeId, false);
+        }, getMinActiveMs());
+        deactivateTimers[nodeId] = timer;
+    }
+
+    function spawnParticle(pathEl, color) {
+        if (!pathEl || !zoomGroup) return { cancel: function() {} };
+        var alive = true;
+        var dot = null;
+
+        dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('r', PARTICLE_RADIUS);
+        dot.setAttribute('fill', color);
+        dot.setAttribute('class', 'flow-particle');
+        dot.style.filter = 'drop-shadow(0 0 3px ' + color + ')';
+        zoomGroup.appendChild(dot);
+
+        var len = pathEl.getTotalLength ? pathEl.getTotalLength() : 100;
+        var t0 = performance.now();
+
+        function step(now) {
+            if (!alive) { if (dot) dot.remove(); return; }
+            var t = Math.min((now - t0) / getParticleDuration(), 1);
+            var ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            var pt;
+            try {
+                pt = pathEl.getPointAtLength(ease * len);
+            } catch(e) {
+                pt = { x: 0, y: 0 };
+            }
+            dot.setAttribute('cx', pt.x);
+            dot.setAttribute('cy', pt.y);
+            dot.setAttribute('opacity', 0.4 + 0.6 * Math.sin(t * Math.PI));
+            if (t < 1) {
+                requestAnimationFrame(step);
+            } else {
+                if (dot) dot.remove();
+            }
+        }
+        requestAnimationFrame(step);
+
+        return {
+            cancel: function() { alive = false; if (dot) dot.remove(); }
+        };
+    }
+
+    function clearAllActiveStates() {
+        var keys = Object.keys(deactivateTimers);
+        for (var i = 0; i < keys.length; i++) {
+            clearTimeout(deactivateTimers[keys[i]]);
+        }
+        deactivateTimers = {};
+        var pKeys = Object.keys(particleHandles);
+        for (var j = 0; j < pKeys.length; j++) {
+            particleHandles[pKeys[j]].cancel();
+        }
+        particleHandles = {};
+        if (zoomGroup) {
+            var els = zoomGroup.querySelectorAll('.sim-active, .node-done');
+            for (var k = 0; k < els.length; k++) {
+                els[k].classList.remove('sim-active', 'node-done');
+            }
+            var edgeEls = zoomGroup.querySelectorAll('.edge-active, .edge-done');
+            for (var l = 0; l < edgeEls.length; l++) {
+                edgeEls[l].classList.remove('edge-active', 'edge-done');
+            }
+        }
+        activeNodes = {};
+        visitedNodes = {};
+        visitedEdges = {};
+    }
+
+    function updatePanelIfSelected(nodeId, isActive) {
+        if (!zoomGroup) return;
+        var selected = zoomGroup.querySelector('[data-id="' + nodeId + '"][data-selected="true"]');
+        if (!selected || !currentData) return;
+        var node = null;
+        for (var i = 0; i < currentData.nodes.length; i++) {
+            if (currentData.nodes[i].id === nodeId) {
+                node = currentData.nodes[i];
+                break;
+            }
+        }
+        if (node) showNodePanel(node, isActive);
+    }
+
+    // ========================= SVG 初始化与渲染 =========================
+    function loadJSON() {
+        var diagramId = getUrlParam('diagramId');
+        var flowName  = getUrlParam('name') || '业务流程';
+        document.getElementById('diagramTitle').innerHTML = '📋 ' + escapeHtml(flowName);
+
+        if (diagramId) {
+            document.getElementById('loadingMsg').textContent = '📡 正在从 MagicDraw 获取流程图 ...';
+            connectWS();
+            return;
+        }
+
+        var jsonFile = getUrlParam('file') || 'model1.json';
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', jsonFile, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        currentData = JSON.parse(xhr.responseText);
+                        if (currentData.nodes) {
+                            var filtered = [];
+                            for (var i = 0; i < currentData.nodes.length; i++) {
+                                if (currentData.nodes[i].type !== 'DiagramImpl') {
+                                    filtered.push(currentData.nodes[i]);
+                                }
+                            }
+                            currentData.nodes = filtered;
+                        }
+                        document.getElementById('loadingMsg').style.display = 'none';
+                        document.getElementById('diagramSvg').style.display = 'block';
+                        initSVG();
+                        renderDiagram();
+                    } catch(err) {
+                        document.getElementById('loadingMsg').innerHTML =
+                            '<div style="color:#D32F2F">❌ 加载失败: ' + escapeHtml(err.message) + '</div>' +
+                            '<button onclick="goBack()" style="margin-top:14px;padding:6px 20px;border-radius:40px;border:none;background:#e2e8f0;cursor:pointer;">返回</button>';
+                    }
+                } else {
+                    document.getElementById('loadingMsg').innerHTML =
+                        '<div style="color:#D32F2F">❌ 加载失败: HTTP ' + xhr.status + '</div>' +
+                        '<button onclick="goBack()" style="margin-top:14px;padding:6px 20px;border-radius:40px;border:none;background:#e2e8f0;cursor:pointer;">返回</button>';
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function initSVG() {
+        var svgEl = document.getElementById('diagramSvg');
+        svgEl.innerHTML = '';
+
+        var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML =
+            '<marker id="arr"   markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">' +
+            '<path d="M1,1 L9,5 L1,9" fill="none" stroke="#444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</marker>' +
+            '<marker id="arr-a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">' +
+            '<path d="M1,1 L9,5 L1,9" fill="none" stroke="#d45000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</marker>' +
+            '<marker id="arr-d" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">' +
+            '<path d="M1,1 L9,5 L1,9" fill="none" stroke="#27682a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</marker>';
+        svgEl.appendChild(defs);
+
+        var b = calculateBounds();
+        svgEl.setAttribute('width',   b.width);
+        svgEl.setAttribute('height',  b.height);
+        svgEl.setAttribute('viewBox', b.minX + ' ' + b.minY + ' ' + b.width + ' ' + b.height);
+
+        zoomGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        svgEl.appendChild(zoomGroup);
+
+        zoomBehavior = d3.zoom().scaleExtent([0.1, 6]).on('zoom', function(ev) {
+            currentZoom = ev.transform.k;
+            document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+            d3.select(zoomGroup).attr('transform', ev.transform);
+        });
+        d3.select(svgEl).call(zoomBehavior);
+    }
+
+    function renderDiagram() {
+        if (!currentData || !zoomGroup) return;
+        while (zoomGroup.firstChild) zoomGroup.removeChild(zoomGroup.firstChild);
+        drawGrid();
+        for (var i = 0; i < currentData.edges.length; i++) {
+            drawEdge(currentData.edges[i]);
+        }
+        for (var j = 0; j < currentData.nodes.length; j++) {
+            drawNode(currentData.nodes[j]);
+        }
+    }
+
+    function drawGrid() {
+        var b = calculateBounds();
+        var step = 20;
+        var frag = document.createDocumentFragment();
+        for (var x = b.minX; x <= b.minX + b.width; x += step) {
+            var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            l.setAttribute('x1', x); l.setAttribute('y1', b.minY);
+            l.setAttribute('x2', x); l.setAttribute('y2', b.minY + b.height);
+            l.setAttribute('stroke', '#eef2f8'); l.setAttribute('stroke-width', '.5');
+            frag.appendChild(l);
+        }
+        for (var y = b.minY; y <= b.minY + b.height; y += step) {
+            var l2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            l2.setAttribute('x1', b.minX); l2.setAttribute('y1', y);
+            l2.setAttribute('x2', b.minX + b.width); l2.setAttribute('y2', y);
+            l2.setAttribute('stroke', '#eef2f8'); l2.setAttribute('stroke-width', '.5');
+            frag.appendChild(l2);
+        }
+        zoomGroup.appendChild(frag);
+    }
+
+    function addLabel(g, text, cx, cy, maxW) {
+        if (!text) return;
+        var LH = 14;
+        var CPL = Math.max(4, Math.floor(maxW / 7));
+        var chars = text.split('');
+        var lines = [];
+        var cur = '';
+        for (var i = 0; i < chars.length; i++) {
+            if (cur.length >= CPL) { lines.push(cur); cur = ''; }
+            cur += chars[i];
+        }
+        if (cur) lines.push(cur);
+        var top = cy - (lines.length - 1) * LH / 2;
+        for (var j = 0; j < lines.length; j++) {
+            var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            t.setAttribute('x', cx); t.setAttribute('y', top + j * LH);
+            t.setAttribute('class', 'node-lbl');
+            t.textContent = lines[j];
+            g.appendChild(t);
+        }
+    }
+
+    function drawNode(node) {
+        var x = node.x, y = node.y, w = node.w, h = node.h, id = node.id;
+        var style = getNodeStyle(node.type);
+        var name = node.name || (style.label || style.shape);
+
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('data-node-grp', id);
+        g.setAttribute('data-selected', 'false');
+        g.style.cursor = 'pointer';
+
+        g.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            selectNode(node);
+        });
+
+        var shape = style.shape;
+
+        if (shape === 'initial') {
+            var r = Math.min(w, h) / 2;
+            var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            c.setAttribute('cx', x + w / 2); c.setAttribute('cy', y + h / 2); c.setAttribute('r', r);
+            c.setAttribute('class', 'uml-initial'); c.setAttribute('data-id', id);
+            g.appendChild(c);
+        } else if (shape === 'final') {
+            var r2 = Math.min(w, h) / 2;
+            var cx = x + w / 2, cy = y + h / 2;
+            var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', r2);
+            ring.setAttribute('class', 'uml-final-ring'); ring.setAttribute('data-id', id);
+            g.appendChild(ring);
+            var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', r2 * 0.55);
+            dot.setAttribute('class', 'uml-final-dot'); dot.setAttribute('data-id', id);
+            g.appendChild(dot);
+        } else if (shape === 'bar') {
+            var barH = Math.max(h, 8);
+            var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x); rect.setAttribute('y', y);
+            rect.setAttribute('width', w); rect.setAttribute('height', barH);
+            rect.setAttribute('rx', '2');
+            rect.setAttribute('class', 'uml-bar'); rect.setAttribute('data-id', id);
+            g.appendChild(rect);
+        } else if (shape === 'pin') {
+            var sz = Math.max(w, h, 6);
+            var px = x + (w - sz) / 2, py = y + (h - sz) / 2;
+            var rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect2.setAttribute('x', px); rect2.setAttribute('y', py);
+            rect2.setAttribute('width', sz); rect2.setAttribute('height', sz);
+            rect2.setAttribute('rx', '1');
+            rect2.setAttribute('class', 'uml-bar'); rect2.setAttribute('data-id', id);
+            g.appendChild(rect2);
+            if (node.labelBounds && node.name) {
+                var lb = node.labelBounds;
+                var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl.setAttribute('x', lb.x);
+                lbl.setAttribute('y', lb.y + lb.h / 2);
+                lbl.setAttribute('text-anchor', 'start');
+                lbl.setAttribute('dominant-baseline', 'middle');
+                lbl.setAttribute('font-size', '10');
+                lbl.setAttribute('fill', '#333');
+                lbl.setAttribute('font-family', 'Segoe UI, sans-serif');
+                lbl.setAttribute('pointer-events', 'none');
+                lbl.textContent = node.name;
+                g.appendChild(lbl);
+            }
+        } else if (shape === 'diamond') {
+            var cx2 = x + w / 2, cy2 = y + h / 2;
+            var poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            poly.setAttribute('points', cx2 + ',' + y + ' ' + (x + w) + ',' + cy2 + ' ' + cx2 + ',' + (y + h) + ' ' + x + ',' + cy2);
+            poly.setAttribute('class', 'uml-action'); poly.setAttribute('data-id', id);
+            g.appendChild(poly);
+            if (name) {
+                var lbl2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl2.setAttribute('x', cx2); lbl2.setAttribute('y', cy2 + 1);
+                lbl2.setAttribute('class', 'node-lbl'); lbl2.setAttribute('font-size', '10');
+                lbl2.textContent = name.length > 6 ? name.slice(0, 5) + '…' : name;
+                g.appendChild(lbl2);
+            }
+        } else {
+            var rx = Math.min(h / 2, 18);
+            var rect3 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect3.setAttribute('x', x); rect3.setAttribute('y', y);
+            rect3.setAttribute('width', w); rect3.setAttribute('height', h);
+            rect3.setAttribute('rx', rx); rect3.setAttribute('ry', rx);
+            rect3.setAttribute('class', 'uml-action'); rect3.setAttribute('data-id', id);
+            g.appendChild(rect3);
+            addLabel(g, name, x + w / 2, y + h / 2, w - 22);
+        }
+
+        zoomGroup.appendChild(g);
+    }
+
+    function drawEdge(edge) {
+        if (!edge.points || edge.points.length < 2) return;
+
+        var pts = [];
+        for (var i = edge.points.length - 1; i >= 0; i--) {
+            pts.push(edge.points[i]);
+        }
+        var d = '';
+        for (var j = 0; j < pts.length; j++) {
+            d += (j === 0 ? 'M' : 'L') + pts[j][0] + ',' + pts[j][1];
+        }
+
+        var t = edge.type || '';
+        var isDashed = false;
+        if (t === 'ControlFlowImpl') isDashed = true;
+        else if (t === 'ObjectFlowImpl') isDashed = false;
+        else isDashed = t.toLowerCase().indexOf('control') !== -1 || !!edge.isDashed;
+
+        var hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hit.setAttribute('d', d);
+        hit.setAttribute('class', 'edge-hit');
+        hit.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            selectEdge(edge);
+        });
+        zoomGroup.appendChild(hit);
+
+        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'uml-edge' + (isDashed ? ' dashed' : ''));
+        path.setAttribute('data-id', edge.id);
+        path.setAttribute('marker-end', 'url(#arr)');
+        path.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            selectEdge(edge);
+        });
+        zoomGroup.appendChild(path);
+
+        if (edge.label) {
+            var midIdx = Math.floor(pts.length / 2);
+            var mid = pts[midIdx];
+            var p0Idx = Math.max(0, midIdx - 1);
+            var p0 = pts[p0Idx];
+            var dx = mid[0] - p0[0], dy = mid[1] - p0[1];
+            var len = Math.sqrt(dx * dx + dy * dy) || 1;
+            var ox = -dy / len * 10, oy = dx / len * 10;
+            var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            lbl.setAttribute('x', mid[0] + ox); lbl.setAttribute('y', mid[1] + oy);
+            lbl.setAttribute('class', 'edge-lbl'); lbl.setAttribute('text-anchor', 'middle');
+            lbl.textContent = edge.label;
+            zoomGroup.appendChild(lbl);
+        }
+    }
+
+    // ========================= 选中 & 面板 =========================
+    function selectNode(node) {
+        clearSelection();
+        selectedNodeId = node.id;
+        selectedEdgeId = null;
+        var g = zoomGroup ? zoomGroup.querySelector('[data-node-grp="' + node.id + '"]') : null;
+        if (g) g.setAttribute('data-selected', 'true');
+        var els = allEls(node.id);
+        for (var i = 0; i < els.length; i++) {
+            els[i].classList.add('selected');
+        }
+
+        showNodePanel(node, !!activeNodes[node.id]);
+
+        if (wsReady() && node.type === 'CallBehaviorActionImpl') {
+            requestActivitiesList();
+        }
+    }
+
+    function selectEdge(edge) {
+        clearSelection();
+        selectedEdgeId = edge.id;
+        selectedNodeId = null;
+        var els = allEls(edge.id);
+        for (var i = 0; i < els.length; i++) {
+            els[i].classList.add('selected');
+        }
+        showEdgePanel(edge);
+    }
+
+    function clearSelection() {
+        if (zoomGroup) {
+            var selectedGroups = zoomGroup.querySelectorAll('[data-selected="true"]');
+            for (var i = 0; i < selectedGroups.length; i++) {
+                selectedGroups[i].setAttribute('data-selected', 'false');
+            }
+            var selectedEls = zoomGroup.querySelectorAll('.selected');
+            for (var j = 0; j < selectedEls.length; j++) {
+                selectedEls[j].classList.remove('selected');
+            }
+        }
+    }
+
+    function showNodePanel(node, isActive) {
+        var bdg = '<span class="badge badge-idle">⚪ 未执行</span>';
+        if (isActive) bdg = '<span class="badge badge-active">🔴 执行中</span>';
+        else if (visitedNodes[node.id]) bdg = '<span class="badge badge-done">✅ 已完成</span>';
+
+        var subprocessHtml = '';
+        if (node.type === 'CallBehaviorActionImpl') {
+            var optionsHtml = '<option value="">-- 选择子流程 --</option>';
+            for (var i = 0; i < availableActivities.length; i++) {
+                var act = availableActivities[i];
+                optionsHtml += '<option value="' + escapeHtml(act.id) + '">' + escapeHtml(act.name) + '</option>';
+            }
+            var currentBindingHtml = node.boundBehavior ?
+                '<div class="current-binding">✓ 当前绑定: ' + escapeHtml(node.boundBehavior) + '</div>' : '';
+
+            subprocessHtml =
+                '<div class="info-section">' +
+                '<h3>🔗 子流程绑定</h3>' +
+                '<div class="subprocess-selector">' +
+                '<label>选择要绑定的子流程:</label>' +
+                '<select id="subprocessSelect">' + optionsHtml + '</select>' +
+                currentBindingHtml +
+                '<button class="bind-btn" onclick="bindSubprocess(\'' + escapeHtml(node.id) + '\')">绑定子流程</button>' +
+                '</div>' +
+                '</div>';
+        }
+
+        document.getElementById('panelContent').innerHTML =
+            '<div class="info-section"><h3>📌 节点</h3>' +
+            '<div class="info-row"><div class="info-label">名称</div><div class="info-value">' + escapeHtml(node.name || getNodeStyle(node.type).shape) + '</div></div>' +
+            '<div class="info-row"><div class="info-label">类型</div><div class="info-value">' + escapeHtml(node.type || '—') + '</div></div>' +
+            '<div class="info-row"><div class="info-label">状态</div><div class="info-value">' + bdg + '</div></div>' +
+            '<div class="info-row"><div class="info-label">ID</div><div class="info-value" style="font:11px monospace;word-break:break-all">' + escapeHtml(node.id || '—') + '</div></div></div>' +
+            subprocessHtml;
+    }
+
+    function showEdgePanel(edge) {
+        var src = null, tgt = null;
+        for (var i = 0; i < currentData.nodes.length; i++) {
+            if (currentData.nodes[i].id === edge.sourceId) src = currentData.nodes[i];
+            if (currentData.nodes[i].id === edge.targetId) tgt = currentData.nodes[i];
+        }
+        document.getElementById('panelContent').innerHTML =
+            '<div class="info-section"><h3>🔀 连线</h3>' +
+            '<div class="info-row"><div class="info-label">类型</div><div class="info-value">' + escapeHtml(edge.type || 'ControlFlow') + '</div></div>' +
+            '<div class="info-row"><div class="info-label">标签</div><div class="info-value">' + escapeHtml(edge.label || '—') + '</div></div>' +
+            '<div class="info-row"><div class="info-label">ID</div><div class="info-value" style="font:11px monospace;word-break:break-all">' + escapeHtml(edge.id || '—') + '</div></div></div>' +
+            '<div class="info-section"><h3>⚡ 端点</h3>' +
+            '<div class="info-row"><div class="info-label">源</div><div class="info-value">' + escapeHtml(src ? src.name || src.type : '?') + '</div></div>' +
+            '<div class="info-row"><div class="info-label">目标</div><div class="info-value">' + escapeHtml(tgt ? tgt.name || tgt.type : '?') + '</div></div></div>';
+    }
+
+    // ========================= 子流程 =========================
+    function requestActivitiesList() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ command: 'get_activities_list' }));
+    }
+
+    function bindSubprocess(nodeId) {
+        var selectEl = document.getElementById('subprocessSelect');
+        if (!selectEl) return;
+        var activityId = selectEl.value;
+        if (!activityId) { showNotification('❌ 请选择一个子流程', true); return; }
+        if (!wsReady()) { showNotification('❌ 未连接到后端', true); return; }
+        ws.send(JSON.stringify({ command: 'bind_subprocess', nodeId: nodeId, activityId: activityId }));
+        showNotification('🔄 正在绑定子流程...');
+    }
+
+    function handleActivitiesList(msg) {
+        if (!msg.activities) return;
+        availableActivities = msg.activities;
+        if (selectedNodeId && currentData) {
+            var node = null;
+            for (var i = 0; i < currentData.nodes.length; i++) {
+                if (currentData.nodes[i].id === selectedNodeId) {
+                    node = currentData.nodes[i];
+                    break;
+                }
+            }
+            if (node && node.type === 'CallBehaviorActionImpl') {
+                showNodePanel(node, !!activeNodes[selectedNodeId]);
+            }
+        }
+    }
+
+    function handleBindSubprocessResult(msg) {
+        if (msg.success) {
+            showNotification('✅ 子流程绑定成功!');
+            if (selectedNodeId && currentData) {
+                var node = null;
+                for (var i = 0; i < currentData.nodes.length; i++) {
+                    if (currentData.nodes[i].id === msg.nodeId) {
+                        node = currentData.nodes[i];
+                        break;
+                    }
+                }
+                if (node) {
+                    node.boundBehavior = msg.behaviorName;
+                    showNodePanel(node, !!activeNodes[selectedNodeId]);
+                }
+            }
+        } else {
+            showNotification('❌ 绑定失败: ' + (msg.message || '未知错误'), true);
+        }
+    }
+
+    // ========================= 运行变量 & 日志 =========================
+    function updateRuntimeValues(values) {
+        var tbody = document.getElementById('runtimeValuesBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        var keys = Object.keys(values || {});
+        if (keys.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" style="color:#94a3b8;text-align:center;padding:10px;">暂无运行变量</td></tr>';
+            return;
+        }
+        for (var i = 0; i < keys.length; i++) {
+            var name = keys[i];
+            var value = values[name];
+            var valueText = (value === null || value === undefined) ? '—' : String(value);
+            var lower = valueText.toLowerCase();
+            var cls = '';
+            if (lower === 'true') cls = 'true';
+            else if (lower === 'false') cls = 'false';
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + escapeHtml(name) + '</td><td class="runtime-value ' + cls + '">' + escapeHtml(valueText) + '</td>';
+            tbody.appendChild(tr);
+        }
+    }
+
+    function appendEventLog(message, level, time) {
+        var box = document.getElementById('eventLogBox');
+        if (!box) return;
+        if (box.children.length === 1 && box.children[0].textContent.indexOf('等待连接') !== -1) {
+            box.innerHTML = '';
+        }
+        var div = document.createElement('div');
+        div.className = 'log-line ' + (level || 'info');
+        div.textContent = (time ? time + '  ' : '') + (message || '');
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // ========================= 回放 =========================
+    function requestLatestReplay() {
+        if (!wsReady()) { showNotification('❌ 未连接服务器，无法获取回放', true); return; }
+        ws.send(JSON.stringify({ command: 'get_latest_replay' }));
+        showNotification('🎞 正在读取最近一次仿真回放');
+    }
+
+    function startReplay(record) {
+        if (!record || !record.events || !Array.isArray(record.events)) {
+            showNotification('❌ 回放数据格式不正确', true);
+            return;
+        }
+        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+
+        replayEvents = record.events.slice(0);
+        replayEvents.sort(function(a, b) { return (a.time || 0) - (b.time || 0); });
+        replayIndex = 0;
+        replayStartTime = Date.now();
+        replaySpeed = simSpeed || 1.0;
+
+        var info = document.getElementById('replayInfo');
+        if (info) {
+            info.innerHTML = '当前回放：<span class="replay-badge">' + escapeHtml(record.runId || 'latest') + '</span><br>' +
+                '图：' + escapeHtml(record.diagramName || '未知') + '<br>' +
+                '启动方式：' + escapeHtml(record.startMode || '未知');
+        }
+
+        if (record.diagramSnapshot && record.diagramSnapshot.nodes) {
+            currentData = record.diagramSnapshot;
+            document.getElementById('loadingMsg').style.display = 'none';
+            document.getElementById('diagramSvg').style.display = 'block';
+            initSVG();
+            renderDiagram();
+            setTimeout(fitView, 100);
+        }
+
+        clearAllActiveStates();
+        updateRuntimeValues({});
+        appendEventLog('开始回放：' + (record.runId || 'latest'), 'info');
+        var statusEl = document.getElementById('simStatus');
+        if (statusEl) { statusEl.className = 'sim-status running'; statusEl.textContent = '🎞 回放中'; }
+
+        replayTimer = setInterval(tickReplay, 30);
+    }
+
+    function tickReplay() {
+        if (replayIndex >= replayEvents.length) {
+            clearInterval(replayTimer);
+            replayTimer = null;
+            appendEventLog('回放结束', 'info');
+            var statusEl = document.getElementById('simStatus');
+            if (statusEl) { statusEl.className = 'sim-status ended'; statusEl.textContent = '⏹ 回放结束'; }
+            return;
+        }
+        var elapsed = (Date.now() - replayStartTime) * replaySpeed;
+        while (replayIndex < replayEvents.length && (replayEvents[replayIndex].time || 0) <= elapsed) {
+            applyReplayEvent(replayEvents[replayIndex]);
+            replayIndex++;
+        }
+    }
+
+    function applyReplayEvent(e) {
+        if (!e || !e.event) return;
+        switch (e.event) {
+            case 'sim_start':       clearAllActiveStates(); appendEventLog('回放：仿真开始', 'info'); break;
+            case 'node_activate':   activateNode(e.nodeId); break;
+            case 'node_deactivate': deactivateNode(e.nodeId); break;
+            case 'runtime_values':  updateRuntimeValues(e.values || {}); break;
+            case 'log':             appendEventLog(e.message || '', e.level || 'info', e.timeText || ''); break;
+            case 'sim_end':         appendEventLog('回放：仿真结束 ' + (e.status || ''), 'info'); break;
+        }
+    }
+
+    // ========================= WebSocket =========================
+    function wsReady() { return isConnected && ws && ws.readyState === WebSocket.OPEN; }
+
+    function toggleConnection() {
+        if (isConnected) {
+            disconnectWS();
+        } else {
+            connectWS();
+        }
+    }
+
+    function connectWS() {
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+        var statusEl = document.getElementById('simStatus');
+        statusEl.className = 'sim-status';
+        statusEl.textContent = '⏳ 连接中...';
+        ws = new WebSocket('ws://127.0.0.1:8765');
+
+        ws.onopen = function() {
+            isConnected = true;
+            statusEl.className = 'sim-status connected';
+            statusEl.textContent = '🟢 已连接 MagicDraw';
+            document.getElementById('connectBtn').textContent = '🔌 断开';
+            updateControlButtons(true);
+            showNotification('✅ WebSocket 已就绪，可控制仿真');
+            sendSpeedToBackend();
+            var diagramId = getUrlParam('diagramId');
+            if (diagramId && !diagramRequested) {
+                diagramRequested = true;
+                ws.send(JSON.stringify({ command: 'get_diagram_json', diagramId: diagramId }));
+            }
+        };
+
+        ws.onclose = function() {
+            isConnected = false;
+            ws = null;
+            statusEl.className = 'sim-status';
+            statusEl.textContent = '⚪ 未连接';
+            document.getElementById('connectBtn').textContent = '🔌 连接';
+            updateControlButtons(false);
+        };
+
+        ws.onerror = function() {
+            statusEl.className = 'sim-status';
+            statusEl.textContent = '⚠️ 连接失败';
+            showNotification('❌ 无法连接至 MagicDraw 插件，请确认插件已运行', true);
+        };
+
+        ws.onmessage = function(evt) {
+            try {
+                handleSimEvent(JSON.parse(evt.data));
+            } catch (e) {
+                console.warn('非JSON消息', evt.data);
+            }
+        };
+    }
+
+    function disconnectWS() {
+        if (ws) {
+            ws.close();
+            ws = null;
+        }
+    }
+
+    function updateControlButtons(on) {
+        var ids = ['startSimBtn', 'startContextBtn', 'startConfigBtn', 'stopSimBtn', 'replayBtn'];
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el) el.disabled = !on;
+        }
+    }
+
+    // ========================= 仿真控制 =========================
+    function sendStartSimulation() {
+        if (!wsReady()) { showNotification('❌ 未连接，请先连接', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', diagramId: getUrlParam('diagramId') || '' }));
+        showNotification('🚀 已发送开始仿真请求，当前播放速度 ' + simSpeed + 'x');
+    }
+
+    function sendStartSimulationWithContext() {
+        if (!wsReady()) { showNotification('❌ 未连接至 MagicDraw 插件，请先连接', true); return; }
+        var diagramId = getUrlParam('diagramId');
+        if (!diagramId) { showNotification('❌ 当前页面没有 diagramId，不能 Run with Context', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', mode: 'run_with_context', diagramId: diagramId }));
+        showNotification('🚀 已发送 Run with Context 请求');
+    }
+
+    function sendStartSimulationConfig() {
+        if (!wsReady()) { showNotification('❌ 未连接至 MagicDraw 插件，请先连接', true); return; }
+        sendSpeedToBackend();
+        ws.send(JSON.stringify({ command: 'start_simulation', useConfig: true, configName: 'Simulation Config' }));
+        showNotification('🛠 已发送 Simulation Config 启动请求');
+    }
+
+    function sendStopSimulation() {
+        if (!wsReady()) { showNotification('❌ 未连接服务器', true); return; }
+        ws.send(JSON.stringify({ command: 'stop_simulation' }));
+        showNotification('⏹ 已发送「终止仿真」指令');
+    }
+
+    function sendSpeedToBackend() {
+        if (wsReady()) ws.send(JSON.stringify({ command: 'set_sim_speed', speed: simSpeed }));
+    }
+
+    function onSpeedChange(value) {
+        simSpeed = parseFloat(value) || 1.0;
+        var display = simSpeed.toFixed(2).replace(/\.00$/, '.0') + 'x';
+        document.getElementById('speedValue').textContent = display;
+        sendSpeedToBackend();
+    }
+
+    // ========================= 消息分发 =========================
+    function handleSimEvent(msg) {
+        var statusEl = document.getElementById('simStatus');
+        switch (msg.event) {
+
+            case 'backend_error':
+                appendEventLog(msg.message || '后端发生错误', 'error', msg.time);
+                showNotification('❌ ' + (msg.message || '后端错误'), true);
+                var ld = document.getElementById('loadingMsg');
+                if (ld && ld.style.display !== 'none') {
+                    ld.innerHTML = '<div style="color:#D32F2F">❌ ' + escapeHtml(msg.message || '') + '</div>';
+                }
+                break;
+
+            case 'backend_info':
+                appendEventLog(msg.message || '后端提示', 'info', msg.time);
+                showNotification('ℹ️ ' + (msg.message || ''));
+                break;
+
+            case 'log':
+                appendEventLog(msg.message || '', msg.level || 'info', msg.time);
+                break;
+
+            case 'status':
+                if (msg.status === 'ready') showNotification('✅ MagicDraw 后端已就绪');
+                break;
+
+            case 'diagram_json':
+                applyDiagramData(msg.data, msg.name);
+                break;
+
+            case 'sim_start':
+                clearAllActiveStates();
+                statusEl.className = 'sim-status running';
+                statusEl.textContent = '▶ 仿真运行中';
+                showNotification('▶ MagicDraw 仿真已开始');
+                break;
+
+            case 'sim_end':
+                statusEl.className = 'sim-status ended';
+                statusEl.textContent = '⏹ 仿真已结束';
+                showNotification('⏹ 仿真结束，绿色为已完成路径');
+                break;
+
+            case 'node_activate':
+                activateNode(msg.nodeId);
+                break;
+
+            case 'node_deactivate':
+                deactivateNode(msg.nodeId);
+                break;
+
+            case 'clear_all':
+                clearAllActiveStates();
+                break;
+
+            case 'runtime_values':
+                updateRuntimeValues(msg.values || {});
+                break;
+
+            case 'replay_data':
+                startReplay(msg.record);
+                break;
+
+            case 'replay_saved':
+                var info = document.getElementById('replayInfo');
+                if (info) info.innerHTML = '已保存最近一次回放：<span class="replay-badge">' + escapeHtml(msg.runId || '') + '</span>';
+                appendEventLog('回放记录已保存：' + (msg.runId || ''), 'info', msg.time);
+                break;
+
+            case 'activities_list':
+                handleActivitiesList(msg);
+                break;
+
+            case 'bind_subprocess_result':
+                handleBindSubprocessResult(msg);
+                break;
+
+            default:
+                console.log('未处理的后端事件：', msg);
+                break;
+        }
+    }
+
+    // ========================= 图数据应用 =========================
+    function applyDiagramData(data, name) {
+        currentData = data;
+        if (!currentData || !currentData.nodes || currentData.nodes.length === 0) {
+            showNotification('❌ 图中没有可渲染节点', true);
+            var ld = document.getElementById('loadingMsg');
+            if (ld) ld.innerHTML = '<div style="color:#D32F2F">❌ 图中没有可渲染节点</div>';
+            return;
+        }
+        var filtered = [];
+        for (var i = 0; i < currentData.nodes.length; i++) {
+            if (currentData.nodes[i].type !== 'DiagramImpl') {
+                filtered.push(currentData.nodes[i]);
+            }
+        }
+        currentData.nodes = filtered;
+        if (name) document.getElementById('diagramTitle').innerHTML = '📋 ' + escapeHtml(name);
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('diagramSvg').style.display = 'block';
+        initSVG();
+        renderDiagram();
+        setTimeout(fitView, 100);
+        showNotification('✅ 已从 MagicDraw 加载图');
+    }
+
+    // ========================= 视图控制 =========================
+    function zoomIn() {
+        d3.select('#diagramSvg').transition().duration(200).call(zoomBehavior.scaleBy, 1.2);
+    }
+
+    function zoomOut() {
+        d3.select('#diagramSvg').transition().duration(200).call(zoomBehavior.scaleBy, 0.85);
+    }
+
+    function resetView() {
+        d3.select('#diagramSvg').transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity);
+    }
+
+    function fitView() {
+        var b = calculateBounds();
+        var svgEl = document.getElementById('diagramSvg');
+        var w = svgEl.clientWidth || 800;
+        var h = svgEl.clientHeight || 600;
+        var sc = Math.min(w / b.width, h / b.height) * 0.88;
+        var tx = (w - b.width * sc) / 2 - b.minX * sc;
+        var ty = (h - b.height * sc) / 2 - b.minY * sc;
+        d3.select('#diagramSvg').transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(sc));
+    }
+
+    function goBack() {
+        if (ws) ws.close();
+        window.location.href = 'index.html';
+    }
+
+    // 点击空白处取消选中
+    document.getElementById('diagramSvg').addEventListener('click', function(ev) {
+        if (ev.target === ev.currentTarget || ev.target.tagName === 'svg') {
+            clearSelection();
+            document.getElementById('panelContent').innerHTML = '<div class="empty-state">✨ 点击节点或连线，查看仿真详情</div>';
+        }
+    });
+
+    loadJSON();
+</script>
+</body>
+</html>

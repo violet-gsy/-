@@ -1,0 +1,15 @@
+# Java build outputs
+out/
+*.class
+
+# IntelliJ IDEA local state
+.idea/workspace.xml
+.idea/shelf/
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db

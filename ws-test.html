@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>MagicDraw WebSocket 消息测试</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 30px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .status {
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #eee;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .connected {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .disconnected {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 8px;
+      background: #3b82f6;
+      color: white;
+      font-size: 14px;
+    }
+
+    button.stop {
+      background: #ef4444;
+    }
+
+    button.gray {
+      background: #64748b;
+    }
+
+    pre {
+      background: #111827;
+      color: #d1fae5;
+      padding: 16px;
+      border-radius: 10px;
+      height: 500px;
+      overflow: auto;
+      white-space: pre-wrap;
+      margin-top: 20px;
+    }
+    .form-card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 520px;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+
+    .form-row input,
+    .form-row select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>MagicDraw WebSocket 消息测试页面</h2>
+
+<div id="status" class="status disconnected">未连接</div>
+
+<br>
+
+<button onclick="connectWS()">连接</button>
+<button class="stop" onclick="disconnectWS()">断开</button>
+<button class="gray" onclick="clearLog()">清空日志</button>
+<button onclick="startCurrentActivity()">开始仿真：当前活动图</button>
+<button onclick="startWithSimulationConfig()">开始仿真：Simulation Config</button>
+<button id="stopSimBtn" class="stop" onclick="sendStopSimulation()" disabled>停止仿真</button>
+<button onclick="sendFakeResult()">发送模拟外部返回</button>
+<div id="formArea"></div>
+<pre id="log"></pre>
+
+<script>
+  var ws = null;
+
+  function startCurrentActivity() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      appendLog("WebSocket 未连接");
+      return;
+    }
+
+    var msg = { command: "start_simulation" };
+    ws.send(JSON.stringify(msg));
+    appendLog("已发送开始仿真指令：" + JSON.stringify(msg));
+  }
+
+  function startWithSimulationConfig() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      appendLog("WebSocket 未连接");
+      return;
+    }
+
+    var msg = {
+      command: "start_simulation",
+      useConfig: true,
+      configName: "Simulation Config"
+    };
+
+    ws.send(JSON.stringify(msg));
+    appendLog("已发送 Simulation Config 启动指令：" + JSON.stringify(msg));
+  }
+
+  function updateSimButtons(connected) {
+    document.getElementById("stopSimBtn").disabled = !connected;
+  }
+
+  function sendStopSimulation() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      appendLog("未连接，不能发送停止仿真指令");
+      return;
+    }
+
+    var cmd = { command: "stop_simulation" };
+    ws.send(JSON.stringify(cmd));
+    appendLog("已发送停止仿真指令:");
+    appendLog(JSON.stringify(cmd));
+  }
+
+  function appendLog(text) {
+    var log = document.getElementById("log");
+    var time = new Date().toLocaleTimeString();
+    log.textContent += "[" + time + "] " + text + "\n";
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function setStatus(text, connected) {
+    var status = document.getElementById("status");
+    status.textContent = text;
+    status.className = connected ? "status connected" : "status disconnected";
+  }
+
+  function connectWS() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      appendLog("已经连接，无需重复连接");
+      return;
+    }
+
+    appendLog("正在连接 ws://127.0.0.1:8765 ...");
+
+    ws = new WebSocket("ws://127.0.0.1:8765");
+
+    ws.onopen = function() {
+      setStatus("已连接 MagicDraw WebSocket", true);
+      appendLog("连接成功");
+      updateSimButtons(true);
+    };
+
+    ws.onmessage = function(event) {
+      appendLog("收到消息:");
+      appendLog(event.data);
+
+      try {
+        var msg = JSON.parse(event.data);
+
+        if (msg.event === "external_interaction_request") {
+          appendLog("识别到外部交互请求节点：" + msg.nodeName);
+          appendLog("类型：" + msg.type);
+          appendLog("任务编号：" + msg.taskId);
+          appendLog("航天器编号：" + msg.spacecraftId);
+          renderSpacecraftForm(msg);
+        }
+
+        if (msg.event === "backend_error") {
+          appendLog("后端错误：" + msg.message);
+          showToast(msg.message, true);
+        }
+
+        if (msg.event === "backend_info") {
+          appendLog("后端提示：" + msg.message);
+          showToast(msg.message, false);
+        }
+
+      } catch (e) {
+        console.warn("消息解析失败", e);
+      }
+    };
+
+    ws.onerror = function() {
+      appendLog("连接出错，请确认 MagicDraw 插件已启动");
+    };
+
+    ws.onclose = function() {
+      setStatus("未连接", false);
+      appendLog("连接已关闭");
+      updateSimButtons(false);
+    };
+  }
+
+  function showToast(message, isError) {
+    var toast = document.createElement("div");
+    toast.textContent = message;
+    toast.style.position = "fixed";
+    toast.style.top = "20px";
+    toast.style.right = "20px";
+    toast.style.zIndex = "9999";
+    toast.style.padding = "12px 18px";
+    toast.style.borderRadius = "10px";
+    toast.style.color = "#fff";
+    toast.style.fontSize = "14px";
+    toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+    toast.style.background = isError ? "#e53935" : "#43a047";
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3000);
+  }
+
+  function disconnectWS() {
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+  }
+
+  function clearLog() {
+    document.getElementById("log").textContent = "";
+  }
+
+  function sendFakeResult() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      appendLog("未连接，不能发送模拟返回");
+      return;
+    }
+
+    var result = {
+      event: "external_interaction_result",
+      type: "spacecraft_check_result",
+      taskId: "T001",
+      spacecraftId: "SC001",
+      voltage: 30.0,
+      power: 118.0,
+      temperature: 36.0,
+      healthStatus: "正常"
+    };
+
+    ws.send(JSON.stringify(result));
+    appendLog("已发送模拟外部返回:");
+    appendLog(JSON.stringify(result, null, 2));
+  }
+
+  var lastSpacecraftRequest = null;
+
+  function renderSpacecraftForm(msg) {
+    lastSpacecraftRequest = msg;
+
+    var formArea = document.getElementById("formArea");
+
+    formArea.innerHTML =
+            '<div class="form-card">' +
+            '<h3>航天器外部参数编辑</h3>' +
+
+            '<div class="form-row">' +
+            '<label>任务编号</label>' +
+            '<input id="taskIdInput" value="' + escapeHtml(msg.taskId || '') + '" readonly>' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>航天器编号</label>' +
+            '<input id="spacecraftIdInput" value="' + escapeHtml(msg.spacecraftId || '') + '" readonly>' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>当前电压</label>' +
+            '<input id="voltageInput" type="text" value="' + (msg.currentVoltage || 28) + '">' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>当前功率</label>' +
+            '<input id="powerInput" type="text" value="' + (msg.currentPower || 118) + '">' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>当前温度</label>' +
+            '<input id="temperatureInput" type="text" value="' + (msg.currentTemperature || 36) + '">' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>健康阈值</label>' +
+            '<input id="thresholdInput" type="number" step="0.01" value="' + (msg.healthThreshold || 0.85) + '" readonly>' +
+            '</div>' +
+
+            '<div class="form-row">' +
+            '<label>健康状态</label>' +
+            '<select id="healthStatusInput">' +
+            '<option value="正常">正常</option>' +
+            '<option value="异常">异常</option>' +
+            '<option value="需检查">需检查</option>' +
+            '</select>' +
+            '</div>' +
+
+            '<button onclick="sendEditedSpacecraftResult()">提交修改结果</button>' +
+            '</div>';
+  }
+
+  function sendEditedSpacecraftResult() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      appendLog("未连接，不能发送外部返回");
+      return;
+    }
+
+    var result = {
+      event: "external_interaction_result",
+      type: "spacecraft_check_result",
+      taskId: document.getElementById("taskIdInput").value,
+      spacecraftId: document.getElementById("spacecraftIdInput").value,
+      voltage: Number(document.getElementById("voltageInput").value),
+      power: Number(document.getElementById("powerInput").value),
+      temperature: Number(document.getElementById("temperatureInput").value),
+      healthStatus: document.getElementById("healthStatusInput").value
+    };
+
+    appendLog("当前输入框值：电压=" + document.getElementById("voltageInput").value +
+            "，功率=" + document.getElementById("powerInput").value +
+            "，温度=" + document.getElementById("temperatureInput").value +
+            "，健康状态=" + document.getElementById("healthStatusInput").value
+    );
+
+    ws.send(JSON.stringify(result));
+    appendLog("已提交用户编辑后的外部返回:");
+    appendLog(JSON.stringify(result, null, 2));
+    document.getElementById("formArea").innerHTML = "";
+    lastSpacecraftRequest = null;
+    showToast("已提交外部返回，参数编辑面板已关闭", false);
+  }
+
+  function escapeHtml(text) {
+    if (text === null || text === undefined) {
+      return "";
+    }
+    return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+  }
+</script>
+
+</body>
+</html>
